@@ -20,6 +20,7 @@ HttpRequest库是对libcurl的封装，结合C++线程池，实现http多线程�
 - 所有方法线程安全
 
 本模块使用的是vs2015编译的libcurl静态库，版本不同请自行编译。
+sample项目是Qt写的界面。
 
 
 ## How to use
