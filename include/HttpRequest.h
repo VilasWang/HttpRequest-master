@@ -22,28 +22,28 @@ class CURLWrapper;
 class HTTP_REQUEST_EXPORT HttpRequest
 {
 public:
-    typedef enum
+    enum RequestType
     {
-        POST,
-        GET,
-        DWONLOAD,
-        UPLOAD,
-    } RequestType;
+        Post,
+        Get,
+        Download,
+        Upload,
+    };
 
-    typedef enum
+    enum CallType
     {
-        SYNC,
-        ASYNC,
-    } CallType;
+        Sync,
+        Async,
+    };
 
-    typedef enum
+    enum RequestResult
     {
         REQUEST_OK,
         REQUEST_INVALID_OPT,
         REQUEST_PERFORM_ERROR,
         REQUEST_OPENFILE_ERROR,
         REQUEST_INIT_ERROR,
-    } RequestResult;
+    };
 
 public:
     HttpRequest(RequestType type);
