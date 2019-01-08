@@ -1,3 +1,5 @@
+*.cpp linguist-language=Java
+
 # Prerequisites
 *.d
 
