@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+*.suo
+*.ilk
+/bin/Debug/CURLTool.pdb
+/bin/Debug/HttpRequest.pdb
+*.tlog
+/HttpRequest/Debug/vc140.pdb
+*.log
+*.user
+*.exp
+/Sample/CURLTool/Debug/vc140.pdb
+/Sample/CURLTool/GeneratedFiles/Debug/moc_curltool.cpp
+/Sample/CURLTool/GeneratedFiles/ui_curltool.h
+/HttpRequest.VC.db
