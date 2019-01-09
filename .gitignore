@@ -43,3 +43,5 @@
 /Sample/CURLTool/GeneratedFiles/ui_curltool.h
 /HttpRequest.VC.db
 /lib/Debug/HttpRequest.lib
+/lib/Release/HttpRequest.lib
+/Sample/CURLTool/GeneratedFiles/Release/moc_curltool.cpp

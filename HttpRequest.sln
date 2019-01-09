@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HttpRequest", "HttpRequest\networktool.vcxproj", "{F78079E4-5F91-4C4E-BD62-2436CFF8E6F2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CURLTool", "Sample\CURLTool\CURLTool.vcxproj", "{557375F8-5320-4BB8-A5A5-6521C1FA42BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F78079E4-5F91-4C4E-BD62-2436CFF8E6F2} = {F78079E4-5F91-4C4E-BD62-2436CFF8E6F2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
