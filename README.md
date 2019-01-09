@@ -19,12 +19,13 @@ HttpRequest库是对libcurl的封装，结合C++线程池，实现http多线程�
 - 所有任务异步调用
 - 所有方法线程安全
 
-本模块使用的是vs2015编译的libcurl静态库，版本不同请自行编译。
+本模块使用的是vs2015编译的libcurl静态库，版本不同请自行编译。  
+sample项目是Qt写的界面。
 
 
 ## How to use
 
->下载：
+>异步下载：
 > 
 
 ```cpp
@@ -33,20 +34,20 @@ HttpRequest库是对libcurl的封装，结合C++线程池，实现http多线程�
 const std::string strUrl = "...";
 const std::string strFilePath = "...";
 
-HttpRequest req(HttpRequest::DWONLOAD);
-req.setRequestUrl();
-req.setDownloadFile(strFilePath);
-req.setFollowLocation(true);
-req.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
+HttpRequest request(HttpRequest::Download);
+request.setRequestUrl();
+request.setDownloadFile(strFilePath);
+request.setFollowLocation(true);
+request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-req.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
+request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-int nId = req.perform(HttpRequest::ASYNC);
+int nReqId = request.perform(HttpRequest::Async);
 ```
 
 
->上传
+>异步上传
 >
 
 ```cpp
@@ -57,15 +58,15 @@ const std::string strUploadFilePath = "...";
 const std::string strTargetName = "...";
 const std::string strSavePath = "...";
 
-HttpRequest req(HttpRequest::UPLOAD);
-req.setRequestUrl(strUrl);
-req.setUploadFile(strUploadFilePath, strTargetName, strSavePath);
-req.setFollowLocation(true);
-req.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
+HttpRequest request(HttpRequest::Upload);
+request.setRequestUrl(strUrl);
+request.setUploadFile(strUploadFilePath, strTargetName, strSavePath);
+request.setFollowLocation(true);
+request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-req.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
+request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-int nId = req.perform(HttpRequest::ASYNC);
+int nReqId = request.perform(HttpRequest::Async);
 ```
 

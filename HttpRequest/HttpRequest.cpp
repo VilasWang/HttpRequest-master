@@ -284,11 +284,11 @@ int HttpRequest::perform(CallType type)
             nRequestId = m_request_helper->requestId();
             m_request_helper->reset();
 
-            if (type == SYNC)
+            if (type == Sync)
             {
                 m_request_helper->perform();
             }
-            else if (type == ASYNC)
+            else if (type == Async)
             {
                 HttpTask* task = new HttpTask(true);
                 task->attach(m_request_helper);
@@ -554,15 +554,15 @@ int CURLWrapper::perform()
     m_error_string.clear();
     m_http_code = 0;
 
-    if (m_type == HttpRequest::POST || m_type == HttpRequest::GET)
+    if (m_type == HttpRequest::Post || m_type == HttpRequest::Get)
     {
         curl_code = doPostGet();
     }
-    else if (m_type == HttpRequest::DWONLOAD)
+    else if (m_type == HttpRequest::Download)
     {
         curl_code = doDownload();
     }
-    else if (m_type == HttpRequest::UPLOAD)
+    else if (m_type == HttpRequest::Upload)
     {
         curl_code = doUpload();
     }
@@ -573,7 +573,7 @@ int CURLWrapper::perform()
         if (m_result_callback)
         {
             bool success = (curl_code == CURLE_OK && m_http_code == 200);
-            if (m_type == HttpRequest::DWONLOAD)
+            if (m_type == HttpRequest::Download)
             {
                 success = (curl_code == CURLE_OK && (m_http_code >= 200 && m_http_code < 300));
             }
@@ -613,7 +613,7 @@ int CURLWrapper::doPostGet()
         curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &m_receive_content);
         curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1);
 
-        if (m_type == HttpRequest::POST)
+        if (m_type == HttpRequest::Post)
         {
             curl_code = curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
             if (curl_code == CURLE_OK)

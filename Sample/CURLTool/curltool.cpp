@@ -281,7 +281,7 @@ void CurlTool::onDownload()
     m_nTotalNum = 1;
     const QString& strFilePath = strSavePath + "/" + strFileName;
 
-    HttpRequest request(HttpRequest::DWONLOAD);
+    HttpRequest request(HttpRequest::Download);
     request.setRequestUrl(strUrl.toStdString());
     request.setDownloadFile(strFilePath.toStdString(), ui.cmb_multiDownload->currentText().toInt());
     request.setFollowLocation(true);
@@ -290,7 +290,7 @@ void CurlTool::onDownload()
     request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
                                           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-    int nId = request.perform(HttpRequest::ASYNC);
+    int nId = request.perform(HttpRequest::Async);
     if (nId > 0)
     {
         m_mapRequest.insert(nId, 0);
@@ -336,7 +336,7 @@ void CurlTool::onUpload()
     m_mapRequest.clear();
     m_nTotalNum = 1;
 
-    HttpRequest request(HttpRequest::UPLOAD);
+    HttpRequest request(HttpRequest::Upload);
     request.setRequestUrl(strUrl.toStdString());
     request.setUploadFile(strUploadFilePath.toStdString(), strTargetName.toStdString(), strSavePath.toStdString());
     request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
@@ -344,7 +344,7 @@ void CurlTool::onUpload()
     request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
                                           std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-    int nId = request.perform(HttpRequest::ASYNC);
+    int nId = request.perform(HttpRequest::Async);
     if (nId > 0)
     {
         m_mapRequest.insert(nId, 0);
@@ -368,12 +368,12 @@ void CurlTool::onGetRequest()
     m_nTotalNum = 1;
     for (int i = 0; i < m_nTotalNum; ++i)
     {
-        HttpRequest request(HttpRequest::GET);
+        HttpRequest request(HttpRequest::Get);
         request.setRequestUrl(strUrl.toStdString());
         request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
                                             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-        int nId = request.perform(HttpRequest::ASYNC);
+        int nId = request.perform(HttpRequest::Async);
         if (nId > 0)
         {
             m_mapRequest.insert(nId, 0);
@@ -406,14 +406,14 @@ void CurlTool::onPostRequest()
     m_nTotalNum = 200;
     for (int i = 0; i < m_nTotalNum; ++i)
     {
-        HttpRequest request(HttpRequest::POST);
+        HttpRequest request(HttpRequest::Post);
         request.setRequestUrl(strUrl.toStdString());
         request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
                                             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         std::string strSendData = strArg.toStdString();
         request.setPostData(strSendData.c_str(), strSendData.size());
 
-        int nId = request.perform(HttpRequest::ASYNC);
+        int nId = request.perform(HttpRequest::Async);
         if (nId > 0)
         {
             m_mapRequest.insert(nId, 0);
