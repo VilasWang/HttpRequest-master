@@ -1,6 +1,6 @@
 HttpRequest moudle
 ======================================================
-@version: 1.0.0.3  
+@version: 1.0.3  
 @Author: Vilas Wang  
 @Contact: QQ451930733 | 451930733@qq.com  
 
