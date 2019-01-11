@@ -1,12 +1,14 @@
 #include "HttpRequestManager.h"
 #include "HttpRequest.h"
+#include "ClassMemoryTracer.h"
 
 CURLSH* HttpRequestManager::s_share_handle_ = nullptr;
 
 HttpRequestManager::HttpRequestManager()
     : m_callback(new HttpTaskCallBack)
-    , m_lock(new CMutex)
+    , m_lock(new TPLock)
 {
+	TRACE_CLASS_CONSTRUCTOR(HttpRequestManager);
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     s_share_handle_ = curl_share_init();
@@ -21,6 +23,7 @@ HttpRequestManager::~HttpRequestManager()
     char ch[64];
     sprintf_s(ch, "%s(B)\n", __FUNCTION__);
     OutputDebugStringA(ch);
+	TRACE_CLASS_DESTRUCTOR(HttpRequestManager);
 
     ThreadPool::Instance()->waitForDone();
     clearTask();
@@ -36,6 +39,8 @@ HttpRequestManager::~HttpRequestManager()
 
     sprintf_s(ch, "%s(E)\n", __FUNCTION__);
     OutputDebugStringA(ch);
+
+	TRACE_CLASS_PRINT();
 }
 
 HttpRequestManager* HttpRequestManager::Instance()
@@ -80,13 +85,13 @@ void HttpRequestManager::set_share_handle(CURL* curl_handle)
 
 void HttpRequestManager::insertTask(TaskBase* t)
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
     m_map_tasks[t->id()] = t;
 }
 
 void HttpRequestManager::removeTask(int task_id)
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
 
     auto iter = m_map_tasks.find(task_id);
     if (iter != m_map_tasks.end())
@@ -103,7 +108,7 @@ void HttpRequestManager::removeTask(int task_id)
 
 void HttpRequestManager::clearTask()
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
     auto iter = m_map_tasks.begin();
     for (; iter != m_map_tasks.end();)
     {

@@ -40,7 +40,7 @@ private:
     static CURLSH* s_share_handle_;
     std::map<int, TaskBase*> m_map_tasks;
     HttpTaskCallBack* m_callback;
-    std::shared_ptr<CMutex> m_lock;
+    std::shared_ptr<TPLock> m_lock;
 
 	friend class CURLWrapper;
 	friend class HttpRequest;

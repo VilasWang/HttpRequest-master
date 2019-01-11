@@ -59,6 +59,9 @@
     <ClCompile Include="HttpRequestManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ClassMemoryTracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadPool\Task.h">
@@ -83,6 +86,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HttpTask.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassMemoryTracer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

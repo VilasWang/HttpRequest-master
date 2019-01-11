@@ -46,7 +46,7 @@ private:
     UINT m_threadId;
     HANDLE m_hEvent;
     bool m_bExit;
-    CMutex m_mutex;
+    TPLock m_mutex;
 
     TaskBase* m_pTask;
     ThreadPool* m_pThreadPool;
@@ -69,7 +69,7 @@ public:
 
 private:
     std::list<ThreadPoolThread*>m_list;
-    CMutex m_mutex;
+    TPLock m_lock;
 };
 
 class IdleThreadStack
@@ -87,5 +87,5 @@ public:
 
 private:
     std::stack<ThreadPoolThread*> m_stack;
-    CMutex m_mutex;
+    TPLock m_lock;
 };

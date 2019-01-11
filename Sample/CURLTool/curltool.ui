@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>700</height>
+    <width>630</width>
+    <height>610</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -45,8 +45,8 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>80</x>
-      <y>380</y>
-      <width>600</width>
+      <y>310</y>
+      <width>540</width>
       <height>23</height>
      </rect>
     </property>
@@ -67,9 +67,9 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>419</y>
-      <width>670</width>
-      <height>251</height>
+      <y>350</y>
+      <width>611</width>
+      <height>231</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -129,8 +129,8 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>80</x>
-      <y>350</y>
-      <width>600</width>
+      <y>280</y>
+      <width>540</width>
       <height>23</height>
      </rect>
     </property>
@@ -145,7 +145,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>380</y>
+      <y>310</y>
       <width>54</width>
       <height>21</height>
      </rect>
@@ -158,7 +158,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>350</y>
+      <y>280</y>
       <width>54</width>
       <height>21</height>
      </rect>
@@ -173,8 +173,8 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     </property>
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>300</y>
+      <x>490</x>
+      <y>240</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -195,9 +195,9 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>250</y>
+      <y>201</y>
       <width>411</width>
-      <height>71</height>
+      <height>61</height>
      </rect>
     </property>
     <property name="title">
@@ -286,8 +286,8 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <widget class="QPushButton" name="btn_start">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>250</y>
+      <x>490</x>
+      <y>201</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -428,7 +428,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>190</y>
+      <y>170</y>
       <width>91</width>
       <height>22</height>
      </rect>
@@ -438,7 +438,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>190</y>
+      <y>170</y>
       <width>101</width>
       <height>21</height>
      </rect>
@@ -452,7 +452,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <rect>
       <x>490</x>
       <y>80</y>
-      <width>171</width>
+      <width>141</width>
       <height>21</height>
      </rect>
     </property>
@@ -460,7 +460,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <string notr="true">color:red;</string>
     </property>
     <property name="text">
-     <string>注：带后缀，空则根据url获取</string>
+     <string>注：带后缀，空则根据url</string>
     </property>
    </widget>
    <zorder>groupBox</zorder>
@@ -493,7 +493,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>700</width>
+     <width>630</width>
      <height>20</height>
     </rect>
    </property>

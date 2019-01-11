@@ -1,5 +1,5 @@
 //#include "stdafx.h"
-#include "curl/curl.h"		//libcurl interface
+#include "curl/curl.h"		//libcurl
 #include "HttpRequest.h"
 #include "HttpTask.h"
 #include <iostream>
@@ -8,6 +8,8 @@
 #include <regex>
 #include <process.h>
 #include "ThreadPool/mutex.h"
+#include "ClassMemoryTracer.h"
+
 
 const int s_nRetryCount = 3;
 const int s_kThreadCount = 5;
@@ -88,7 +90,7 @@ private:
 
 private:
     static int s_id_;
-    std::shared_ptr<CMutex> m_lock;
+    std::shared_ptr<TPLock> m_lock;
 
     ResultCallback  m_result_callback;
     ProgressCallback  m_progress_callback;
@@ -131,17 +133,19 @@ int CURLWrapper::s_id_ = 0;
 HttpRequest::HttpRequest(RequestType type)
     : m_request_helper(new CURLWrapper(type))
 {
+	TRACE_CLASS_CONSTRUCTOR(HttpRequest);
     HttpRequestManager::Instance();
 }
 
 HttpRequest::~HttpRequest()
 {
+	TRACE_CLASS_DESTRUCTOR(HttpRequest);
     m_request_helper = nullptr;
 }
 
 int HttpRequest::setRetryTimes(int retry_times)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setRetryTimes(retry_times);
     }
@@ -151,7 +155,7 @@ int HttpRequest::setRetryTimes(int retry_times)
 
 int HttpRequest::setRequestTimeout(long time_out)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setRequestTimeout(time_out);
     }
@@ -161,7 +165,7 @@ int HttpRequest::setRequestTimeout(long time_out)
 
 int HttpRequest::setRequestUrl(const std::string& url)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setRequestUrl(url);
     }
@@ -171,7 +175,7 @@ int HttpRequest::setRequestUrl(const std::string& url)
 
 int HttpRequest::setFollowLocation(bool follow_location)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setFollowLocation(follow_location);
     }
@@ -186,7 +190,7 @@ int HttpRequest::setPostData(const std::string& message)
 
 int HttpRequest::setPostData(const char* data, unsigned int size)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setPostData(data, size);
     }
@@ -195,7 +199,7 @@ int HttpRequest::setPostData(const char* data, unsigned int size)
 
 int HttpRequest::setRequestHeader(const std::map<std::string, std::string>& headers)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         for (auto it = headers.begin(); it != headers.end(); ++it)
         {
@@ -212,7 +216,7 @@ int HttpRequest::setRequestHeader(const std::map<std::string, std::string>& head
 
 int HttpRequest::setRequestHeader(const std::string& header)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setRequestHeader(header);
     }
@@ -221,7 +225,7 @@ int HttpRequest::setRequestHeader(const std::string& header)
 
 int HttpRequest::setRequestProxy(const std::string& proxy, long proxy_port)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         return m_request_helper->setRequestProxy(proxy, proxy_port);
     }
@@ -231,7 +235,7 @@ int HttpRequest::setRequestProxy(const std::string& proxy, long proxy_port)
 
 int HttpRequest::setDownloadFile(const std::string& file_path, int thread_count /* = 5 */)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         m_request_helper->setDownloadFile(file_path);
         m_request_helper->setDownloadThreadCount(thread_count);
@@ -243,7 +247,7 @@ int HttpRequest::setDownloadFile(const std::string& file_path, int thread_count 
 
 int HttpRequest::setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         m_request_helper->setUploadFile(file_path, target_name, target_path);
         return REQUEST_OK;
@@ -254,7 +258,7 @@ int HttpRequest::setUploadFile(const std::string& file_path, const std::string& 
 
 int HttpRequest::setResultCallback(ResultCallback rc)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         m_request_helper->setResultCallback(rc);
         return REQUEST_OK;
@@ -265,7 +269,7 @@ int HttpRequest::setResultCallback(ResultCallback rc)
 
 int	HttpRequest::setProgressCallback(ProgressCallback pc)
 {
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         m_request_helper->setProgressCallback(pc);
         return REQUEST_OK;
@@ -277,7 +281,7 @@ int	HttpRequest::setProgressCallback(ProgressCallback pc)
 int HttpRequest::perform(CallType type)
 {
     int nRequestId = 0;
-    if (m_request_helper)
+    if (m_request_helper.get())
     {
         if (!m_request_helper->m_is_running)
         {
@@ -317,7 +321,7 @@ void HttpRequest::globalCleanup()
 
 bool HttpRequest::getHttpCode(long& http_code)
 {
-    if (m_request_helper == nullptr)
+    if (nullptr == m_request_helper.get())
     {
         return false;
     }
@@ -328,7 +332,7 @@ bool HttpRequest::getHttpCode(long& http_code)
 
 bool HttpRequest::getReceiveHeader(std::string& header)
 {
-    if (m_request_helper == nullptr)
+    if (nullptr == m_request_helper.get())
     {
         return false;
     }
@@ -338,7 +342,7 @@ bool HttpRequest::getReceiveHeader(std::string& header)
 
 bool HttpRequest::getReceiveContent(std::string& receive)
 {
-    if (m_request_helper == nullptr)
+    if (nullptr == m_request_helper.get())
     {
         return false;
     }
@@ -348,7 +352,7 @@ bool HttpRequest::getReceiveContent(std::string& receive)
 
 bool HttpRequest::getErrorString(std::string& error_string)
 {
-    if (m_request_helper == nullptr)
+    if (nullptr == m_request_helper.get())
     {
         return false;
     }
@@ -372,8 +376,9 @@ CURLWrapper::CURLWrapper(HttpRequest::RequestType type)
     , m_total_size(0)
     , m_current_size(0)
     , m_http_code(0)
-    , m_lock(new CMutex)
+    , m_lock(new TPLock)
 {
+	TRACE_CLASS_CONSTRUCTOR(CURLWrapper);
     setResultCallback(std::bind(&CURLWrapper::defaultResultCallBack, this,
                                 std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
@@ -386,6 +391,7 @@ CURLWrapper::~CURLWrapper()
     //char ch[64];
     //sprintf_s(ch, "%s id:%d\n", __FUNCTION__, m_id);
     //OutputDebugStringA(ch);
+	TRACE_CLASS_DESTRUCTOR(CURLWrapper);
 
     cancel();
     resetCallBacks();
@@ -466,19 +472,19 @@ int CURLWrapper::setUploadFile(const std::string& file_path, const std::string& 
 
 void CURLWrapper::setResultCallback(ResultCallback rc)
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
     m_result_callback = rc;
 }
 
 void CURLWrapper::setProgressCallback(ProgressCallback pc)
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
     m_progress_callback = pc;
 }
 
 void CURLWrapper::resetCallBacks()
 {
-    CMutexLocker locker(m_lock);
+    TPLocker locker(m_lock);
     m_result_callback = nullptr;
     m_progress_callback = nullptr;
 }
@@ -569,7 +575,7 @@ int CURLWrapper::perform()
 
     if (!m_is_cancel)
     {
-        m_lock->Lock();
+        m_lock->lock();
         if (m_result_callback)
         {
             bool success = (curl_code == CURLE_OK && m_http_code == 200);
@@ -579,7 +585,7 @@ int CURLWrapper::perform()
             }
             m_result_callback(m_id, success, m_receive_content, m_error_string);
         }
-        m_lock->UnLock();
+        m_lock->unLock();
     }
     m_is_running = false;
 
@@ -1154,7 +1160,7 @@ size_t CURLWrapper::write_file_callback(char* buffer, size_t size, size_t nmemb,
     }
 
     size_t written = 0;
-    helper->m_lock->Lock();
+    helper->m_lock->lock();
     int seek_error = fseek(thread_chunk->_fp, thread_chunk->_startidx, SEEK_SET);
     if (seek_error != 0)
     {
@@ -1166,7 +1172,7 @@ size_t CURLWrapper::write_file_callback(char* buffer, size_t size, size_t nmemb,
     }
     thread_chunk->_startidx += written;
     helper->m_current_size += written;
-    helper->m_lock->UnLock();
+    helper->m_lock->unLock();
 
     return written;
 }

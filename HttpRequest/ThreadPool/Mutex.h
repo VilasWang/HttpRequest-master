@@ -2,36 +2,36 @@
 #include <windows.h>
 #include <memory>
 
-class CMutex
+class TPLock
 {
 public:
-    CMutex(void);
-    ~CMutex(void);
+    TPLock(void);
+    ~TPLock(void);
 
 public:
-    bool Lock();
-    bool UnLock();
+    bool lock();
+    bool unLock();
 
 private:
     CRITICAL_SECTION m_cs;
 };
 
-class CMutexLocker
+class TPLocker
 {
 public:
-	CMutexLocker(std::shared_ptr<CMutex>& lock)
+	TPLocker(std::shared_ptr<TPLock>& lock)
 		: m_lock(lock)
 	{
-		m_lock->Lock();
+		m_lock->lock();
 	}
 
-	~CMutexLocker()
+	~TPLocker()
 	{
-		m_lock->UnLock();
+		m_lock->unLock();
 		m_lock = 0;
 	}
 
 private:
-	std::shared_ptr<CMutex> m_lock;
+	std::shared_ptr<TPLock> m_lock;
 };
 

@@ -45,3 +45,4 @@
 /lib/Debug/HttpRequest.lib
 /lib/Release/HttpRequest.lib
 /Sample/CURLTool/GeneratedFiles/Release/moc_curltool.cpp
+/HttpRequest.VC.VC.opendb

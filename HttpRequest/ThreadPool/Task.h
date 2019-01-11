@@ -38,5 +38,5 @@ public:
 
 private:
     std::deque<TaskBase*>m_TaskQueue;
-    CMutex m_mutex;
+    TPLock m_lock;
 };

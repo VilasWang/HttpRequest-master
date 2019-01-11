@@ -13,23 +13,10 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
+#define POST_TEST_NUMBER 5000
 //局域网Apache http服务器
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
-
-
-
-//获取系统默认下载目录
-QString getDefaultDownloadDir()
-{
-	const QStringList& lstDir = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation);
-	if (!lstDir.isEmpty())
-	{
-		return lstDir[0];
-	}
-	return "download/";
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 const int RequestFinish = QEvent::User + 150;
@@ -37,8 +24,9 @@ const int Rrogress = QEvent::User + 151;
 class RequestFinishEvent : public QEvent
 {
 public:
-    RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish)) {}
+    RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish)), bFinishAll(false){}
     QString strMsg;
+	bool bFinishAll;
 };
 
 class RrogressEvent : public QEvent
@@ -59,14 +47,14 @@ int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
 QTime CurlTool::m_timeStart;
-QMap<int, int> CurlTool::m_mapRequest;
+QSet<int> CurlTool::m_mapSet;
 CurlTool *CurlTool::ms_instance = nullptr;
 
 CurlTool::CurlTool(QWidget* parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
-    setFixedSize(700, 700);
+    setFixedSize(630, 610);
     setWindowTitle(QStringLiteral("Curl网络请求工具"));
 
     ui.btn_abort->setEnabled(false);
@@ -217,8 +205,12 @@ bool CurlTool::event(QEvent* event)
         if (nullptr != e)
         {
             appendMsg(e->strMsg);
+			if (e->bFinishAll)
+			{
+				reset();
+			}
         }
-        reset();
+
         return true;
     }
 	else if (event->type() == QEvent::Type(Rrogress))
@@ -293,7 +285,7 @@ void CurlTool::onDownload()
     int nId = request.perform(HttpRequest::Async);
     if (nId > 0)
     {
-        m_mapRequest.insert(nId, 0);
+        m_mapSet.insert(nId);
     }
 }
 
@@ -333,7 +325,7 @@ void CurlTool::onUpload()
     m_timeStart = QTime::currentTime();
     appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-    m_mapRequest.clear();
+    m_mapSet.clear();
     m_nTotalNum = 1;
 
     HttpRequest request(HttpRequest::Upload);
@@ -347,7 +339,7 @@ void CurlTool::onUpload()
     int nId = request.perform(HttpRequest::Async);
     if (nId > 0)
     {
-        m_mapRequest.insert(nId, 0);
+        m_mapSet.insert(nId);
     }
 }
 
@@ -364,7 +356,7 @@ void CurlTool::onGetRequest()
     m_timeStart = QTime::currentTime();
     appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-    m_mapRequest.clear();
+    m_mapSet.clear();
     m_nTotalNum = 1;
     for (int i = 0; i < m_nTotalNum; ++i)
     {
@@ -376,7 +368,7 @@ void CurlTool::onGetRequest()
         int nId = request.perform(HttpRequest::Async);
         if (nId > 0)
         {
-            m_mapRequest.insert(nId, 0);
+            m_mapSet.insert(nId);
         }
     }
 }
@@ -402,8 +394,8 @@ void CurlTool::onPostRequest()
     m_timeStart = QTime::currentTime();
     appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-    m_mapRequest.clear();
-    m_nTotalNum = 200;
+    m_mapSet.clear();
+    m_nTotalNum = POST_TEST_NUMBER;
     for (int i = 0; i < m_nTotalNum; ++i)
     {
         HttpRequest request(HttpRequest::Post);
@@ -416,37 +408,48 @@ void CurlTool::onPostRequest()
         int nId = request.perform(HttpRequest::Async);
         if (nId > 0)
         {
-            m_mapRequest.insert(nId, 0);
+            m_mapSet.insert(nId);
         }
     }
 }
 
 void CurlTool::onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string)
 {
-    if (m_mapRequest.contains(id))
+    if (m_mapSet.contains(id))
     {
-        //异步请求走这里
+		QString strMsg;
         if (success)
         {
             m_nSuccessNum++;
-            qDebug() << "[async]id:" << id  << "; content:" << QString::fromStdString(data);
+			strMsg = QString("[async]id:%1 success. %2").arg(id).arg(QString::fromStdString(data));
         }
         else
         {
             m_nFailedNum++;
-            qDebug() << "[async]id:" << id << "; error:" << QString::fromStdString(error_string);
+			strMsg = QString("[async]id:%1 error: %2").arg(id).arg(QString::fromStdString(error_string));
         }
+
+		if (CurlTool::isInstantiated())
+		{
+			RequestFinishEvent* event = new RequestFinishEvent;
+			event->strMsg = strMsg;
+			QCoreApplication::postEvent(CurlTool::instance(), event);
+			//qDebug() << strMsg;
+		}
 
         if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
         {
 			if (CurlTool::isInstantiated())
 			{
 				QTime time = QTime::currentTime();
-				QString strMsg = QString("Time elapsed: %1s.").arg(m_timeStart.secsTo(time));
+				int msec = m_timeStart.msecsTo(time);
+				float sec = (float)msec / 1000;
+				strMsg = QString("Time elapsed: %1s.").arg(sec);
 				//qDebug() << strMsg;
 
 				RequestFinishEvent* event = new RequestFinishEvent;
 				event->strMsg = strMsg;
+				event->bFinishAll = true;
 				QCoreApplication::postEvent(CurlTool::instance(), event);
 			}
         }
@@ -580,4 +583,14 @@ void CurlTool::appendMsg(const QString& strMsg, bool bQDebug)
         ui.textEdit_output->append(strMsg);
         ui.textEdit_output->append("");
     }
+}
+
+QString CurlTool::getDefaultDownloadDir()
+{
+	const QStringList& lstDir = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation);
+	if (!lstDir.isEmpty())
+	{
+		return lstDir[0];
+	}
+	return "download/";
 }

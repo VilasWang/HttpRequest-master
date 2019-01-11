@@ -9,7 +9,7 @@
 #include "HttpRequest_global.h"
 
 #ifndef INT64
-#define INT64 signed long long int
+#define INT64 long long int
 #endif
 
 //{int id, bool success, const std::string& data, const std::string& error_string}

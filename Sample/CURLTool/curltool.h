@@ -42,6 +42,8 @@ private:
     QString bytes2String(qint64 bytes);
     void appendMsg(const QString& strMsg, bool bQDebug = true);
     void reset();
+	//获取系统默认下载目录
+	QString getDefaultDownloadDir();
 
 public Q_SLOTS:
     void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
@@ -64,7 +66,7 @@ private:
 	static int m_nSuccessNum;
 
 	static QTime m_timeStart;
-	static QMap<int, int> m_mapRequest;
+	static QSet<int> m_mapSet;
 };
 
 #endif // INTERNET_H

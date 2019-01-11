@@ -7,6 +7,7 @@ ThreadPool::ThreadPool()
     , m_bInitialized(false)
     , m_pCallBack(nullptr)
 {
+
 }
 
 ThreadPool::~ThreadPool()

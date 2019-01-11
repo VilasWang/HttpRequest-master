@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;HTTP_REQUEST_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\include;..\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -70,7 +70,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;NDEBUG;HTTP_REQUEST_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;NDEBUG;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\include;..\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>
       </DebugInformationFormat>
@@ -90,6 +90,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ClassMemoryTracer.cpp" />
     <ClCompile Include="HttpRequestManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpTask.cpp" />
@@ -101,6 +102,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\HttpRequest.h" />
     <ClInclude Include="..\include\HttpRequest_global.h" />
+    <ClInclude Include="ClassMemoryTracer.h" />
     <ClInclude Include="HttpRequestManager.h" />
     <ClInclude Include="HttpTask.h" />
     <ClInclude Include="ThreadPool\Mutex.h" />

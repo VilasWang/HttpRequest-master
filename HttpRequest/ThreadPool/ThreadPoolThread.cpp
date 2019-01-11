@@ -97,21 +97,6 @@ UINT WINAPI ThreadPoolThread::threadProc(LPVOID pParam)
         DWORD ret = WaitForSingleObject(pThread->m_hEvent, INFINITE);
         switch (ret)
         {
-        case WAIT_OBJECT_0 + 1:
-        {
-            while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                switch (msg.message)
-                {
-                case WM_QUIT:
-                    pThread->m_bExit = TRUE;
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        break;
         case WAIT_OBJECT_0:
         {
             pThread->exec();
@@ -172,7 +157,8 @@ void ThreadPoolThread::exec()
         m_pTask->exec();
         if (m_pTask->isAutoDelete())
         {
-            delete m_pTask;
+			delete m_pTask;
+			m_pTask = nullptr;
         }
         else
         {
@@ -211,9 +197,9 @@ bool ActiveThreadList::append(ThreadPoolThread* t)
         return false;
     }
 
-    m_mutex.Lock();
+    m_lock.lock();
     m_list.push_back(t);
-    m_mutex.UnLock();
+    m_lock.unLock();
     return true;
 }
 
@@ -224,16 +210,16 @@ bool ActiveThreadList::remove(ThreadPoolThread* t)
         return false;
     }
 
-    m_mutex.Lock();
+    m_lock.lock();
     m_list.remove(t);
-    m_mutex.UnLock();
+    m_lock.unLock();
     return true;
 }
 
 ThreadPoolThread* ActiveThreadList::remove(int task_id)
 {
     ThreadPoolThread* thread = nullptr;
-    m_mutex.Lock();
+    m_lock.lock();
     auto iter = m_list.begin();
     for (; iter != m_list.end();)
     {
@@ -248,42 +234,42 @@ ThreadPoolThread* ActiveThreadList::remove(int task_id)
             ++iter;
         }
     }
-    m_mutex.UnLock();
+    m_lock.unLock();
     return thread;
 }
 
 ThreadPoolThread* ActiveThreadList::pop_back()
 {
     ThreadPoolThread* thread = nullptr;
-    m_mutex.Lock();
+    m_lock.lock();
     if (!m_list.empty())
     {
         thread = m_list.back();
         m_list.remove(thread);
     }
-    m_mutex.UnLock();
+    m_lock.unLock();
     return thread;
 }
 
 int ActiveThreadList::size()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     int size = m_list.size();
-    m_mutex.UnLock();
+    m_lock.unLock();
     return size;
 }
 
 bool ActiveThreadList::isEmpty()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     bool ret = m_list.empty();
-    m_mutex.UnLock();
+    m_lock.unLock();
     return ret;
 }
 
 bool ActiveThreadList::clear()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     auto iter = m_list.begin();
     for (; iter != m_list.end(); iter++)
     {
@@ -293,7 +279,7 @@ bool ActiveThreadList::clear()
         }
     }
     m_list.clear();
-    m_mutex.UnLock();
+    m_lock.unLock();
     return true;
 }
 
@@ -309,15 +295,15 @@ IdleThreadStack::~IdleThreadStack()
 
 ThreadPoolThread* IdleThreadStack::pop()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     if (!m_stack.empty())
     {
         ThreadPoolThread* t = m_stack.top();
         m_stack.pop();
-        m_mutex.UnLock();
+        m_lock.unLock();
         return t;
     }
-    m_mutex.UnLock();
+    m_lock.unLock();
     return nullptr;
 }
 
@@ -328,32 +314,32 @@ bool IdleThreadStack::push(ThreadPoolThread* t)
     {
         return false;
     }
-    m_mutex.Lock();
+    m_lock.lock();
     t->suspend();
     m_stack.push(t);
-    m_mutex.UnLock();
+    m_lock.unLock();
     return true;
 }
 
 int IdleThreadStack::size()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     int size = m_stack.size();
-    m_mutex.UnLock();
+    m_lock.unLock();
     return size;
 }
 
 bool IdleThreadStack::isEmpty()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     bool ret = m_stack.empty();
-    m_mutex.UnLock();
+    m_lock.unLock();
     return ret;
 }
 
 bool IdleThreadStack::clear()
 {
-    m_mutex.Lock();
+    m_lock.lock();
     ThreadPoolThread* pThread = nullptr;
     while (!m_stack.empty())
     {
@@ -365,6 +351,6 @@ bool IdleThreadStack::clear()
             delete pThread;
         }
     }
-    m_mutex.UnLock();
+    m_lock.unLock();
     return true;
 }

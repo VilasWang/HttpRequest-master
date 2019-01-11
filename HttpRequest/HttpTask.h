@@ -17,5 +17,5 @@ public:
 
 private:
     std::shared_ptr<RequestImpl> m_request;
-    CMutex m_lock;
+    TPLock m_lock;
 };

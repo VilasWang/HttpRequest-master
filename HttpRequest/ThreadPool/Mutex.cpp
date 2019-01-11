@@ -1,22 +1,22 @@
 #include "Mutex.h"
 
-CMutex::CMutex(void)
+TPLock::TPLock(void)
 {
     InitializeCriticalSection(&m_cs);
 }
 
-CMutex::~CMutex(void)
+TPLock::~TPLock(void)
 {
     DeleteCriticalSection(&m_cs);
 }
 
-bool CMutex::Lock()
+bool TPLock::lock()
 {
     EnterCriticalSection(&m_cs);
     return true;
 }
 
-bool CMutex::UnLock()
+bool TPLock::unLock()
 {
     LeaveCriticalSection(&m_cs);
     return true;
