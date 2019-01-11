@@ -1,11 +1,9 @@
 HttpRequest moudle
 ======================================================
-@version: 1.0.0.2  
+@version: 1.0.0.3  
 @Author: Vilas Wang  
-@Contact: QQ451930733  
-@Email: vilas900420@gmail.com / 451930733@qq.com
+@Contact: QQ451930733 | 451930733@qq.com  
 
-Copyright © 2018 Vilas Wang. All rights reserved.
 
 ** HttpRequest is free library licensed under the term of LGPL v3.0. **
 
