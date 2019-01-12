@@ -19,7 +19,7 @@ private:
 class TPLocker
 {
 public:
-	TPLocker(std::shared_ptr<TPLock>& lock)
+	TPLocker(std::shared_ptr<TPLock> lock)
 		: m_lock(lock)
 	{
 		m_lock->lock();

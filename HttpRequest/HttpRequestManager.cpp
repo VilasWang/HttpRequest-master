@@ -31,6 +31,7 @@ HttpRequestManager::~HttpRequestManager()
 	if (m_callback)
 	{
 		delete m_callback;
+		m_callback = nullptr;
 	}
 	m_lock = nullptr;
 
@@ -49,9 +50,14 @@ HttpRequestManager* HttpRequestManager::Instance()
 	return &_instance;
 }
 
-bool HttpRequestManager::addTask(TaskBase* t, ThreadPool::Priority priority)
+bool HttpRequestManager::addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority)
 {
-	if (!t->isAutoDelete() && t)
+	if (!t.get())
+	{
+		return false;
+	}
+
+	if (!t->isAutoDelete())
 	{
 		HttpRequestManager::Instance()->insertTask(t);
 	}
@@ -83,10 +89,11 @@ void HttpRequestManager::set_share_handle(CURL* curl_handle)
 	}
 }
 
-void HttpRequestManager::insertTask(TaskBase* t)
+void HttpRequestManager::insertTask(std::shared_ptr<TaskBase> t)
 {
 	TPLocker locker(m_lock);
-	m_map_tasks[t->id()] = t;
+	std::shared_ptr<TaskBase> task(t);
+	m_map_tasks[t->id()] = task;
 }
 
 void HttpRequestManager::removeTask(int task_id)
@@ -96,12 +103,6 @@ void HttpRequestManager::removeTask(int task_id)
 	auto iter = m_map_tasks.find(task_id);
 	if (iter != m_map_tasks.end())
 	{
-		TaskBase* t = iter->second;
-		if (t)
-		{
-			delete t;
-		}
-
 		m_map_tasks.erase(iter);
 	}
 }
@@ -109,17 +110,7 @@ void HttpRequestManager::removeTask(int task_id)
 void HttpRequestManager::clearTask()
 {
 	TPLocker locker(m_lock);
-	auto iter = m_map_tasks.begin();
-	for (; iter != m_map_tasks.end();)
-	{
-		TaskBase* t = iter->second;
-		if (t)
-		{
-			delete t;
-		}
-
-		iter = m_map_tasks.erase(iter);
-	}
+	m_map_tasks.clear();
 }
 
 void HttpRequestManager::HttpTaskCallBack::onTaskFinished(int task_id)

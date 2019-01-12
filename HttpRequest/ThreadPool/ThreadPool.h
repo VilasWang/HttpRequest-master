@@ -24,7 +24,7 @@ public:
 	bool waitForDone();
 
 	//priority为优先级。高优先级的任务将被插入到队首
-	bool addTask(TaskBase* t, Priority p);
+	bool addTask(std::shared_ptr<TaskBase> t, Priority p);
 
 	bool abortTask(int taskId);
 	bool abortAllTask();
@@ -47,7 +47,7 @@ public:
 protected:
 	ThreadPool();
 	virtual ThreadPoolThread* popIdleThread();
-	virtual TaskBase* getNextTask();
+	virtual std::shared_ptr<TaskBase> getNextTask();
 
 private:
 	int m_nThreadNum;

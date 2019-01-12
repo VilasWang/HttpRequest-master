@@ -21,14 +21,11 @@ public:
 	//线程挂起恢复
 	bool resume();
 
-	const UINT threadId() const
-	{
-		return m_threadId;
-	}
+	const UINT threadId() const { return m_threadId; }
 	const int taskId();
 
 	//将任务关联到线程类
-	bool assignTask(TaskBase* pTask);
+	bool assignTask(std::shared_ptr<TaskBase> pTask);
 	void detachTask();
 	bool startTask();
 	bool stopTask();
@@ -48,7 +45,7 @@ private:
 	bool m_bExit;
 	TPLock m_mutex;
 
-	TaskBase* m_pTask;
+	std::shared_ptr<TaskBase> m_pTask;
 	ThreadPool* m_pThreadPool;
 };
 

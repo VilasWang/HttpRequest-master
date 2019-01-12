@@ -8,55 +8,55 @@
 
 class CurlTool : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    CurlTool(QWidget* parent = 0);
-    ~CurlTool();
+	CurlTool(QWidget* parent = 0);
+	~CurlTool();
 
-	static CurlTool *instance() {return ms_instance;}
-	static bool isInstantiated() {return (ms_instance != nullptr);}
+	static CurlTool *instance() { return ms_instance; }
+	static bool isInstantiated() { return (ms_instance != nullptr); }
 
-    bool event(QEvent* event) Q_DECL_OVERRIDE;
+	bool event(QEvent* event) Q_DECL_OVERRIDE;
 
-public Q_SLOTS:
-    void onStartTask();
-    void onAbortTask();
+	public Q_SLOTS:
+	void onStartTask();
+	void onAbortTask();
 
-private Q_SLOTS:
-    void onDownload();
-    void onUpload();
-    void onGetRequest();
-    void onPostRequest();
+	private Q_SLOTS:
+	void onDownload();
+	void onUpload();
+	void onGetRequest();
+	void onPostRequest();
 
-    void onUpdateDefaultInfos();
-    void onGetSaveDirectory();
-    void onGetUploadFile();
+	void onUpdateDefaultInfos();
+	void onGetSaveDirectory();
+	void onGetUploadFile();
 
-    static void onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string);
-    static void onProgressCallback(int id, bool bDownload, qint64 total_size, qint64 downloaded_size);
+	static void onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string);
+	static void onProgressCallback(int id, bool bDownload, qint64 total_size, qint64 downloaded_size);
 
 private:
-    void initialize();
-    void unIntialize();
-    QString bytes2String(qint64 bytes);
-    void appendMsg(const QString& strMsg, bool bQDebug = true);
-    void reset();
+	void initialize();
+	void unIntialize();
+	QString bytes2String(qint64 bytes);
+	void appendMsg(const QString& strMsg, bool bQDebug = true);
+	void reset();
 	//获取系统默认下载目录
 	QString getDefaultDownloadDir();
 
-public Q_SLOTS:
-    void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
+	public Q_SLOTS:
+	void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
 
 private:
-    Ui::networkClass ui;
+	Ui::networkClass ui;
 
-    qint64 m_nbytesReceived;
-    qint64 m_nbytesTotalDownload;
-    QString m_strTotalDownload;
-    qint64 m_nbytesSent;
-    qint64 m_nbytesTotalUpload;
-    QString m_strTotalUpload;
+	qint64 m_nbytesReceived;
+	qint64 m_nbytesTotalDownload;
+	QString m_strTotalDownload;
+	qint64 m_nbytesSent;
+	qint64 m_nbytesTotalUpload;
+	QString m_strTotalUpload;
 
 private:
 	static CurlTool *ms_instance;

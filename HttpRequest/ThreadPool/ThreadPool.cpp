@@ -66,9 +66,9 @@ bool ThreadPool::waitForDone()
 	return true;
 }
 
-bool ThreadPool::addTask(TaskBase* t, Priority p)
+bool ThreadPool::addTask(std::shared_ptr<TaskBase> t, Priority p)
 {
-	if (!t || !m_bInitialized)
+	if (!t.get() || !m_bInitialized)
 	{
 		return false;
 	}
@@ -84,8 +84,8 @@ bool ThreadPool::addTask(TaskBase* t, Priority p)
 
 	if (!m_idleThreads.isEmpty())
 	{
-		TaskBase* task = getNextTask();
-		if (task == nullptr)
+		std::shared_ptr<TaskBase> task = getNextTask();
+		if (!task.get())
 		{
 			return false;
 		}
@@ -124,17 +124,17 @@ bool ThreadPool::abortAllTask()
 	return true;
 }
 
-TaskBase* ThreadPool::getNextTask()
+std::shared_ptr<TaskBase> ThreadPool::getNextTask()
 {
 	if (m_taskQueue.isEmpty())
 	{
 		return nullptr;
 	}
 
-	TaskBase* task = m_taskQueue.pop();
-	if (task == nullptr)
+	std::shared_ptr<TaskBase> task = m_taskQueue.pop();
+	if (!task.get())
 	{
-		OutputDebugStringA("null task!\n");
+		OutputDebugStringA("error task!\n");
 	}
 	return task;
 }
@@ -151,8 +151,8 @@ bool ThreadPool::onThreadFinished(ThreadPoolThread* t)
 		return false;
 	}
 
-	TaskBase* pTask = getNextTask();
-	if (pTask)
+	std::shared_ptr<TaskBase> pTask = getNextTask();
+	if (pTask.get())
 	{
 		t->assignTask(pTask);
 		t->startTask();

@@ -13,7 +13,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_TEST_NUMBER 5000
+#define POST_TEST_NUMBER 1000
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -435,8 +435,8 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 			RequestFinishEvent* event = new RequestFinishEvent;
 			event->strMsg = strMsg;
 			QCoreApplication::postEvent(CurlTool::instance(), event);
-			//qDebug() << strMsg;
 		}
+		qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
 
 		if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
 		{
@@ -446,7 +446,6 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 				int msec = m_timeStart.msecsTo(time);
 				float sec = (float)msec / 1000;
 				strMsg = QString("Time elapsed: %1s.").arg(sec);
-				//qDebug() << strMsg;
 
 				RequestFinishEvent* event = new RequestFinishEvent;
 				event->strMsg = strMsg;

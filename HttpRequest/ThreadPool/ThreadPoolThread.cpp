@@ -109,13 +109,12 @@ UINT WINAPI ThreadPoolThread::threadProc(LPVOID pParam)
 	return 0;
 }
 
-bool ThreadPoolThread::assignTask(TaskBase* pTask)
+bool ThreadPoolThread::assignTask(std::shared_ptr<TaskBase> pTask)
 {
 	if (!pTask)
 	{
 		return false;
 	}
-
 	m_pTask = pTask;
 	return true;
 }
@@ -127,7 +126,7 @@ void ThreadPoolThread::detachTask()
 
 const int ThreadPoolThread::taskId()
 {
-	if (m_pTask)
+	if (m_pTask.get())
 	{
 		return m_pTask->id();
 	}
@@ -142,7 +141,7 @@ bool ThreadPoolThread::startTask()
 
 bool ThreadPoolThread::stopTask()
 {
-	if (m_pTask)
+	if (m_pTask.get())
 	{
 		m_pTask->cancel();
 	}
@@ -152,22 +151,16 @@ bool ThreadPoolThread::stopTask()
 
 void ThreadPoolThread::exec()
 {
-	if (m_pTask)
+	if (m_pTask.get())
 	{
+		int id = m_pTask->id();
 		m_pTask->exec();
-		if (m_pTask->isAutoDelete())
+		m_pTask.reset();
+
+		if (m_pThreadPool)
 		{
-			delete m_pTask;
-			m_pTask = nullptr;
+			m_pThreadPool->onTaskFinished(id);
 		}
-		else
-		{
-			if (m_pThreadPool)
-			{
-				m_pThreadPool->onTaskFinished(m_pTask->id());
-			}
-		}
-		m_pTask = nullptr;
 	}
 
 	if (!m_bExit)

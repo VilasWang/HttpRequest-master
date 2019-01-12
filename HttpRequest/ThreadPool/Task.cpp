@@ -31,28 +31,41 @@ TaskQueue::~TaskQueue(void)
 {
 }
 
-TaskBase* TaskQueue::pop()
+std::shared_ptr<TaskBase> TaskQueue::pop()
 {
-	TaskBase* p = nullptr;
+	std::shared_ptr<TaskBase> t;
 	m_lock.lock();
 	if (!m_TaskQueue.empty())
 	{
-		p = m_TaskQueue.front();
+		t = m_TaskQueue.front();
 		m_TaskQueue.pop_front();
 	}
 	m_lock.unLock();
-	return p;
+	return t;
 }
 
-bool TaskQueue::push(TaskBase* t)
+bool TaskQueue::push(std::shared_ptr<TaskBase> t)
 {
-	if (!t)
+	if (!t.get())
 	{
 		return false;
 	}
 
 	m_lock.lock();
 	m_TaskQueue.push_back(t);
+	m_lock.unLock();
+	return true;
+}
+
+bool TaskQueue::pushFront(std::shared_ptr<TaskBase> t)
+{
+	if (!t.get())
+	{
+		return false;
+	}
+
+	m_lock.lock();
+	m_TaskQueue.push_front(t);
 	m_lock.unLock();
 	return true;
 }
@@ -66,30 +79,9 @@ bool TaskQueue::isEmpty()
 	return ret;
 }
 
-bool TaskQueue::pushFront(TaskBase* t)
-{
-	if (!t)
-	{
-		return false;
-	}
-
-	m_lock.lock();
-	m_TaskQueue.push_front(t);
-	m_lock.unLock();
-	return true;
-}
-
 bool TaskQueue::clear()
 {
 	m_lock.lock();
-	std::deque<TaskBase*>::iterator iter = m_TaskQueue.begin();
-	for (; iter != m_TaskQueue.end(); ++iter)
-	{
-		if (nullptr != (*iter) && (*iter)->isAutoDelete())
-		{
-			delete (*iter);
-		}
-	}
 	m_TaskQueue.clear();
 	m_lock.unLock();
 	return true;

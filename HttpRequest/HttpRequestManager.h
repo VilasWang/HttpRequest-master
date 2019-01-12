@@ -19,13 +19,13 @@ protected:
 
 private:
 	static void set_share_handle(CURL* curl_handle);
-	static bool addTask(TaskBase* t, ThreadPool::Priority priority = ThreadPool::Normal);
+	static bool addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority = ThreadPool::Normal);
 	static bool abortTask(int taskId);
 	static bool abortAllTask();
 	static void globalCleanup();
 
 private:
-	void insertTask(TaskBase* t);
+	void insertTask(std::shared_ptr<TaskBase> t);
 	void removeTask(int taskId);
 	void clearTask();
 
@@ -38,7 +38,7 @@ private:
 
 private:
 	static CURLSH* s_share_handle_;
-	std::map<int, TaskBase*> m_map_tasks;
+	std::map<int, std::shared_ptr<TaskBase>> m_map_tasks;
 	HttpTaskCallBack* m_callback;
 	std::shared_ptr<TPLock> m_lock;
 

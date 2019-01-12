@@ -30,13 +30,13 @@ public:
     ~TaskQueue();
 
 public:
-    TaskBase* pop();
-    bool push(TaskBase* t);
-    bool pushFront(TaskBase* t);//插到队首。
+	std::shared_ptr<TaskBase> pop();
+    bool push(std::shared_ptr<TaskBase> t);
+    bool pushFront(std::shared_ptr<TaskBase> t);//插到队首。
     bool isEmpty();
     bool clear();
 
 private:
-    std::deque<TaskBase*>m_TaskQueue;
+    std::deque<std::shared_ptr<TaskBase>>m_TaskQueue;
     TPLock m_lock;
 };
