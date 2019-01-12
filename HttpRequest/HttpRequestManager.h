@@ -11,11 +11,11 @@ class TaskBase;
 class HttpRequestManager
 {
 public:
-    ~HttpRequestManager();
-    static HttpRequestManager* Instance();
+	~HttpRequestManager();
+	static HttpRequestManager* Instance();
 
 protected:
-    HttpRequestManager();
+	HttpRequestManager();
 
 private:
 	static void set_share_handle(CURL* curl_handle);
@@ -25,9 +25,9 @@ private:
 	static void globalCleanup();
 
 private:
-    void insertTask(TaskBase* t);
-    void removeTask(int taskId);
-    void clearTask();
+	void insertTask(TaskBase* t);
+	void removeTask(int taskId);
+	void clearTask();
 
 private:
 	class HttpTaskCallBack : public ThreadPool::ThreadPoolCallBack
@@ -37,10 +37,10 @@ private:
 	};
 
 private:
-    static CURLSH* s_share_handle_;
-    std::map<int, TaskBase*> m_map_tasks;
-    HttpTaskCallBack* m_callback;
-    std::shared_ptr<TPLock> m_lock;
+	static CURLSH* s_share_handle_;
+	std::map<int, TaskBase*> m_map_tasks;
+	HttpTaskCallBack* m_callback;
+	std::shared_ptr<TPLock> m_lock;
 
 	friend class CURLWrapper;
 	friend class HttpRequest;

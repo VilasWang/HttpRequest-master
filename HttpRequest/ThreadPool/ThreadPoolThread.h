@@ -10,82 +10,82 @@ class ThreadPool;
 class ThreadPoolThread
 {
 public:
-    ThreadPoolThread(ThreadPool* threadPool);
-    ~ThreadPoolThread();
+	ThreadPoolThread(ThreadPool* threadPool);
+	~ThreadPoolThread();
 
 public:
-    bool start();
+	bool start();
 	void quit();
-    //线程挂起
-    bool suspend();
-    //线程挂起恢复
-    bool resume();
+	//线程挂起
+	bool suspend();
+	//线程挂起恢复
+	bool resume();
 
-    const UINT threadId() const
-    {
-        return m_threadId;
-    }
-    const int taskId();
+	const UINT threadId() const
+	{
+		return m_threadId;
+	}
+	const int taskId();
 
-    //将任务关联到线程类
-    bool assignTask(TaskBase* pTask);
-    void detachTask();
-    bool startTask();
-    bool stopTask();
+	//将任务关联到线程类
+	bool assignTask(TaskBase* pTask);
+	void detachTask();
+	bool startTask();
+	bool stopTask();
 
 protected:
-    virtual void exec();
-    //尝试停止正在执行的任务，否则等待任务结束
-    virtual void waitForDone();
+	virtual void exec();
+	//尝试停止正在执行的任务，否则等待任务结束
+	virtual void waitForDone();
 
 private:
-    static UINT WINAPI threadProc(LPVOID pParam);
+	static UINT WINAPI threadProc(LPVOID pParam);
 
 private:
-    HANDLE m_hThread;
-    UINT m_threadId;
-    HANDLE m_hEvent;
-    bool m_bExit;
-    TPLock m_mutex;
+	HANDLE m_hThread;
+	UINT m_threadId;
+	HANDLE m_hEvent;
+	bool m_bExit;
+	TPLock m_mutex;
 
-    TaskBase* m_pTask;
-    ThreadPool* m_pThreadPool;
+	TaskBase* m_pTask;
+	ThreadPool* m_pThreadPool;
 };
 
 class ActiveThreadList
 {
 public:
-    ActiveThreadList();
-    ~ActiveThreadList();
+	ActiveThreadList();
+	~ActiveThreadList();
 
 public:
-    bool append(ThreadPoolThread* t);
-    bool remove(ThreadPoolThread* t);
-    ThreadPoolThread* remove(int task_id);
-    ThreadPoolThread* pop_back();
-    int size();
-    bool isEmpty();
-    bool clear();
+	bool append(ThreadPoolThread* t);
+	bool remove(ThreadPoolThread* t);
+	ThreadPoolThread* remove(int task_id);
+	ThreadPoolThread* pop_back();
+	int size();
+	bool isEmpty();
+	bool clear();
 
 private:
-    std::list<ThreadPoolThread*>m_list;
-    TPLock m_lock;
+	std::list<ThreadPoolThread*>m_list;
+	TPLock m_lock;
 };
 
 class IdleThreadStack
 {
 public:
-    IdleThreadStack();
-    ~IdleThreadStack();
+	IdleThreadStack();
+	~IdleThreadStack();
 
 public:
-    ThreadPoolThread* pop();
-    bool push(ThreadPoolThread*);
-    int size();
-    bool isEmpty();
-    bool clear();
+	ThreadPoolThread* pop();
+	bool push(ThreadPoolThread*);
+	int size();
+	bool isEmpty();
+	bool clear();
 
 private:
-    std::stack<ThreadPoolThread*> m_stack;
-    TPLock m_lock;
+	std::stack<ThreadPoolThread*> m_stack;
+	TPLock m_lock;
 };

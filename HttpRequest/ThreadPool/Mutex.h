@@ -5,15 +5,15 @@
 class TPLock
 {
 public:
-    TPLock(void);
-    ~TPLock(void);
+	TPLock(void);
+	~TPLock(void);
 
 public:
-    bool lock();
-    bool unLock();
+	bool lock();
+	bool unLock();
 
 private:
-    CRITICAL_SECTION m_cs;
+	CRITICAL_SECTION m_cs;
 };
 
 class TPLocker
