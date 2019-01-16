@@ -16,33 +16,27 @@ HttpTask::~HttpTask()
 	detach();
 }
 
-void HttpTask::attach(const std::shared_ptr<RequestImpl>& request)
+void HttpTask::attach(std::shared_ptr<RequestInterface> request)
 {
-	m_lock.lock();
 	m_request = request;
 	m_id = request->requestId();
-	m_lock.unLock();
 }
 
 void HttpTask::detach()
 {
-	m_lock.lock();
 	if (m_request.get())
 	{
 		m_request.reset();
 	}
-	m_lock.unLock();
 }
 
 void HttpTask::exec()
 {
-	m_lock.lock();
 	if (m_request.get())
 	{
 		m_request->perform();
 		m_request.reset();
 	}
-	m_lock.unLock();
 }
 
 void HttpTask::cancel()

@@ -6,16 +6,22 @@
 #include "curl/curl.h"
 #include "ThreadPool/ThreadPool.h"
 #include "ThreadPool/mutex.h"
+#include "HttpReply.h"
 
 class TaskBase;
-class HttpRequestManager
+class HttpManager
 {
 public:
-	~HttpRequestManager();
-	static HttpRequestManager* Instance();
+	~HttpManager();
+	static HttpManager* Instance();
+
+	void addReply(std::shared_ptr<HttpReply> reply);
+	void removeReply(int);
+	std::shared_ptr<HttpReply> takeReply(int);
+	std::shared_ptr<HttpReply> getReply(int);
 
 protected:
-	HttpRequestManager();
+	explicit HttpManager();
 
 private:
 	static void set_share_handle(CURL* curl_handle);
@@ -25,21 +31,8 @@ private:
 	static void globalCleanup();
 
 private:
-	void insertTask(std::shared_ptr<TaskBase> t);
-	void removeTask(int taskId);
-	void clearTask();
-
-private:
-	class HttpTaskCallBack : public ThreadPool::ThreadPoolCallBack
-	{
-	public:
-		void onTaskFinished(int taskId) override;
-	};
-
-private:
 	static CURLSH* s_share_handle_;
-	std::map<int, std::shared_ptr<TaskBase>> m_map_tasks;
-	HttpTaskCallBack* m_callback;
+	std::map<int, std::shared_ptr<HttpReply>> m_map_replys;
 	std::shared_ptr<TPLock> m_lock;
 
 	friend class CURLWrapper;

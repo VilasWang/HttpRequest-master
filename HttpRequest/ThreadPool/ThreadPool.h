@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ThreadPoolThread.h"
+#include "ScheduleThread.h"
 #include "Task.h"
 
 #define DEFAULT_THREAD_COUNT 4
+#define WM_THREAD_TASK_FINISHED (WM_USER + 1000)
 
 class ThreadPool
 {
@@ -15,7 +17,10 @@ public:
 	};
 
 	~ThreadPool();
-	static ThreadPool* Instance();
+	ThreadPool(const ThreadPool &) = delete;
+	ThreadPool &operator=(const ThreadPool &) = delete;
+
+	static ThreadPool* globalInstance();
 
 public:
 	//初始化线程池，创建n个线程的线程池。
@@ -25,14 +30,17 @@ public:
 
 	//priority为优先级。高优先级的任务将被插入到队首
 	bool addTask(std::shared_ptr<TaskBase> t, Priority p);
-
 	bool abortTask(int taskId);
 	bool abortAllTask();
 
-	//线程任务完成通知取任务
-	//将线程从活动队列取出，放入空闲线程栈中。
-	//在取任务之前，先判断任务队列是否有任务,如为空时才挂起,否则从任务队列取任务继续执行
-	virtual bool onThreadFinished(ThreadPoolThread*);
+	bool hasTask() { return !m_taskQueue.isEmpty(); }
+	bool hasIdleThread() { return !m_idleThreads.isEmpty(); }
+
+	std::shared_ptr<TaskBase> takeTask();
+	ThreadPoolThread* popIdleThread();
+	ThreadPoolThread* takeActiveThread(UINT threadId);
+	void appendActiveThread(ThreadPoolThread*);
+	void pushIdleThread(ThreadPoolThread*);
 
 public:
 	class ThreadPoolCallBack
@@ -42,18 +50,16 @@ public:
 	};
 
 	void setCallBack(ThreadPoolCallBack* pCallBack);
-	void onTaskFinished(int taskId);
+	void onTaskFinished(int taskId, UINT threadId);
 
-protected:
+private:
 	ThreadPool();
-	virtual ThreadPoolThread* popIdleThread();
-	virtual std::shared_ptr<TaskBase> getNextTask();
 
 private:
 	int m_nThreadNum;
 	bool m_bInitialized;
 	ThreadPoolCallBack* m_pCallBack;
-
+	ScheduleThread *m_pThread;
 	IdleThreadStack m_idleThreads;
 	ActiveThreadList m_activeThreads;
 	TaskQueue m_taskQueue;

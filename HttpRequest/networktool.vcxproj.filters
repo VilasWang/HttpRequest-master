@@ -56,11 +56,17 @@
     <ClCompile Include="HttpTask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HttpRequestManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ClassMemoryTracer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpReply.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool\ScheduleThread.cpp">
+      <Filter>ThreadPool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,14 +88,23 @@
     <ClInclude Include="..\include\HttpRequest_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HttpRequestManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HttpTask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClassMemoryTracer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="httprequestdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\HttpReply.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool\ScheduleThread.h">
+      <Filter>ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

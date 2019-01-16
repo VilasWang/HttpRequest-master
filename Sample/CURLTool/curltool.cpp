@@ -10,6 +10,7 @@
 #include <QButtonGroup>
 #include <QListView>
 #include <QStandardPaths>
+#include <memory>
 #include "curltool.h"
 #include "HttpRequest.h"
 
@@ -49,7 +50,7 @@ int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
 QTime CurlTool::m_timeStart;
-QSet<int> CurlTool::m_mapSet;
+QMap<int, std::shared_ptr<HttpReply>> CurlTool::m_mapReplys;
 CurlTool *CurlTool::ms_instance = nullptr;
 
 CurlTool::CurlTool(QWidget* parent)
@@ -125,9 +126,9 @@ void CurlTool::onUpdateDefaultInfos()
 	{
 		if (ui.cb_download->isChecked())
 		{
-			const QString& strUrl = "http://8dx.pc6.com/xzx6/curl_v7.61.1.zip";
+			const QString& strUrl = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";// "http://8dx.pc6.com/xzx6/curl_v7.61.1.zip";
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_filename->setText("curl_v7.61.1.zip");
+			ui.lineEdit_filename->setText("mysql-8.0.13-winx64.zip");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
@@ -274,7 +275,7 @@ void CurlTool::onDownload()
 	m_nTotalNum = 1;
 	const QString& strFilePath = strSavePath + "/" + strFileName;
 
-	HttpRequest request(HttpRequest::Download);
+	HttpRequest request;
 	request.setRequestUrl(strUrl.toStdString());
 	request.setDownloadFile(strFilePath.toStdString(), ui.cmb_multiDownload->currentText().toInt());
 	request.setFollowLocation(true);
@@ -283,10 +284,10 @@ void CurlTool::onDownload()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	int nId = request.perform(HttpRequest::Async);
-	if (nId > 0)
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
+	if (reply.get())
 	{
-		m_mapSet.insert(nId);
+		m_mapReplys.insert(reply->id(), reply);
 	}
 }
 
@@ -326,10 +327,10 @@ void CurlTool::onUpload()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapSet.clear();
+	m_mapReplys.clear();
 	m_nTotalNum = 1;
 
-	HttpRequest request(HttpRequest::Upload);
+	HttpRequest request;
 	request.setRequestUrl(strUrl.toStdString());
 	request.setUploadFile(strUploadFilePath.toStdString(), strTargetName.toStdString(), strSavePath.toStdString());
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
@@ -337,10 +338,10 @@ void CurlTool::onUpload()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	int nId = request.perform(HttpRequest::Async);
-	if (nId > 0)
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
+	if (reply.get())
 	{
-		m_mapSet.insert(nId);
+		m_mapReplys.insert(reply->id(), reply);
 	}
 }
 
@@ -357,19 +358,19 @@ void CurlTool::onGetRequest()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapSet.clear();
-	m_nTotalNum = 1;
+	m_mapReplys.clear();
+	m_nTotalNum = 1000;
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
-		HttpRequest request(HttpRequest::Get);
+		HttpRequest request;
 		request.setRequestUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-		int nId = request.perform(HttpRequest::Async);
-		if (nId > 0)
+		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Get, HttpRequest::Async);
+		if (reply.get())
 		{
-			m_mapSet.insert(nId);
+			m_mapReplys.insert(reply->id(), reply);
 		}
 	}
 }
@@ -395,63 +396,60 @@ void CurlTool::onPostRequest()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapSet.clear();
+	m_mapReplys.clear();
 	m_nTotalNum = POST_TEST_NUMBER;
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
-		HttpRequest request(HttpRequest::Post);
+		HttpRequest request;
 		request.setRequestUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 		std::string strSendData = strArg.toStdString();
 		request.setPostData(strSendData.c_str(), strSendData.size());
 
-		int nId = request.perform(HttpRequest::Async);
-		if (nId > 0)
+		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Post, HttpRequest::Async);
+		if (reply.get())
 		{
-			m_mapSet.insert(nId);
+			m_mapReplys.insert(reply->id(), reply);
 		}
 	}
 }
 
 void CurlTool::onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string)
 {
-	if (m_mapSet.contains(id))
+	QString strMsg;
+	if (success)
 	{
-		QString strMsg;
-		if (success)
-		{
-			m_nSuccessNum++;
-			strMsg = QString("[async]id:%1 success. %2").arg(id).arg(QString::fromStdString(data));
-		}
-		else
-		{
-			m_nFailedNum++;
-			strMsg = QString("[async]id:%1 error: %2").arg(id).arg(QString::fromStdString(error_string));
-		}
+		m_nSuccessNum++;
+		strMsg = QString("[async]id:%1 success. %2").arg(id).arg(QString::fromStdString(data));
+	}
+	else
+	{
+		m_nFailedNum++;
+		strMsg = QString("[async]id:%1 error: %2").arg(id).arg(QString::fromStdString(error_string));
+	}
 
+	if (CurlTool::isInstantiated())
+	{
+		RequestFinishEvent* event = new RequestFinishEvent;
+		event->strMsg = strMsg;
+		QCoreApplication::postEvent(CurlTool::instance(), event);
+	}
+	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
+
+	if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
+	{
 		if (CurlTool::isInstantiated())
 		{
+			QTime time = QTime::currentTime();
+			int msec = m_timeStart.msecsTo(time);
+			float sec = (float)msec / 1000;
+			strMsg = QString("Time elapsed: %1s.").arg(sec);
+
 			RequestFinishEvent* event = new RequestFinishEvent;
 			event->strMsg = strMsg;
+			event->bFinishAll = true;
 			QCoreApplication::postEvent(CurlTool::instance(), event);
-		}
-		qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
-
-		if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
-		{
-			if (CurlTool::isInstantiated())
-			{
-				QTime time = QTime::currentTime();
-				int msec = m_timeStart.msecsTo(time);
-				float sec = (float)msec / 1000;
-				strMsg = QString("Time elapsed: %1s.").arg(sec);
-
-				RequestFinishEvent* event = new RequestFinishEvent;
-				event->strMsg = strMsg;
-				event->bFinishAll = true;
-				QCoreApplication::postEvent(CurlTool::instance(), event);
-			}
 		}
 	}
 }

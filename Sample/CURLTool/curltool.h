@@ -3,8 +3,10 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QTime>
+#include <memory>
 #include "ui_curltool.h"
 #include "HttpRequest.h"
+#include "HttpReply.h"
 
 class CurlTool : public QMainWindow
 {
@@ -66,7 +68,7 @@ private:
 	static int m_nSuccessNum;
 
 	static QTime m_timeStart;
-	static QSet<int> m_mapSet;
+	static QMap<int, std::shared_ptr<HttpReply>> m_mapReplys;
 };
 
 #endif // INTERNET_H

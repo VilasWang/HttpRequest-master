@@ -91,21 +91,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClassMemoryTracer.cpp" />
-    <ClCompile Include="HttpRequestManager.cpp" />
+    <ClCompile Include="HttpReply.cpp" />
+    <ClCompile Include="HttpManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpTask.cpp" />
     <ClCompile Include="ThreadPool\Mutex.cpp" />
+    <ClCompile Include="ThreadPool\ScheduleThread.cpp" />
     <ClCompile Include="ThreadPool\Task.cpp" />
     <ClCompile Include="ThreadPool\ThreadPool.cpp" />
     <ClCompile Include="ThreadPool\ThreadPoolThread.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\HttpReply.h" />
     <ClInclude Include="..\include\HttpRequest.h" />
     <ClInclude Include="..\include\HttpRequest_global.h" />
     <ClInclude Include="ClassMemoryTracer.h" />
-    <ClInclude Include="HttpRequestManager.h" />
+    <ClInclude Include="httprequestdef.h" />
+    <ClInclude Include="HttpManager.h" />
     <ClInclude Include="HttpTask.h" />
     <ClInclude Include="ThreadPool\Mutex.h" />
+    <ClInclude Include="ThreadPool\ScheduleThread.h" />
     <ClInclude Include="ThreadPool\Task.h" />
     <ClInclude Include="ThreadPool\ThreadPool.h" />
     <ClInclude Include="ThreadPool\ThreadPoolThread.h" />

@@ -3,6 +3,7 @@
 #include "Task.h"
 #include <process.h>
 #include <cassert>
+#include <iostream>
 #define WAIT_TIME 20
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
@@ -10,7 +11,7 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	, m_pTask(nullptr)
 	, m_hThread(INVALID_HANDLE_VALUE)
 	, m_hEvent(nullptr)
-	, m_threadId(0)
+	, m_nThreadID(0)
 	, m_bExit(false)
 {
 	m_hEvent = CreateEvent(nullptr, false, false, nullptr);
@@ -18,10 +19,7 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 
 ThreadPoolThread::~ThreadPoolThread()
 {
-	char ch[64];
-	sprintf_s(ch, "%s id:%d\n", __FUNCTION__, m_threadId);
-	OutputDebugStringA(ch);
-
+	std::cout << __FUNCTION__ << "id:" << m_nThreadID << std::endl;
 	quit();
 
 	if (m_hEvent)
@@ -29,25 +27,11 @@ ThreadPoolThread::~ThreadPoolThread()
 		CloseHandle(m_hEvent);
 		m_hEvent = nullptr;
 	}
-
-	if (m_hThread)
-	{
-		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
-		{
-			char ch[64];
-			sprintf_s(ch, "TerminateThread5 id:%d\n", m_threadId);
-			OutputDebugStringA(ch);
-			TerminateThread(m_hThread, -1);
-		}
-		CloseHandle(m_hThread);
-		m_hThread = nullptr;
-		m_threadId = 0;
-	}
 }
 
 bool ThreadPoolThread::start()
 {
-	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, &ThreadPoolThread::threadProc, this, 0, &m_threadId);
+	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, &ThreadPoolThread::threadFunc, this, 0, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
 		return false;
@@ -72,11 +56,17 @@ void ThreadPoolThread::quit()
 	m_bExit = true;
 	waitForDone();
 
-	if (WaitForSingleObject(m_hThread, 1000) == WAIT_TIMEOUT)
+	if (m_hThread)
 	{
-		char ch[64];
-		sprintf_s(ch, "TerminateThread TIMEOUT id:%d\n", m_threadId);
-		OutputDebugStringA(ch);
+		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
+		{
+			std::cout << "TerminateThread 5s TIMEOUT. id:" << m_nThreadID << std::endl;
+			_endthreadex(1);
+		}
+
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
+		m_nThreadID = 0;
 	}
 }
 
@@ -85,12 +75,8 @@ void ThreadPoolThread::waitForDone()
 	stopTask();
 }
 
-UINT WINAPI ThreadPoolThread::threadProc(LPVOID pParam)
+UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 {
-	// 为线程准备消息队列
-	MSG msg = {0};
-	PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-
 	ThreadPoolThread* pThread = (ThreadPoolThread*)pParam;
 	while (pThread && !pThread->m_bExit)
 	{
@@ -98,10 +84,10 @@ UINT WINAPI ThreadPoolThread::threadProc(LPVOID pParam)
 		switch (ret)
 		{
 		case WAIT_OBJECT_0:
-		{
-			pThread->exec();
-		}
-		break;
+			{
+				pThread->exec();
+			}
+			break;
 		default:
 			break;
 		}
@@ -151,24 +137,19 @@ bool ThreadPoolThread::stopTask()
 
 void ThreadPoolThread::exec()
 {
+	if (m_bExit)
+		return;
+
+	int id = 0;
 	if (m_pTask.get())
 	{
-		int id = m_pTask->id();
+		id = m_pTask->id();
 		m_pTask->exec();
 		m_pTask.reset();
 
-		if (m_pThreadPool)
+		if (m_pThreadPool && !m_bExit)
 		{
-			m_pThreadPool->onTaskFinished(id);
-		}
-	}
-
-	if (!m_bExit)
-	{
-		Sleep(1);
-		if (m_pThreadPool)
-		{
-			m_pThreadPool->onThreadFinished(this);
+			m_pThreadPool->onTaskFinished(id, m_nThreadID);
 		}
 	}
 }
@@ -209,7 +190,7 @@ bool ActiveThreadList::remove(ThreadPoolThread* t)
 	return true;
 }
 
-ThreadPoolThread* ActiveThreadList::remove(int task_id)
+ThreadPoolThread* ActiveThreadList::take(int task_id)
 {
 	ThreadPoolThread* thread = nullptr;
 	m_lock.lock();
@@ -217,6 +198,28 @@ ThreadPoolThread* ActiveThreadList::remove(int task_id)
 	for (; iter != m_list.end();)
 	{
 		if ((*iter)->taskId() == task_id)
+		{
+			thread = (*iter);
+			iter = m_list.erase(iter);
+			break;
+		}
+		else
+		{
+			++iter;
+		}
+	}
+	m_lock.unLock();
+	return thread;
+}
+
+ThreadPoolThread* ActiveThreadList::take(UINT thread_id)
+{
+	ThreadPoolThread* thread = nullptr;
+	m_lock.lock();
+	auto iter = m_list.begin();
+	for (; iter != m_list.end();)
+	{
+		if ((*iter)->threadId() == thread_id)
 		{
 			thread = (*iter);
 			iter = m_list.erase(iter);

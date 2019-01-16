@@ -4,18 +4,10 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <functional>
-#include "HttpRequestManager.h"
+
+#include "HttpManager.h"
+#include "HttpReply.h"
 #include "HttpRequest_global.h"
-
-#ifndef INT64
-#define INT64 long long int
-#endif
-
-//{int id, bool success, const std::string& data, const std::string& error_string}
-typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
-//{int id, bool is_download, INT64 total_size, INT64 downloaded_size}
-typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
 
 
 class CURLWrapper;
@@ -28,6 +20,7 @@ public:
 		Get,
 		Download,
 		Upload,
+		Unkonwn = -1
 	};
 
 	enum CallType
@@ -46,7 +39,7 @@ public:
 	};
 
 public:
-	HttpRequest(RequestType type);
+	HttpRequest();
 	~HttpRequest();
 
 	int setRetryTimes(int retry_times);
@@ -69,7 +62,7 @@ public:
 	int setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path);
 
 	//开始请求，并返回requestId; 成功：非0
-	int perform(CallType type);
+	std::shared_ptr<HttpReply> perform(RequestType rtype, CallType ctype = Async);
 	//取消请求
 	static bool cancel(int requestId);
 	//取消所有请求
@@ -82,25 +75,8 @@ public:
 	int setResultCallback(ResultCallback rc);
 	int	setProgressCallback(ProgressCallback pc);
 
-	//以下几个同步有效
-	bool getHttpCode(long& http_code);
-	bool getReceiveHeader(std::string& header);
-	bool getReceiveContent(std::string& receive);
-	bool getErrorString(std::string& error_string);
-
 private:
-	std::shared_ptr<CURLWrapper> m_request_helper;
+	std::shared_ptr<CURLWrapper> m_helper;
 };
 
-
-class RequestImpl
-{
-public:
-	RequestImpl() {}
-	virtual ~RequestImpl() {}
-public:
-	virtual int	perform() = 0;
-	virtual void cancel() = 0;
-	virtual int	requestId() = 0;
-};
 #endif  /*__HTTP_REQUEST_H*/

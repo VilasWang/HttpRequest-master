@@ -7,22 +7,24 @@ ThreadPool::ThreadPool()
 	, m_bInitialized(false)
 	, m_pCallBack(nullptr)
 {
-
+	m_pThread = new ScheduleThread;
 }
 
 ThreadPool::~ThreadPool()
 {
-	char ch[64];
-	sprintf_s(ch, "%s(B)\n", __FUNCTION__);
-	OutputDebugStringA(ch);
-
+	std::cout << __FUNCTION__ << "(B)" << std::endl;
 	waitForDone();
-
-	sprintf_s(ch, "%s(E)\n", __FUNCTION__);
-	OutputDebugStringA(ch);
+	if (m_pThread)
+	{
+		m_pThread->quit();
+		m_pThread->wait();
+		delete m_pThread;
+		m_pThread = nullptr;
+	}
+	std::cout << __FUNCTION__ << "(E)" << std::endl;
 }
 
-ThreadPool* ThreadPool::Instance()
+ThreadPool* ThreadPool::globalInstance()
 {
 	static ThreadPool _instance;
 	return &_instance;
@@ -35,15 +37,12 @@ bool ThreadPool::init(int threadCount)
 		return false;
 	}
 
-	if (threadCount < 1 || threadCount > 8)
+	if (threadCount < 1 || threadCount > 16)
 	{
-		char ch[128];
-		sprintf_s(ch, "%s failed! thread range(1-8).\n", __FUNCTION__);
-		OutputDebugStringA(ch);
+		std::cout << __FUNCTION__ << " failed! thread range(1-8)." << std::endl;
 		return false;
 	}
 
-	m_bInitialized = true;
 	m_nThreadNum = threadCount;
 	for (int i = 0; i < threadCount; i++)
 	{
@@ -51,6 +50,8 @@ bool ThreadPool::init(int threadCount)
 		m_idleThreads.push(p);
 		p->start();
 	}
+	m_pThread->start();
+	m_bInitialized = true;
 	return true;
 }
 
@@ -82,28 +83,16 @@ bool ThreadPool::addTask(std::shared_ptr<TaskBase> t, Priority p)
 		m_taskQueue.pushFront(t);	//高优先级任务
 	}
 
-	if (!m_idleThreads.isEmpty())
+	if (m_pThread)
 	{
-		std::shared_ptr<TaskBase> task = getNextTask();
-		if (!task.get())
-		{
-			return false;
-		}
-
-		ThreadPoolThread* pThread = popIdleThread();
-		if (pThread)
-		{
-			m_activeThreads.append(pThread);
-			pThread->assignTask(task);
-			pThread->startTask();
-		}
+		m_pThread->wakeONe();
 	}
 	return true;
 }
 
 bool ThreadPool::abortTask(int taskId)
 {
-	ThreadPoolThread* p = m_activeThreads.remove(taskId);
+	ThreadPoolThread* p = m_activeThreads.take(taskId);
 	if (p)
 	{
 		p->stopTask();
@@ -124,7 +113,7 @@ bool ThreadPool::abortAllTask()
 	return true;
 }
 
-std::shared_ptr<TaskBase> ThreadPool::getNextTask()
+std::shared_ptr<TaskBase> ThreadPool::takeTask()
 {
 	if (m_taskQueue.isEmpty())
 	{
@@ -134,9 +123,18 @@ std::shared_ptr<TaskBase> ThreadPool::getNextTask()
 	std::shared_ptr<TaskBase> task = m_taskQueue.pop();
 	if (!task.get())
 	{
-		OutputDebugStringA("error task!\n");
+		std::cout << "error task!" << std::endl;
+	}
+	else
+	{
+		std::cout << "take task id:" << task->id();
 	}
 	return task;
+}
+
+void ThreadPool::pushIdleThread(ThreadPoolThread* t)
+{
+	m_idleThreads.push(t);
 }
 
 ThreadPoolThread* ThreadPool::popIdleThread()
@@ -144,25 +142,14 @@ ThreadPoolThread* ThreadPool::popIdleThread()
 	return m_idleThreads.pop();
 }
 
-bool ThreadPool::onThreadFinished(ThreadPoolThread* t)
+void ThreadPool::appendActiveThread(ThreadPoolThread* t)
 {
-	if (!m_bInitialized)
-	{
-		return false;
-	}
+	m_activeThreads.append(t);
+}
 
-	std::shared_ptr<TaskBase> pTask = getNextTask();
-	if (pTask.get())
-	{
-		t->assignTask(pTask);
-		t->startTask();
-	}
-	else	//任务队列为空，该线程挂起
-	{
-		m_activeThreads.remove(t);
-		m_idleThreads.push(t);
-	}
-	return true;
+ThreadPoolThread* ThreadPool::takeActiveThread(UINT threadId)
+{
+	return m_activeThreads.take(threadId);
 }
 
 void ThreadPool::setCallBack(ThreadPoolCallBack* pCallBack)
@@ -173,9 +160,14 @@ void ThreadPool::setCallBack(ThreadPoolCallBack* pCallBack)
 	}
 }
 
-void ThreadPool::onTaskFinished(int taskId)
+void ThreadPool::onTaskFinished(int taskId, UINT threadId)
 {
-	if (m_pCallBack)
+	if (m_pThread)
+	{
+		::PostThreadMessage(m_pThread->threadId(), WM_THREAD_TASK_FINISHED, (WPARAM)threadId, 0);
+	}
+
+	if (m_pCallBack && taskId > 0)
 	{
 		m_pCallBack->onTaskFinished(taskId);
 	}

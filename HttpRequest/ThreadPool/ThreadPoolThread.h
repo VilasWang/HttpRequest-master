@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <list>
 #include <stack>
+#include <atomic>
 #include "Mutex.h"
 
 class TaskBase;
@@ -21,7 +22,7 @@ public:
 	//线程挂起恢复
 	bool resume();
 
-	const UINT threadId() const { return m_threadId; }
+	const UINT threadId() const { return m_nThreadID; }
 	const int taskId();
 
 	//将任务关联到线程类
@@ -36,13 +37,13 @@ protected:
 	virtual void waitForDone();
 
 private:
-	static UINT WINAPI threadProc(LPVOID pParam);
+	static UINT WINAPI threadFunc(LPVOID pParam);
 
 private:
 	HANDLE m_hThread;
-	UINT m_threadId;
+	UINT m_nThreadID;
 	HANDLE m_hEvent;
-	bool m_bExit;
+	std::atomic<bool> m_bExit;
 	TPLock m_mutex;
 
 	std::shared_ptr<TaskBase> m_pTask;
@@ -58,7 +59,8 @@ public:
 public:
 	bool append(ThreadPoolThread* t);
 	bool remove(ThreadPoolThread* t);
-	ThreadPoolThread* remove(int task_id);
+	ThreadPoolThread* take(int task_id);
+	ThreadPoolThread* take(UINT thread_id);
 	ThreadPoolThread* pop_back();
 	int size();
 	bool isEmpty();
