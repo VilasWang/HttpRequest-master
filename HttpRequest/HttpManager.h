@@ -29,6 +29,7 @@ private:
 	static bool abortTask(int taskId);
 	static bool abortAllTask();
 	static void globalCleanup();
+	void clearReply();
 
 private:
 	static CURLSH* s_share_handle_;

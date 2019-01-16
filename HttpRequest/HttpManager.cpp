@@ -23,8 +23,8 @@ HttpManager::~HttpManager()
 	OutputDebugStringA(ch);
 
 	TRACE_CLASS_DESTRUCTOR(HttpManager);
-	ThreadPool::globalInstance()->waitForDone();
-	m_lock = nullptr;
+	globalCleanup();
+	m_lock.reset();
 
 	curl_share_cleanup(s_share_handle_);
 	curl_global_cleanup();
@@ -56,12 +56,20 @@ bool HttpManager::abortTask(int task_id)
 
 bool HttpManager::abortAllTask()
 {
+	HttpManager::Instance()->clearReply();
 	return ThreadPool::globalInstance()->abortAllTask();
 }
 
 void HttpManager::globalCleanup()
 {
+	HttpManager::Instance()->clearReply();
 	ThreadPool::globalInstance()->waitForDone();
+}
+
+void HttpManager::clearReply()
+{
+	TPLocker locker(m_lock);
+	m_map_replys.clear();
 }
 
 void HttpManager::set_share_handle(CURL* curl_handle)

@@ -83,10 +83,6 @@ bool ThreadPool::addTask(std::shared_ptr<TaskBase> t, Priority p)
 		m_taskQueue.pushFront(t);	//高优先级任务
 	}
 
-	if (m_pThread)
-	{
-		m_pThread->wakeONe();
-	}
 	return true;
 }
 
