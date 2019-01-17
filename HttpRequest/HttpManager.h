@@ -9,6 +9,7 @@
 #include "HttpReply.h"
 
 class TaskBase;
+// class HttpManager - Httpπ‹¿Ì¿‡
 class HttpManager
 {
 public:

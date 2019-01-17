@@ -4,6 +4,7 @@
 #include "httprequestdef.h"
 #include "HttpRequest_global.h"
 
+// class HttpReply - HttpœÏ”¶¿‡
 class HTTP_REQUEST_EXPORT HttpReply
 {
 public:

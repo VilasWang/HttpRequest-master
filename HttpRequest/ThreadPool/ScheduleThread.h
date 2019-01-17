@@ -6,6 +6,7 @@
 #include <atomic>
 #include <mutex>
 
+//class ScheduleThread - 线程池调度线程
 class ScheduleThread
 {
 public:

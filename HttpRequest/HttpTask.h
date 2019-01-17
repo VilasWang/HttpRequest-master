@@ -5,6 +5,7 @@
 #include "HttpRequest.h"
 #include "httprequestdef.h"
 
+// class HttpTask - HttpÇëÇóÈÎÎñ
 class HttpTask : public TaskBase
 {
 public:

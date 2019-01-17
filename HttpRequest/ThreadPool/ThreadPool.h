@@ -37,12 +37,6 @@ public:
 	bool hasTask() { return !m_taskQueue.isEmpty(); }
 	bool hasIdleThread() { return !m_idleThreads.isEmpty(); }
 
-	std::shared_ptr<TaskBase> takeTask();
-	ThreadPoolThread* popIdleThread();
-	ThreadPoolThread* takeActiveThread(UINT threadId);
-	void appendActiveThread(ThreadPoolThread*);
-	void pushIdleThread(ThreadPoolThread*);
-
 public:
 	class ThreadPoolCallBack
 	{
@@ -55,6 +49,14 @@ public:
 
 private:
 	ThreadPool();
+
+	std::shared_ptr<TaskBase> takeTask();
+	ThreadPoolThread* popIdleThread();
+	ThreadPoolThread* takeActiveThread(UINT threadId);
+	void appendActiveThread(ThreadPoolThread*);
+	void pushIdleThread(ThreadPoolThread*);
+
+	friend class ScheduleThread;
 
 private:
 	int m_nThreadNum;

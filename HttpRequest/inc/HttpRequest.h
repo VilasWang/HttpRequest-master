@@ -11,6 +11,7 @@
 
 
 class CURLWrapper;
+// class HttpRequest - Http«Î«Û¿‡£®libcurl£©
 class HTTP_REQUEST_EXPORT HttpRequest
 {
 public:
