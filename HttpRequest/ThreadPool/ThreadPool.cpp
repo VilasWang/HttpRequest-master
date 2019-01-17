@@ -33,9 +33,7 @@ ThreadPool* ThreadPool::globalInstance()
 bool ThreadPool::init(int threadCount)
 {
 	if (m_bInitialized)
-	{
 		return false;
-	}
 
 	if (threadCount < 1 || threadCount > 16)
 	{
@@ -158,6 +156,9 @@ void ThreadPool::setCallBack(ThreadPoolCallBack* pCallBack)
 
 void ThreadPool::onTaskFinished(int taskId, UINT threadId)
 {
+	if (!m_bInitialized)
+		return;
+
 	if (m_pThread)
 	{
 		::PostThreadMessage(m_pThread->threadId(), WM_THREAD_TASK_FINISHED, (WPARAM)threadId, 0);

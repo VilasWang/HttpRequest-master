@@ -45,3 +45,9 @@
 /lib/Release/HttpRequest.lib
 /Sample/CURLTool/GeneratedFiles/Release/moc_curltool.cpp
 /HttpRequest.VC.VC.opendb
+/bin/Debug/HttpRequest.dll
+/bin/Release/libcurl.pdb
+/bin/Debug/libcurld.pdb
+/bin/Release/HttpRequest.dll
+*.rar
+*.bak

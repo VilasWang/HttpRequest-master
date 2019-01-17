@@ -39,41 +39,41 @@ public:
 	};
 
 public:
-	HttpRequest();
+	explicit HttpRequest();
 	~HttpRequest();
 
+	// 开始请求，并返回HttpReply. 
+	// 1：同步请求可以直接调用HttpReply的接口获取结果
+	// 2：异步请求可以设置异步回调接口，请求结束时自动回调获取结果
+	std::shared_ptr<HttpReply> perform(RequestType rtype, CallType ctype = Async);
+	// 取消请求
+	static bool cancel(int requestId);
+	// 取消所有请求
+	static bool cancelAll();
+	// 取消所有请求，清理所有curl资源，让线程池所有线程取消任务并退出
+	static void globalCleanup();
+
+	// 异步回调api
+	// 最好不要用类的非静态方法。以免回调时类已析构
+	int setResultCallback(ResultCallback rc);
+	int	setProgressCallback(ProgressCallback pc);
+
 	int setRetryTimes(int retry_times);
-	int setRequestTimeout(long time_out = 0);
+	int setRequestTimeout(long time_out = 0); // 请求超时（second）
 	int setRequestUrl(const std::string& url);
 	int setRequestProxy(const std::string& proxy, long proxy_port);
-
-	// Description: set http redirect follow location
+	// set http redirect follow location
 	int setFollowLocation(bool follow_location);
-
-	// Description: set http request header, for example : Range:bytes=554554-
+	// set http request header, for example : Range:bytes=554554-
 	int setRequestHeader(const std::map<std::string, std::string>& headers);
 	int setRequestHeader(const std::string& header);
 
-	// Description: 若调用该方法就是post方式请求，否则是curl默认get
+	// 若调用该方法就是post方式请求，否则是curl默认get
 	int setPostData(const std::string& data);
 	int setPostData(const char* data, unsigned int size);
 
 	int setDownloadFile(const std::string& file_path, int thread_count = 5);
 	int setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path);
-
-	//开始请求，并返回requestId; 成功：非0
-	std::shared_ptr<HttpReply> perform(RequestType rtype, CallType ctype = Async);
-	//取消请求
-	static bool cancel(int requestId);
-	//取消所有请求
-	static bool cancelAll();
-	//取消所有请求，清理所有curl资源，让线程池所有线程取消任务并退出
-	static void globalCleanup();
-
-	//异步回調api
-	//最好不是类的非静态方法。以免回调之前类析构了
-	int setResultCallback(ResultCallback rc);
-	int	setProgressCallback(ProgressCallback pc);
 
 private:
 	std::shared_ptr<CURLWrapper> m_helper;

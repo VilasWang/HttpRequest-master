@@ -29,7 +29,7 @@ protected:
 
 private:
 	static unsigned __stdcall ThreadFunc(LPVOID pParam);
-	void switchThread(UINT threadId);
+	void switchToIdleThread(UINT threadId);
 
 private:
 	HANDLE m_hThread;

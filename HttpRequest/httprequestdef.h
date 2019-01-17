@@ -7,16 +7,27 @@
 #define INT64 long long int
 #endif
 
-//{int id, bool success, const std::string& data, const std::string& error_string}
+#if 0
+// int id, bool success, const std::string& data, const std::string& error_string
 typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
-//{int id, bool is_download, INT64 total_size, INT64 current_size}
+
+// int id, bool is_download, INT64 total_size, INT64 current_size
 typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
 
-class RequestInterface
+#else
+// int id, bool success, const std::string& data, const std::string& error_string
+using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
+
+// int id, bool is_download, INT64 total_size, INT64 current_size
+using ProgressCallback = std::function<void(int, bool, INT64, INT64)>;
+#endif
+
+
+class CURLInterface
 {
 public:
-	RequestInterface() {}
-	virtual ~RequestInterface() {}
+	CURLInterface() {}
+	virtual ~CURLInterface() {}
 public:
 	virtual int	perform() = 0;
 	virtual void cancel() = 0;
@@ -32,7 +43,7 @@ public:
 
 struct ThreadChunk
 {
-	RequestInterface* _helper;
+	CURLInterface* _helper;
 	FILE* _fp;
 	long _startidx;
 	long _endidx;

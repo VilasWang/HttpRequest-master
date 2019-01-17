@@ -13,6 +13,9 @@ class HttpManager
 {
 public:
 	~HttpManager();
+	HttpManager(const HttpManager &) = delete;
+	HttpManager &operator=(const HttpManager &) = delete;
+
 	static HttpManager* Instance();
 
 	void addReply(std::shared_ptr<HttpReply> reply);

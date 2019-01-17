@@ -17,39 +17,6 @@ ScheduleThread::~ScheduleThread()
 	quit();
 }
 
-unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
-{
-	ScheduleThread *thread = (ScheduleThread *)(pParam);
-	if (thread)
-	{
-		thread->m_bRunning = true;
-		thread->onBeforeExec();
-
-		MSG msg = { 0 };
-		while (!thread->m_bExit)
-		{
-			msg = { 0 };
-			PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-			switch (msg.message)
-			{
-			case WM_THREAD_TASK_FINISHED:
-				thread->switchThread((UINT)msg.wParam);
-				break;
-			case WM_QUIT:
-				thread->m_bExit = true;
-				break;
-			default: 
-				break;
-			}
-
-			thread->run();
-		}
-		thread->onBeforeExit();
-		thread->m_bRunning = false;
-	}
-	return 0;
-}
-
 bool ScheduleThread::start()
 {
 	m_bExit = false;
@@ -75,7 +42,7 @@ void ScheduleThread::quit()
 		}
 
 		CloseHandle(m_hThread);
-		m_hThread = NULL;
+		m_hThread = nullptr;
 		m_nThreadID = 0;
 	}
 }
@@ -107,15 +74,41 @@ void ScheduleThread::wakeONe()
 	m_task_cv.notify_one();
 }
 
+unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
+{
+	ScheduleThread *t = (ScheduleThread *)(pParam);
+	if (t)
+	{
+		t->m_bRunning = true;
+		t->onBeforeExec();
+
+		MSG msg = { 0 };
+		while (!t->m_bExit)
+		{
+			msg = { 0 };
+			PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+			switch (msg.message)
+			{
+			case WM_THREAD_TASK_FINISHED:
+				t->switchToIdleThread((UINT)msg.wParam);
+				break;
+			case WM_QUIT:
+				t->m_bExit = true;
+				break;
+			default:
+				break;
+			}
+
+			t->run();
+		}
+		t->onBeforeExit();
+		t->m_bRunning = false;
+	}
+	return 0;
+}
+
 void ScheduleThread::run()
 {
-	/*{
-		std::unique_lock<std::mutex> lock(m_mutex);
-		m_task_cv.wait(lock, [this] {
-			return (m_bExit || (ThreadPool::globalInstance()->hasIdleThread() && ThreadPool::globalInstance()->hasTask()));
-		});
-	}*/
-
 	if (m_bExit)
 		return;
 
@@ -128,12 +121,12 @@ void ScheduleThread::run()
 	std::shared_ptr<TaskBase> pTask = ThreadPool::globalInstance()->takeTask();
 	if (pTask.get())
 	{
-		ThreadPoolThread* thread = ThreadPool::globalInstance()->popIdleThread();
-		if (nullptr != thread)
+		ThreadPoolThread* t = ThreadPool::globalInstance()->popIdleThread();
+		if (nullptr != t)
 		{
-			ThreadPool::globalInstance()->appendActiveThread(thread);
-			thread->assignTask(pTask);
-			thread->resume();
+			ThreadPool::globalInstance()->appendActiveThread(t);
+			t->assignTask(pTask);
+			t->resume();
 			Sleep(1);
 		}
 		else
@@ -147,12 +140,15 @@ void ScheduleThread::run()
 	}
 }
 
-void ScheduleThread::switchThread(UINT threadId)
+void ScheduleThread::switchToIdleThread(UINT threadId)
 {
-	ThreadPoolThread* thread = ThreadPool::globalInstance()->takeActiveThread(threadId);
-	if (nullptr != thread)
+	ThreadPoolThread* t = ThreadPool::globalInstance()->takeActiveThread(threadId);
+	if (nullptr != t)
 	{
-		ThreadPool::globalInstance()->pushIdleThread(thread);
-		//m_task_cv.notify_one();
+		ThreadPool::globalInstance()->pushIdleThread(t);
+	}
+	else
+	{
+		OutputDebugString(L"error3\n");
 	}
 }

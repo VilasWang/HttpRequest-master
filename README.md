@@ -17,23 +17,43 @@ HttpRequest库是对libcurl的封装，结合C++线程池，实现http多线程�
 - 所有任务异步调用
 - 所有方法线程安全
 
-本模块使用的是vs2015编译的libcurl静态库，版本不同请自行编译。  
+本模块使用的是vs2015编译的带openssl的libcurl动态库，版本不同请自行编译。  
 sample项目是Qt写的界面。
 
 
 ## How to use
+
+>同步下载：
+> 
+
+```cpp
+#include "HttpRequest.h"
+#include "HttpReply.h"
+
+
+const std::string strUrl = "...";
+const std::string strFilePath = "...";
+
+HttpRequest request;
+request.setRequestUrl(strUrl);
+request.setDownloadFile(strFilePath);
+
+std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
+std::cout << reply->id() << reply->httpStatusCode() << reply->errorString() << reply->readAll() << std::endl;
+```
 
 >异步下载：
 > 
 
 ```cpp
 #include "HttpRequest.h"
+#include "HttpReply.h"
 
 const std::string strUrl = "...";
 const std::string strFilePath = "...";
 
-HttpRequest request(HttpRequest::Download);
-request.setRequestUrl();
+HttpRequest request;
+request.setRequestUrl(strUrl);
 request.setDownloadFile(strFilePath);
 request.setFollowLocation(true);
 request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
@@ -41,7 +61,8 @@ request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this,
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-int nReqId = request.perform(HttpRequest::Async);
+std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
+std::cout << reply->id();
 ```
 
 
@@ -50,13 +71,14 @@ int nReqId = request.perform(HttpRequest::Async);
 
 ```cpp
 #include "HttpRequest.h"
+#include "HttpReply.h"
 
 const std::string strUrl = "...";
 const std::string strUploadFilePath = "...";
 const std::string strTargetName = "...";
 const std::string strSavePath = "...";
 
-HttpRequest request(HttpRequest::Upload);
+HttpRequest request;
 request.setRequestUrl(strUrl);
 request.setUploadFile(strUploadFilePath, strTargetName, strSavePath);
 request.setFollowLocation(true);
@@ -65,6 +87,7 @@ request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this,
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-int nReqId = request.perform(HttpRequest::Async);
+std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
+std::cout << reply->id();
 ```
 

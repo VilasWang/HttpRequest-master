@@ -70,7 +70,7 @@ CurlTool::CurlTool(QWidget* parent)
 	{
 		ui.cmb_multiDownload->addItem(QString::number(i));
 	}
-	ui.cmb_multiDownload->setCurrentText(QString::number(1));
+	ui.cmb_multiDownload->setCurrentText(QString::number(5));
 
 	QButtonGroup* bg1 = new QButtonGroup(this);
 	bg1->addButton(ui.cb_download);
@@ -126,17 +126,21 @@ void CurlTool::onUpdateDefaultInfos()
 	{
 		if (ui.cb_download->isChecked())
 		{
-			const QString& strUrl = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";// "http://8dx.pc6.com/xzx6/curl_v7.61.1.zip";
+			const QString& strUrl = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
 			ui.lineEdit_url->setText(strUrl);
 			ui.lineEdit_filename->setText("mysql-8.0.13-winx64.zip");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
 		{
+#if 1
+			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/upload.php?filename=upload/3rd_Dev_Library.rar");
+#else
 			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/uploadFile.php");
-			ui.lineEdit_uploadFile->setText("VerComp.dat");
+#endif
+			ui.lineEdit_uploadFile->setText("3rd_Dev_Library.rar");
 			ui.lineEdit_saveDir->setText("./upload");//对应上传服务器的根目录的相对路径
-			ui.lineEdit_filename->setText("VerComp.dat");
+			ui.lineEdit_filename->setText("3rd_Dev_Library.rar");
 		}
 		else if (ui.cb_get->isChecked())
 		{
@@ -495,7 +499,7 @@ void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint
 	if (dlnow > m_nbytesReceived)
 	{
 		m_nbytesReceived = dlnow;
-		if (dltotal != m_nbytesTotalDownload)
+		if (dltotal > m_nbytesTotalDownload)
 		{
 			m_nbytesTotalDownload = dltotal;
 			m_strTotalDownload = bytes2String(dltotal);
@@ -503,13 +507,13 @@ void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint
 		}
 		const QString& strReceived = bytes2String(dlnow);
 		ui.progressBar_d->setValue(dlnow);
-		appendMsg(QStringLiteral("下载：%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
+		//appendMsg(QStringLiteral("下载：%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
 	}
 
 	if (ulnow > m_nbytesSent)
 	{
 		m_nbytesSent = ulnow;
-		if (ultotal != m_nbytesTotalUpload)
+		if (ultotal > m_nbytesTotalUpload)
 		{
 			m_nbytesTotalUpload = ultotal;
 			m_strTotalUpload = bytes2String(ultotal);
@@ -517,7 +521,7 @@ void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint
 		}
 		const QString& strSent = bytes2String(ulnow);
 		ui.progressBar_u->setValue(ulnow);
-		appendMsg(QStringLiteral("上传：%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
+		//appendMsg(QStringLiteral("上传：%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
 	}
 }
 

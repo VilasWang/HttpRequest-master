@@ -16,7 +16,7 @@ HttpTask::~HttpTask()
 	detach();
 }
 
-void HttpTask::attach(std::shared_ptr<RequestInterface> request)
+void HttpTask::attach(std::shared_ptr<CURLInterface> request)
 {
 	m_request = request;
 	m_id = request->requestId();

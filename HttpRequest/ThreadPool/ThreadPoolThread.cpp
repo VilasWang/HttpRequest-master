@@ -39,6 +39,25 @@ bool ThreadPoolThread::start()
 	return true;
 }
 
+void ThreadPoolThread::quit()
+{
+	m_bExit = true;
+	waitForDone();
+
+	if (m_hThread)
+	{
+		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
+		{
+			std::cout << "WaitForSingleObject 5s TIMEOUT. id:" << m_nThreadID << std::endl;
+			_endthreadex(1);
+		}
+
+		CloseHandle(m_hThread);
+		m_hThread = nullptr;
+		m_nThreadID = 0;
+	}
+}
+
 bool ThreadPoolThread::suspend()
 {
 	ResetEvent(m_hEvent);
@@ -49,25 +68,6 @@ bool ThreadPoolThread::resume()
 {
 	SetEvent(m_hEvent);
 	return true;
-}
-
-void ThreadPoolThread::quit()
-{
-	m_bExit = true;
-	waitForDone();
-
-	if (m_hThread)
-	{
-		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
-		{
-			std::cout << "TerminateThread 5s TIMEOUT. id:" << m_nThreadID << std::endl;
-			_endthreadex(1);
-		}
-
-		CloseHandle(m_hThread);
-		m_hThread = NULL;
-		m_nThreadID = 0;
-	}
 }
 
 void ThreadPoolThread::waitForDone()
@@ -105,11 +105,6 @@ bool ThreadPoolThread::assignTask(std::shared_ptr<TaskBase> pTask)
 	return true;
 }
 
-void ThreadPoolThread::detachTask()
-{
-	stopTask();
-}
-
 const int ThreadPoolThread::taskId()
 {
 	if (m_pTask.get())
@@ -140,10 +135,9 @@ void ThreadPoolThread::exec()
 	if (m_bExit)
 		return;
 
-	int id = 0;
 	if (m_pTask.get())
 	{
-		id = m_pTask->id();
+		int id = m_pTask->id();
 		m_pTask->exec();
 		m_pTask.reset();
 
@@ -192,14 +186,14 @@ bool ActiveThreadList::remove(ThreadPoolThread* t)
 
 ThreadPoolThread* ActiveThreadList::take(int task_id)
 {
-	ThreadPoolThread* thread = nullptr;
+	ThreadPoolThread* t = nullptr;
 	m_lock.lock();
 	auto iter = m_list.begin();
 	for (; iter != m_list.end();)
 	{
 		if ((*iter)->taskId() == task_id)
 		{
-			thread = (*iter);
+			t = (*iter);
 			iter = m_list.erase(iter);
 			break;
 		}
@@ -209,19 +203,19 @@ ThreadPoolThread* ActiveThreadList::take(int task_id)
 		}
 	}
 	m_lock.unLock();
-	return thread;
+	return t;
 }
 
 ThreadPoolThread* ActiveThreadList::take(UINT thread_id)
 {
-	ThreadPoolThread* thread = nullptr;
+	ThreadPoolThread* t = nullptr;
 	m_lock.lock();
 	auto iter = m_list.begin();
 	for (; iter != m_list.end();)
 	{
 		if ((*iter)->threadId() == thread_id)
 		{
-			thread = (*iter);
+			t = (*iter);
 			iter = m_list.erase(iter);
 			break;
 		}
@@ -231,20 +225,20 @@ ThreadPoolThread* ActiveThreadList::take(UINT thread_id)
 		}
 	}
 	m_lock.unLock();
-	return thread;
+	return t;
 }
 
 ThreadPoolThread* ActiveThreadList::pop_back()
 {
-	ThreadPoolThread* thread = nullptr;
+	ThreadPoolThread* t = nullptr;
 	m_lock.lock();
 	if (!m_list.empty())
 	{
-		thread = m_list.back();
-		m_list.remove(thread);
+		t = m_list.back();
+		m_list.remove(t);
 	}
 	m_lock.unLock();
-	return thread;
+	return t;
 }
 
 int ActiveThreadList::size()

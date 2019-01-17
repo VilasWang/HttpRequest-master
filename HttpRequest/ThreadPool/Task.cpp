@@ -1,7 +1,7 @@
 #include "Task.h"
 #include "Mutex.h"
 
-int TaskBase::s_id = 0;
+std::atomic<int> TaskBase::s_id = 0;
 TaskBase::TaskBase(bool bAutoDelete)
 	: m_id(++s_id)
 	, m_bAutoDelete(bAutoDelete)
@@ -12,12 +12,12 @@ TaskBase::~TaskBase()
 {
 }
 
-const int TaskBase::id()
+const int TaskBase::id() const
 {
 	return m_id;
 }
 
-bool TaskBase::isAutoDelete()
+bool TaskBase::isAutoDelete() const
 {
 	return m_bAutoDelete;
 }

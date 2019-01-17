@@ -1,25 +1,26 @@
 #pragma once
 
 #include <deque>
+#include <atomic>
 #include "Mutex.h"
 
 class TaskBase
 {
 public:
-    TaskBase(bool bAutoDelete = true);
+    explicit TaskBase(bool bAutoDelete = true);
     virtual ~TaskBase();
 
     virtual void exec() = 0;
     virtual void cancel() = 0;
 
-    const int id();
-	bool isAutoDelete();
+    const int id() const;
+	bool isAutoDelete() const;
 
 protected:
-    int m_id;
+	int m_id;
 
 private:
-    static int s_id;
+    static std::atomic<int> s_id;
 	bool m_bAutoDelete;
 };
 
@@ -32,7 +33,7 @@ public:
 public:
 	std::shared_ptr<TaskBase> pop();
     bool push(std::shared_ptr<TaskBase> t);
-    bool pushFront(std::shared_ptr<TaskBase> t);//插到队首。
+    bool pushFront(std::shared_ptr<TaskBase> t);//插到队首
     bool isEmpty();
     bool clear();
 

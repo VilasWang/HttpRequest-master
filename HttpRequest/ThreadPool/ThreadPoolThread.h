@@ -8,10 +8,13 @@
 class TaskBase;
 class ThreadPool;
 
+//Class ThreadPoolThread - 线程池工作线程
 class ThreadPoolThread
 {
 public:
-	ThreadPoolThread(ThreadPool* threadPool);
+	explicit ThreadPoolThread(ThreadPool* threadPool);
+	ThreadPoolThread(const ThreadPoolThread &) = delete;
+	ThreadPoolThread &operator=(const ThreadPoolThread &) = delete;
 	~ThreadPoolThread();
 
 public:
@@ -27,7 +30,6 @@ public:
 
 	//将任务关联到线程类
 	bool assignTask(std::shared_ptr<TaskBase> pTask);
-	void detachTask();
 	bool startTask();
 	bool stopTask();
 

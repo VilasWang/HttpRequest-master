@@ -12,8 +12,8 @@ public:
 
 	int id() const { return m_id; }
 	long httpStatusCode() const { return m_http_code; }
+	std::string readAll() const { return m_receive_content; }
 	std::string header() const { return m_receive_header; }
-	std::string getContent() const {return m_receive_content;}
 	std::string errorString() const {return m_error_string;}
 
 public:

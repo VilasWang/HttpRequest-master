@@ -8,8 +8,8 @@ HttpManager::HttpManager()
 	: m_lock(new TPLock)
 {
 	TRACE_CLASS_CONSTRUCTOR(HttpManager);
-	curl_global_init(CURL_GLOBAL_DEFAULT);
 
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 	s_share_handle_ = curl_share_init();
 	curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 

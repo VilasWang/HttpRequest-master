@@ -7,6 +7,7 @@
 #define DEFAULT_THREAD_COUNT 4
 #define WM_THREAD_TASK_FINISHED (WM_USER + 1000)
 
+// class ThreadPool - Ïß³Ì³Ø
 class ThreadPool
 {
 public:
@@ -57,7 +58,7 @@ private:
 
 private:
 	int m_nThreadNum;
-	bool m_bInitialized;
+	std::atomic<bool> m_bInitialized;
 	ThreadPoolCallBack* m_pCallBack;
 	ScheduleThread *m_pThread;
 	IdleThreadStack m_idleThreads;
