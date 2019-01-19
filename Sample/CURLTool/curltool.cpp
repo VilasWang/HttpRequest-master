@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_TEST_NUMBER 1000
+#define POST_GET_TEST_NUMBER 1000
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -412,7 +412,7 @@ void CurlTool::onGetRequest()
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
 	m_mapReplys.clear();
-	m_nTotalNum = 1000;
+	m_nTotalNum = POST_GET_TEST_NUMBER;
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
 		HttpRequest request;
@@ -450,7 +450,7 @@ void CurlTool::onPostRequest()
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
 	m_mapReplys.clear();
-	m_nTotalNum = POST_TEST_NUMBER;
+	m_nTotalNum = POST_GET_TEST_NUMBER;
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
 		HttpRequest request;
