@@ -1313,10 +1313,10 @@ bool HttpRequest::cancelAll()
 
 void HttpRequest::globalInit()
 {
-
+	return HttpManager::globalInit();
 }
 
 void HttpRequest::globalCleanup()
 {
-	return HttpManager::globalInit();
+	return HttpManager::globalCleanup();
 }
