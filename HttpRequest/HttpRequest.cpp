@@ -1311,7 +1311,12 @@ bool HttpRequest::cancelAll()
 	return HttpManager::abortAllTask();
 }
 
+void HttpRequest::globalInit()
+{
+
+}
+
 void HttpRequest::globalCleanup()
 {
-	return HttpManager::globalCleanup();
+	return HttpManager::globalInit();
 }

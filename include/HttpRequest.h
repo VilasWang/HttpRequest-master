@@ -44,6 +44,13 @@ public:
 	explicit HttpRequest();
 	~HttpRequest();
 
+	// 初始化libcurl资源，初始化线程池(需在主线程中)
+	static void globalInit();
+
+	// 取消所有请求，清理libcurl资源，让线程池所有线程取消任务并退出(需在主线程中)
+	static void globalCleanup();
+
+public:
 	// 开始请求，并返回HttpReply. 
 	// 1：同步请求可以直接调用HttpReply的接口获取结果
 	// 2：异步请求可以设置异步回调接口，请求结束时自动回调获取结果
@@ -52,8 +59,6 @@ public:
 	static bool cancel(int requestId);
 	// 取消所有请求
 	static bool cancelAll();
-	// 取消所有请求，清理所有curl资源，让线程池所有线程取消任务并退出
-	static void globalCleanup();
 
 	// 异步回调api
 	// 最好不要用类的非静态方法。以免回调时类已析构

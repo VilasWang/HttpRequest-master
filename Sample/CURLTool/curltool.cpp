@@ -108,11 +108,12 @@ CurlTool::~CurlTool()
 
 void CurlTool::initialize()
 {
+	HttpRequest::globalInit();
 }
 
 void CurlTool::unIntialize()
 {
-	//HttpRequest::globalCleanup();
+	HttpRequest::globalCleanup();
 }
 
 void CurlTool::onUpdateDefaultInfos()
