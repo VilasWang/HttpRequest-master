@@ -411,7 +411,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <string>目标文件名：</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_filename">
+   <widget class="QLineEdit" name="lineEdit_targetname">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -483,7 +483,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
    <zorder>btn_browser2</zorder>
    <zorder>cb_useDefault</zorder>
    <zorder>label_8</zorder>
-   <zorder>lineEdit_filename</zorder>
+   <zorder>lineEdit_targetname</zorder>
    <zorder>cmb_multiDownload</zorder>
    <zorder>label_11</zorder>
    <zorder>label_14</zorder>

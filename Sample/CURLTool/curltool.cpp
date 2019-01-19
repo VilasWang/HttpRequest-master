@@ -118,7 +118,7 @@ void CurlTool::onUpdateDefaultInfos()
 {
 	ui.lineEdit_url->clear();
 	ui.lineEdit_arg->clear();
-	ui.lineEdit_filename->clear();
+	ui.lineEdit_targetname->clear();
 	ui.lineEdit_saveDir->clear();
 	ui.lineEdit_uploadFile->clear();
 
@@ -128,19 +128,19 @@ void CurlTool::onUpdateDefaultInfos()
 		{
 			const QString& strUrl = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_filename->setText("mysql-8.0.13-winx64.zip");
+			ui.lineEdit_targetname->setText("mysql-8.0.13-winx64.zip");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
 		{
 #if 1
-			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/upload.php?filename=upload/3rd_Dev_Library.rar");
+			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/upload.php?filename=upload/test.rar");
 #else
-			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/uploadFile.php");
-#endif
-			ui.lineEdit_uploadFile->setText("3rd_Dev_Library.rar");
+			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/postData.php");
 			ui.lineEdit_saveDir->setText("./upload");//对应上传服务器的根目录的相对路径
-			ui.lineEdit_filename->setText("3rd_Dev_Library.rar");
+			ui.lineEdit_targetname->setText("test.rar");
+#endif
+			ui.lineEdit_uploadFile->setText("test.rar");
 		}
 		else if (ui.cb_get->isChecked())
 		{
@@ -259,7 +259,7 @@ void CurlTool::onDownload()
 		return;
 	}
 
-	const QString& strFileName = ui.lineEdit_filename->text().trimmed();
+	const QString& strFileName = ui.lineEdit_targetname->text().trimmed();
 	if (strFileName.isEmpty())
 	{
 		QMessageBox::information(nullptr, "Tips", QStringLiteral("文件保存位置不能为空"), QMessageBox::Ok);
@@ -319,7 +319,7 @@ void CurlTool::onUpload()
 		strSavePath = ".";
 	}
 
-	QString strTargetName = ui.lineEdit_filename->text().trimmed();
+	QString strTargetName = ui.lineEdit_targetname->text().trimmed();
 	if (strTargetName.isEmpty())
 	{
 		QFileInfo fileInfo(strUploadFilePath);
@@ -425,12 +425,12 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 	if (success)
 	{
 		m_nSuccessNum++;
-		strMsg = QString("[async]id:%1 success. %2").arg(id).arg(QString::fromStdString(data));
+		strMsg = QString("[async] request[%1] success. %2").arg(id).arg(QString::fromStdString(data));
 	}
 	else
 	{
 		m_nFailedNum++;
-		strMsg = QString("[async]id:%1 error: %2").arg(id).arg(QString::fromStdString(error_string));
+		strMsg = QString("[async] request[%1] failed. %2").arg(id).arg(QString::fromStdString(error_string));
 	}
 
 	if (CurlTool::isInstantiated())

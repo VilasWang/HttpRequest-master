@@ -34,10 +34,21 @@ HttpManager::~HttpManager()
 	OutputDebugStringA(ch);
 }
 
-HttpManager* HttpManager::Instance()
+HttpManager* HttpManager::globalInstance()
 {
 	static HttpManager _instance;
 	return &_instance;
+}
+
+void HttpManager::globalInit()
+{
+	HttpManager::globalInstance();
+}
+
+void HttpManager::globalCleanup()
+{
+	HttpManager::globalInstance()->clearReply();
+	ThreadPool::globalInstance()->waitForDone();
 }
 
 bool HttpManager::addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority)
@@ -56,14 +67,8 @@ bool HttpManager::abortTask(int task_id)
 
 bool HttpManager::abortAllTask()
 {
-	HttpManager::Instance()->clearReply();
+	HttpManager::globalInstance()->clearReply();
 	return ThreadPool::globalInstance()->abortAllTask();
-}
-
-void HttpManager::globalCleanup()
-{
-	HttpManager::Instance()->clearReply();
-	ThreadPool::globalInstance()->waitForDone();
 }
 
 void HttpManager::clearReply()

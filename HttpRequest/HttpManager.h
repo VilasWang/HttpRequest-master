@@ -17,7 +17,9 @@ public:
 	HttpManager(const HttpManager &) = delete;
 	HttpManager &operator=(const HttpManager &) = delete;
 
-	static HttpManager* Instance();
+	static HttpManager* globalInstance();
+	static void globalInit();
+	static void globalCleanup();
 
 	void addReply(std::shared_ptr<HttpReply> reply);
 	void removeReply(int);
@@ -32,7 +34,6 @@ private:
 	static bool addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority = ThreadPool::Normal);
 	static bool abortTask(int taskId);
 	static bool abortAllTask();
-	static void globalCleanup();
 	void clearReply();
 
 private:
