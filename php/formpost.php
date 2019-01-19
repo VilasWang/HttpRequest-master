@@ -1,17 +1,16 @@
 ﻿<?php  
 header("content-type:text/html;charset:utf-8");
-echo "[PHP] <br>";
-var_dump($_SERVER['REQUEST_METHOD']);
-echo " <br>";
+echo "<br>[PHP] <br>";
+//var_dump($_SERVER['REQUEST_METHOD']);
+//echo " <br>";
 
 $fileInfo = $_FILES["sendfile"];
 echo "Upload file: ".$fileInfo["name"]." <br>";
 echo "Size: ".($fileInfo["size"] / 1024)." kB <br>";
-echo "Temp file: ".$fileInfo["tmp_name"]." <br>";
+//echo "Temp file: ".$fileInfo["tmp_name"]." <br>";
 $targetname = $_POST["filename"];
-echo "Target file: ".$targetname." <br>";
 $targetpath = $_POST["path"];
-echo "Target path: ".$targetpath." <br>";
+//echo "Target file: ".$targetpath."/".$targetname." <br>";
 
 if ($fileInfo["error"] > 0){
     echo "Error：".$fileInfo["error"]." <br>";
@@ -45,9 +44,9 @@ else{
 			}
 			if (!file_exists($move_to_file)){
 				if(move_uploaded_file($uploaded_file, iconv("utf-8","gb2312",$move_to_file))) {  
-					echo $move_to_file." upload success. <br>";
+					echo $targetname." upload success. <br>";
 				} else {  
-					echo $move_to_file." upload failed. <br>";  
+					echo $targetname." upload failed. <br>";  
 				}
 			}
 			else{

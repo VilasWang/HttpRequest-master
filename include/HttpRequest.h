@@ -20,7 +20,8 @@ public:
 		Post,
 		Get,
 		Download,
-		Upload,
+		Upload,		//HTTP put 方式上次文件 (文件名和路径需在url中指定)
+		Upload2,	//HTTP Multipart formpost 方式上次文件(大小受限于服务器post数据的大小)
 		Unkonwn = -1
 	};
 
@@ -74,6 +75,9 @@ public:
 	int setPostData(const char* data, unsigned int size);
 
 	int setDownloadFile(const std::string& file_path, int thread_count = 5);
+	//HTTP put 方式上次文件 (文件名和路径在url中需要指定)
+	int setUploadFile(const std::string& file_path);
+	//HTTP Multipart formpost 方式上次文件
 	int setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path);
 
 private:

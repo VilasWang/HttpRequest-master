@@ -77,6 +77,7 @@ CurlTool::CurlTool(QWidget* parent)
 	bg1->addButton(ui.cb_upload);
 	bg1->addButton(ui.cb_get);
 	bg1->addButton(ui.cb_post);
+	bg1->addButton(ui.cb_formpost);
 	bg1->setExclusive(true);
 
 	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(onStartTask()));
@@ -126,20 +127,24 @@ void CurlTool::onUpdateDefaultInfos()
 	{
 		if (ui.cb_download->isChecked())
 		{
-			const QString& strUrl = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
+			QString str1 = "timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1547925666567&di=52db6d8b1f0da19f118cfdbe3d969b10&imgtype=0&src=http%3A%2F%2Fimg.pconline.com.cn%2Fimages%2Fupload%2Fupc%2Ftx%2Fwallpaper%2F1207%2F02%2Fc0%2F12195456_1341200893045.jpg";
+			QString str2 = "https://www.python.org/ftp/python/3.7.2/python-3.7.2.exe";
+			QString str3 = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
+			const QString& strUrl = str2;
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_targetname->setText("mysql-8.0.13-winx64.zip");
+			ui.lineEdit_targetname->setText("python.exe");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
 		{
-#if 1
 			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/upload.php?filename=upload/test.rar");
-#else
-			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/postData.php");
+			ui.lineEdit_uploadFile->setText("test.rar");
+		}
+		else if (ui.cb_formpost->isChecked())
+		{
+			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/formpost.php");
 			ui.lineEdit_saveDir->setText("./upload");//对应上传服务器的根目录的相对路径
 			ui.lineEdit_targetname->setText("test.rar");
-#endif
 			ui.lineEdit_uploadFile->setText("test.rar");
 		}
 		else if (ui.cb_get->isChecked())
@@ -183,6 +188,10 @@ void CurlTool::onStartTask()
 	else if (ui.cb_upload->isChecked())
 	{
 		onUpload();
+	}
+	else if (ui.cb_formpost->isChecked())
+	{
+		onFormPost();
 	}
 	else if (ui.cb_get->isChecked())
 	{
@@ -313,6 +322,45 @@ void CurlTool::onUpload()
 		return;
 	}
 
+	m_timeStart = QTime::currentTime();
+	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
+
+	m_mapReplys.clear();
+	m_nTotalNum = 1;
+
+	HttpRequest request;
+	request.setRequestUrl(strUrl.toStdString());
+	request.setUploadFile(strUploadFilePath.toStdString());
+	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
+							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
+								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
+	if (reply.get())
+	{
+		m_mapReplys.insert(reply->id(), reply);
+	}
+}
+
+void CurlTool::onFormPost()
+{
+	const QString& strUrl = ui.lineEdit_url->text().trimmed();
+	if (strUrl.isEmpty())
+	{
+		QMessageBox::information(nullptr, "Tips", QStringLiteral("url不能为空"), QMessageBox::Ok);
+		reset();
+		return;
+	}
+
+	const QString& strUploadFilePath = ui.lineEdit_uploadFile->text().trimmed();
+	if (strUploadFilePath.isEmpty())
+	{
+		QMessageBox::information(nullptr, "Tips", QStringLiteral("上传文件不能为空"), QMessageBox::Ok);
+		reset();
+		return;
+	}
+
 	QString strSavePath = ui.lineEdit_saveDir->text().trimmed();
 	if (strSavePath.isEmpty())
 	{
@@ -342,7 +390,7 @@ void CurlTool::onUpload()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload2, HttpRequest::Async);
 	if (reply.get())
 	{
 		m_mapReplys.insert(reply->id(), reply);

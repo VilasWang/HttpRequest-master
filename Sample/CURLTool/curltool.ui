@@ -45,7 +45,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>80</x>
-      <y>310</y>
+      <y>320</y>
       <width>540</width>
       <height>23</height>
      </rect>
@@ -129,7 +129,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>80</x>
-      <y>280</y>
+      <y>290</y>
       <width>540</width>
       <height>23</height>
      </rect>
@@ -145,7 +145,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>310</y>
+      <y>320</y>
       <width>54</width>
       <height>21</height>
      </rect>
@@ -158,7 +158,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>280</y>
+      <y>290</y>
       <width>54</width>
       <height>21</height>
      </rect>
@@ -174,7 +174,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     <property name="geometry">
      <rect>
       <x>490</x>
-      <y>240</y>
+      <y>250</y>
       <width>131</width>
       <height>31</height>
      </rect>
@@ -197,7 +197,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <x>10</x>
       <y>200</y>
       <width>411</width>
-      <height>71</height>
+      <height>81</height>
      </rect>
     </property>
     <property name="title">
@@ -274,6 +274,25 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      </property>
      <property name="text">
       <string>POST</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>18</width>
+       <height>18</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_formpost">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>formpost</string>
      </property>
      <property name="iconSize">
       <size>

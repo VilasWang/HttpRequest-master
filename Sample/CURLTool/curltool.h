@@ -28,6 +28,7 @@ public:
 	private Q_SLOTS:
 	void onDownload();
 	void onUpload();
+	void onFormPost();
 	void onGetRequest();
 	void onPostRequest();
 
