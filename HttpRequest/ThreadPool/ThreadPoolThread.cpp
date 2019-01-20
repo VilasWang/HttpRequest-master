@@ -25,7 +25,7 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 
 ThreadPoolThread::~ThreadPoolThread()
 {
-	std::cout << __FUNCTION__ << "id:" << m_nThreadID << std::endl;
+	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
 #ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
 #endif

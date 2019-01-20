@@ -76,12 +76,12 @@ public:
 
 public:
 	int	setRetryTimes(int retry_times);
-	int	setRequestTimeout(long time_out = 0);
-	int	setRequestUrl(const std::string& url);
+	int	setTimeout(long time_out = 0);
+	int	setUrl(const std::string& url);
 	int	setFollowLocation(bool follow_location);
 	int	setPostData(const char* data, unsigned int size);
-	int	setRequestHeader(const std::string& header);
-	int	setRequestProxy(const std::string& proxy, long proxy_port);
+	int	setHeader(const std::string& header);
+	int	setProxy(const std::string& proxy, long proxy_port);
 	int setDownloadFile(const std::string& file_name);
 	int setDownloadThreadCount(int thread_count);
 	//HTTP put 方式上次文件
@@ -301,7 +301,7 @@ CURLWrapper::CURLWrapper()
 
 CURLWrapper::~CURLWrapper()
 {
-	std::cout << __FUNCTION__ << "id:" << m_id << std::endl;
+	std::cout << __FUNCTION__ << " id:" << m_id << std::endl;
 	TRACE_CLASS_DESTRUCTOR(CURLWrapper);
 	cancel();
 }
@@ -312,7 +312,7 @@ int	CURLWrapper::setRetryTimes(int retry_times)
 	return HttpRequest::REQUEST_OK;
 }
 
-int CURLWrapper::setRequestTimeout(long time_out)
+int CURLWrapper::setTimeout(long time_out)
 {
 	if (time_out < 0)
 	{
@@ -322,7 +322,7 @@ int CURLWrapper::setRequestTimeout(long time_out)
 	return HttpRequest::REQUEST_OK;
 }
 
-int CURLWrapper::setRequestUrl(const std::string& url)
+int CURLWrapper::setUrl(const std::string& url)
 {
 	m_url = url;
 	return HttpRequest::REQUEST_OK;
@@ -340,7 +340,7 @@ int CURLWrapper::setPostData(const char* data, unsigned int size)
 	return HttpRequest::REQUEST_OK;
 }
 
-int CURLWrapper::setRequestHeader(const std::string& header)
+int CURLWrapper::setHeader(const std::string& header)
 {
 	if (header.empty())
 	{
@@ -351,7 +351,7 @@ int CURLWrapper::setRequestHeader(const std::string& header)
 	return HttpRequest::REQUEST_OK;
 }
 
-int CURLWrapper::setRequestProxy(const std::string& proxy, long proxy_port)
+int CURLWrapper::setProxy(const std::string& proxy, long proxy_port)
 {
 	m_http_proxy = proxy;
 	m_proxy_port = proxy_port;
@@ -1199,21 +1199,21 @@ int HttpRequest::setRetryTimes(int retry_times)
 	return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setRequestTimeout(long time_out)
+int HttpRequest::setTimeout(long time_out)
 {
 	if (m_helper.get())
 	{
-		return m_helper->setRequestTimeout(time_out);
+		return m_helper->setTimeout(time_out);
 	}
 
 	return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setRequestUrl(const std::string& url)
+int HttpRequest::setUrl(const std::string& url)
 {
 	if (m_helper.get())
 	{
-		return m_helper->setRequestUrl(url);
+		return m_helper->setUrl(url);
 	}
 
 	return REQUEST_INIT_ERROR;
@@ -1243,7 +1243,7 @@ int HttpRequest::setPostData(const char* data, unsigned int size)
 	return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setRequestHeader(const std::map<std::string, std::string>& headers)
+int HttpRequest::setHeader(const std::map<std::string, std::string>& headers)
 {
 	if (m_helper.get())
 	{
@@ -1252,7 +1252,7 @@ int HttpRequest::setRequestHeader(const std::map<std::string, std::string>& head
 			std::string header = it->first;
 			header += ": ";
 			header += it->second;
-			m_helper->setRequestHeader(header);
+			m_helper->setHeader(header);
 		}
 		return REQUEST_OK;
 	}
@@ -1260,20 +1260,20 @@ int HttpRequest::setRequestHeader(const std::map<std::string, std::string>& head
 	return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setRequestHeader(const std::string& header)
+int HttpRequest::setHeader(const std::string& header)
 {
 	if (m_helper.get())
 	{
-		return m_helper->setRequestHeader(header);
+		return m_helper->setHeader(header);
 	}
 	return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setRequestProxy(const std::string& proxy, long proxy_port)
+int HttpRequest::setProxy(const std::string& proxy, long proxy_port)
 {
 	if (m_helper.get())
 	{
-		return m_helper->setRequestProxy(proxy, proxy_port);
+		return m_helper->setProxy(proxy, proxy_port);
 	}
 
 	return REQUEST_INIT_ERROR;

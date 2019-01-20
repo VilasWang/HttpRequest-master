@@ -65,14 +65,14 @@ public:
 	int	setProgressCallback(ProgressCallback pc);
 
 	int setRetryTimes(int retry_times);
-	int setRequestTimeout(long time_out = 0); // 请求超时（second）
-	int setRequestUrl(const std::string& url);
-	int setRequestProxy(const std::string& proxy, long proxy_port);
+	int setTimeout(long time_out = 0); // 请求超时（second）
+	int setUrl(const std::string& url);
+	int setProxy(const std::string& proxy, long proxy_port);
 	// set http redirect follow location
 	int setFollowLocation(bool follow_location);
 	// set http request header, for example : Range:bytes=554554-
-	int setRequestHeader(const std::map<std::string, std::string>& headers);
-	int setRequestHeader(const std::string& header);
+	int setHeader(const std::map<std::string, std::string>& headers);
+	int setHeader(const std::string& header);
 
 	// 若调用该方法就是post方式请求，否则是curl默认get
 	int setPostData(const std::string& data);

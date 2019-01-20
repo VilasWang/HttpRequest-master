@@ -471,7 +471,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <rect>
       <x>490</x>
       <y>80</y>
-      <width>141</width>
+      <width>131</width>
       <height>21</height>
      </rect>
     </property>
@@ -479,7 +479,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <string notr="true">color:red;</string>
     </property>
     <property name="text">
-     <string>注：带后缀，空则根据url</string>
+     <string>注：空则根据url取</string>
     </property>
    </widget>
    <zorder>groupBox</zorder>

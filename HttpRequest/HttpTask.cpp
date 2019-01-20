@@ -14,7 +14,7 @@ HttpTask::HttpTask(bool bAutoDelete) : TaskBase(bAutoDelete)
 
 HttpTask::~HttpTask()
 {
-	std::cout << __FUNCTION__ << "id:" << m_id << std::endl;
+	std::cout << __FUNCTION__ << " id:" << m_id << std::endl;
 
 #ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(HttpTask);

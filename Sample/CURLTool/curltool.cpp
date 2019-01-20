@@ -290,7 +290,7 @@ void CurlTool::onDownload()
 	const QString& strFilePath = strSavePath + "/" + strFileName;
 
 	HttpRequest request;
-	request.setRequestUrl(strUrl.toStdString());
+	request.setUrl(strUrl.toStdString());
 	request.setDownloadFile(strFilePath.toStdString(), ui.cmb_multiDownload->currentText().toInt());
 	request.setFollowLocation(true);
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
@@ -330,7 +330,7 @@ void CurlTool::onUpload()
 	m_nTotalNum = 1;
 
 	HttpRequest request;
-	request.setRequestUrl(strUrl.toStdString());
+	request.setUrl(strUrl.toStdString());
 	request.setUploadFile(strUploadFilePath.toStdString());
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -384,7 +384,7 @@ void CurlTool::onFormPost()
 	m_nTotalNum = 1;
 
 	HttpRequest request;
-	request.setRequestUrl(strUrl.toStdString());
+	request.setUrl(strUrl.toStdString());
 	request.setUploadFile(strUploadFilePath.toStdString(), strTargetName.toStdString(), strSavePath.toStdString());
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -416,7 +416,7 @@ void CurlTool::onGetRequest()
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
 		HttpRequest request;
-		request.setRequestUrl(strUrl.toStdString());
+		request.setUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
@@ -454,7 +454,7 @@ void CurlTool::onPostRequest()
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
 		HttpRequest request;
-		request.setRequestUrl(strUrl.toStdString());
+		request.setUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 		std::string strSendData = strArg.toStdString();
