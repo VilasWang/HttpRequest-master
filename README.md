@@ -35,7 +35,7 @@ const std::string strUrl = "...";
 const std::string strFilePath = "...";
 
 HttpRequest request;
-request.setRequestUrl(strUrl);
+request.setUrl(strUrl);
 request.setDownloadFile(strFilePath);
 
 std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
@@ -53,9 +53,8 @@ const std::string strUrl = "...";
 const std::string strFilePath = "...";
 
 HttpRequest request;
-request.setRequestUrl(strUrl);
+request.setUrl(strUrl);
 request.setDownloadFile(strFilePath);
-request.setFollowLocation(true);
 request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
@@ -75,13 +74,10 @@ std::cout << reply->id();
 
 const std::string strUrl = "...";
 const std::string strUploadFilePath = "...";
-const std::string strTargetName = "...";
-const std::string strSavePath = "...";
 
 HttpRequest request;
-request.setRequestUrl(strUrl);
-request.setUploadFile(strUploadFilePath, strTargetName, strSavePath);
-request.setFollowLocation(true);
+request.setUrl(strUrl);
+request.setUploadFile(strUploadFilePath);
 request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
