@@ -1,18 +1,28 @@
 #include "ThreadPool.h"
 #include <cassert>
 #include <iostream>
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+#include "../ClassMemoryTracer.h"
+#endif
 
 ThreadPool::ThreadPool()
 	: m_nThreadNum(1)
 	, m_bInitialized(false)
 	, m_pCallBack(nullptr)
 {
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+	TRACE_CLASS_CONSTRUCTOR(ThreadPool);
+#endif
 	m_pThread = new ScheduleThread;
 }
 
 ThreadPool::~ThreadPool()
 {
 	std::cout << __FUNCTION__ << "(B)" << std::endl;
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+	TRACE_CLASS_DESTRUCTOR(ThreadPool);
+#endif
+
 	waitForDone();
 	if (m_pThread)
 	{
@@ -22,6 +32,9 @@ ThreadPool::~ThreadPool()
 		m_pThread = nullptr;
 	}
 	std::cout << __FUNCTION__ << "(E)" << std::endl;
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+	TRACE_CLASS_PRINT();
+#endif
 }
 
 ThreadPool* ThreadPool::globalInstance()
@@ -117,11 +130,7 @@ std::shared_ptr<TaskBase> ThreadPool::takeTask()
 	std::shared_ptr<TaskBase> task = m_taskQueue.pop();
 	if (!task.get())
 	{
-		std::cout << "error task!" << std::endl;
-	}
-	else
-	{
-		std::cout << "take task id:" << task->id();
+		std::cout << "error take task! id:" << task->id() << std::endl;
 	}
 	return task;
 }

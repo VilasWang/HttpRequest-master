@@ -41,27 +41,4 @@ public:
 	virtual void setCurrentBytes(INT64) = 0;
 };
 
-struct ThreadChunk
-{
-	CURLInterface* _helper;
-	FILE* _fp;
-	long _startidx;
-	long _endidx;
-
-	ThreadChunk()
-	{
-		_helper = nullptr;
-		_fp = nullptr;
-		_startidx = 0;
-		_endidx = 0;
-	}
-	~ThreadChunk()
-	{
-		_helper = nullptr;
-		_fp = nullptr;
-		_startidx = 0;
-		_endidx = 0;
-	}
-};
-
 

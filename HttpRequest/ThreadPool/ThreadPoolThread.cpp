@@ -4,7 +4,10 @@
 #include <process.h>
 #include <cassert>
 #include <iostream>
-#define WAIT_TIME 20
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+#include "../ClassMemoryTracer.h"
+#endif
+
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	: m_pThreadPool(threadPool)
@@ -14,14 +17,20 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	, m_nThreadID(0)
 	, m_bExit(false)
 {
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
+#endif
 	m_hEvent = CreateEvent(nullptr, false, false, nullptr);
 }
 
 ThreadPoolThread::~ThreadPoolThread()
 {
 	std::cout << __FUNCTION__ << "id:" << m_nThreadID << std::endl;
-	quit();
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
+#endif
 
+	quit();
 	if (m_hEvent)
 	{
 		CloseHandle(m_hEvent);

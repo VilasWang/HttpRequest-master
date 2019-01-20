@@ -8,15 +8,62 @@
 #include <regex>
 #include <process.h>
 #include "ThreadPool/mutex.h"
-#include "ClassMemoryTracer.h"
 #include "httprequestdef.h"
-
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+#include "ClassMemoryTracer.h"
+#endif
 
 #define DEFAULT_RETRY_COUNT					3
 #define DEFAULT_DOWNLOAD_THREAD_COUNT		5
 #define DEFAULT_CONNECT_TIMEOUT				10		//连接最长时间
 #define DEFAULT_TIMEOUT						600		//传输最长时间
 #define MINIMAL_PROGRESS_INTERVAL			3
+
+struct ThreadChunk
+{
+	CURLInterface* _helper;
+	FILE* _fp;
+	long _startidx;
+	long _endidx;
+
+	ThreadChunk()
+	{
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+		TRACE_CLASS_CONSTRUCTOR(ThreadChunk);
+#endif
+		_helper = nullptr;
+		_fp = nullptr;
+		_startidx = 0;
+		_endidx = 0;
+	}
+	~ThreadChunk()
+	{
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+		TRACE_CLASS_DESTRUCTOR(ThreadChunk);
+#endif
+	}
+};
+
+struct UploadItem
+{
+	CURLInterface* _helper;
+	FILE* _fp;
+
+	UploadItem()
+	{
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+		TRACE_CLASS_CONSTRUCTOR(UploadItem);
+#endif
+		_helper = nullptr;
+		_fp = nullptr;
+	}
+	~UploadItem()
+	{
+#ifdef TRACE_CLASS_MEMORY_ENABLED
+		TRACE_CLASS_DESTRUCTOR(UploadItem);
+#endif
+	}
+};
 
 
 class CURLWrapper : public CURLInterface
@@ -113,24 +160,6 @@ private:
 std::atomic<int> CURLWrapper::s_id = 0;
 
 //////////////////////////////////////////////////////////////////////////
-size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
-{
-	size_t retcode;
-	curl_off_t nread;
-
-	/* in real-world cases, this would probably get this data differently
-	as this fread() stuff is exactly what the library already would do
-	by default internally */
-	retcode = fread(ptr, size, nmemb, (FILE *)stream);
-
-	nread = (curl_off_t)retcode;
-
-	fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
-			" bytes from file\n", nread);
-
-	return retcode;
-}
-
 size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata)
 {
 	std::string* receive_header = reinterpret_cast<std::string*>(userdata);
@@ -151,6 +180,27 @@ size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 	return nmemb * size;
 }
 
+size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	size_t retcode = 0;
+	size_t nread = 0;
+
+	UploadItem *item = (UploadItem *)userdata;
+	if (!item || !item->_fp || !item->_helper || item->_helper->isFailed())
+		return 0;
+
+	if (item->_helper->isCanceled())
+		return CURL_READFUNC_ABORT;
+
+	retcode = fread(ptr, size, nmemb, (FILE *)item->_fp);
+	nread = retcode * size;
+
+	fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
+			  " bytes from file\n", (curl_off_t)nread);
+
+	return nread;
+}
+
 size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
 {
 	CURLInterface* helper = nullptr;
@@ -167,7 +217,7 @@ size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userda
 	int seek_error = fseek(thread_chunk->_fp, thread_chunk->_startidx, SEEK_SET);
 	if (seek_error != 0)
 	{
-		OutputDebugStringA("fseek error!");
+		OutputDebugStringA("[HttpRequest]write_callback fseek error!");
 		return 0;
 	}
 	else
@@ -244,14 +294,14 @@ CURLWrapper::CURLWrapper()
 	, m_progress_callback(nullptr)
 	, m_result_callback(nullptr)
 {
+#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(CURLWrapper);
+#endif
 }
 
 CURLWrapper::~CURLWrapper()
 {
-	/*char ch[64];
-	sprintf_s(ch, "%s id:%d\n", __FUNCTION__, m_id);
-	OutputDebugStringA(ch);*/
+	std::cout << __FUNCTION__ << "id:" << m_id << std::endl;
 	TRACE_CLASS_DESTRUCTOR(CURLWrapper);
 	cancel();
 }
@@ -565,6 +615,11 @@ int CURLWrapper::doPostGet()
 int CURLWrapper::doDownload()
 {
 	m_total_size = getDownloadFileSize();
+	INT64 size = m_total_size;
+	char ch[64];
+	sprintf_s(ch, "[HttpRequest]file size: %lld\n", size);
+	OutputDebugStringA(ch);
+
 	if (m_total_size < 0)
 	{
 		m_multi_download = false;
@@ -590,14 +645,13 @@ int CURLWrapper::doDownload()
 	if (m_multi_download)
 	{
 		int thread_count = splitDownloadCount(m_total_size);
-		m_thread_count = thread_count > m_thread_count ? m_thread_count : thread_count;
+		m_thread_count = (thread_count > m_thread_count ? m_thread_count : thread_count);
 		if (m_thread_count <= 1)
 		{
 			m_multi_download = false;
 		}
 	}
-	char ch[64];
-	sprintf_s(ch, "multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
+	sprintf_s(ch, "[HttpRequest]multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
 	OutputDebugStringA(ch);
 
 	//文件大小有分开下载的必要并且服务器支持多线程下载时，启用多线程下载
@@ -687,7 +741,7 @@ int CURLWrapper::doUpload()
 		errno_t err = fopen_s(&file, m_strUploadFile.c_str(), "rb");
 		if (err != 0 || nullptr == file)
 		{
-			std::cout << "open file error!" << std::endl;
+			OutputDebugStringA("[HttpRequest]open file error!");
 			curl_code = CURLE_READ_ERROR;
 			setFailed(true);
 			curl_slist_free_all(http_headers);
@@ -695,14 +749,19 @@ int CURLWrapper::doUpload()
 			return curl_code;
 		}
 
+		std::unique_ptr<UploadItem> item = nullptr;
 		if (reply.get())
 		{
 			/* get the file size of the local file */
 			struct stat file_info = {0};
 			stat(m_strUploadFile.c_str(), &file_info);
 
-			curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-			curl_easy_setopt(curl, CURLOPT_READDATA, file);
+			item.reset(new UploadItem);
+			item->_fp = file;
+			item->_helper = this;
+
+			curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_file_callback);
+			curl_easy_setopt(curl, CURLOPT_READDATA, item.get());
 			curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
 				(curl_off_t)file_info.st_size);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
@@ -1116,13 +1175,17 @@ void CURLWrapper::reset()
 HttpRequest::HttpRequest()
 	: m_helper(new CURLWrapper)
 {
+#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(HttpRequest);
+#endif
 	HttpManager::globalInstance();
 }
 
 HttpRequest::~HttpRequest()
 {
+#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(HttpRequest);
+#endif
 	m_helper = nullptr;
 }
 
