@@ -18,8 +18,9 @@ public:
 	bool start();
 	void quit();
 	bool wait(unsigned long time = ULONG_MAX);
-	void wakeAll();
-	void wakeONe();
+	bool isSuspend();
+	bool suspend();
+	bool resume();
 
 	const UINT threadId() const { return m_nThreadID; }
 
@@ -37,8 +38,7 @@ private:
 	unsigned m_nThreadID;
 	std::atomic<bool> m_bExit;
 	std::atomic<bool> m_bRunning;
-	std::mutex m_mutex;
-	std::condition_variable m_task_cv;//Ìõ¼þ×èÈû
+	HANDLE m_hEvent;
 };
 
 #endif //SCHEDULETHREAD_H

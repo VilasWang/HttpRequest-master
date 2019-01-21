@@ -1,9 +1,10 @@
+//#include "stdafx.h"
 #include "ScheduleThread.h"
 #include <process.h>
 #include <iostream>
 #include "ThreadPool.h"
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-#include "../ClassMemoryTracer.h"
+#include "ClassMemoryTracer.h"
 #endif
 
 
@@ -14,16 +15,33 @@ ScheduleThread::ScheduleThread()
 	, m_bRunning(false)
 {
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_CONSTRUCTOR(ScheduleThread);
+	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
 #endif
+	m_hEvent = CreateEvent(0, TRUE, TRUE, 0);
+	if (nullptr == m_hEvent)
+	{
+		std::cout << GetLastError() << std::endl;
+	}
 }
 
 ScheduleThread::~ScheduleThread()
 {
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_DESTRUCTOR(ScheduleThread);
+	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
 #endif
+	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
+
 	quit();
+	if (m_hEvent)
+	{
+		if (WaitForSingleObject(m_hEvent, 1000) == WAIT_TIMEOUT)
+		{
+			std::cout << "ScheduleThread WaitForSingleObject Event 1s TIMEOUT." << std::endl;
+		}
+
+		CloseHandle(m_hEvent);
+		m_hEvent = nullptr;
+	}
 }
 
 bool ScheduleThread::start()
@@ -32,6 +50,7 @@ bool ScheduleThread::start()
 	m_hThread = (HANDLE)_beginthreadex(NULL, 0, &ScheduleThread::ThreadFunc, this, NULL, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
+		std::cout << GetLastError() << std::endl;
 		return false;
 	}
 	return true;
@@ -40,13 +59,13 @@ bool ScheduleThread::start()
 void ScheduleThread::quit()
 {
 	m_bExit = true;
-	m_task_cv.notify_all();
+	resume();
 
 	if (m_hThread)
 	{
 		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
 		{
-			std::cout << "WaitForSingleObject 5s TIMEOUT. id:" << m_nThreadID << std::endl;
+			std::cout << "ScheduleThread WaitForSingleObject Thread 5s TIMEOUT." << std::endl;
 			_endthreadex(1);
 		}
 
@@ -58,6 +77,9 @@ void ScheduleThread::quit()
 
 bool ScheduleThread::wait(unsigned long time)
 {
+	if (nullptr == m_hThread)
+		return true;
+
 	if (time == ULONG_MAX)
 	{
 		WaitForSingleObject(m_hThread, INFINITE);
@@ -73,14 +95,35 @@ bool ScheduleThread::wait(unsigned long time)
 	return true;
 }
 
-void ScheduleThread::wakeAll()
+bool ScheduleThread::suspend()
 {
-	m_task_cv.notify_all();
+	if (m_hEvent)
+	{
+		ResetEvent(m_hEvent);
+		return true;
+	}
+	return false;
 }
 
-void ScheduleThread::wakeONe()
+bool ScheduleThread::resume()
 {
-	m_task_cv.notify_one();
+	if (m_hEvent)
+	{
+		SetEvent(m_hEvent);
+		return true;
+	}
+	return false;
+}
+
+bool ScheduleThread::isSuspend()
+{
+	if (nullptr == m_hThread || nullptr == m_hEvent)
+		return false;
+
+	if (WAIT_OBJECT_0 != WaitForSingleObject(m_hEvent, 0))
+		return true;
+
+	return false;
 }
 
 unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
@@ -92,24 +135,44 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 		t->onBeforeExec();
 
 		MSG msg = { 0 };
+		DWORD ret = WAIT_FAILED;
+		BOOL hasMsg = FALSE;
 		while (!t->m_bExit)
 		{
-			msg = { 0 };
-			PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-			switch (msg.message)
+			ret = WaitForSingleObject(t->m_hEvent, INFINITE);
+			switch (ret)
 			{
-			case WM_THREAD_TASK_FINISHED:
-				t->switchToIdleThread((UINT)msg.wParam);
+			case WAIT_OBJECT_0:
+				{
+					msg = { 0 };
+					hasMsg = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+					if (hasMsg)
+					{
+						switch (msg.message)
+						{
+						case WM_THREAD_TASK_FINISHED:
+							t->switchToIdleThread((UINT)msg.wParam);
+							break;
+						case WM_QUIT:
+							t->m_bExit = true;
+							break;
+						default:
+							break;
+						}
+					}
+					t->run();
+				}
 				break;
-			case WM_QUIT:
-				t->m_bExit = true;
+			case WAIT_FAILED:
+				{
+					std::cout << GetLastError() << std::endl;
+				}
 				break;
 			default:
 				break;
 			}
-
-			t->run();
 		}
+
 		t->onBeforeExit();
 		t->m_bRunning = false;
 	}
@@ -121,9 +184,16 @@ void ScheduleThread::run()
 	if (m_bExit)
 		return;
 
-	if (!ThreadPool::globalInstance()->hasIdleThread() || !ThreadPool::globalInstance()->hasTask())
+	if (!ThreadPool::globalInstance()->hasTask())
 	{
-		Sleep(30);
+		suspend();
+		return;
+	}
+
+	if (!ThreadPool::globalInstance()->hasIdleThread())
+	{
+		//有任务但是没有空闲线程。调用Sleep(0), 放弃当前cpu时间片，调度进程切换可调度线程
+		Sleep(0);//SwitchToThread();
 		return;
 	}
 
@@ -140,12 +210,12 @@ void ScheduleThread::run()
 		}
 		else
 		{
-			OutputDebugString(L"[ThreadPool]error1\n");
+			OutputDebugString(L"ScheduleThread error1\n");
 		}
 	}
 	else
 	{
-		OutputDebugString(L"[ThreadPool]error2\n");
+		OutputDebugString(L"ScheduleThread error2\n");
 	}
 }
 
@@ -158,6 +228,6 @@ void ScheduleThread::switchToIdleThread(UINT threadId)
 	}
 	else
 	{
-		OutputDebugString(L"[ThreadPool]error3\n");
+		OutputDebugString(L"ScheduleThread error3\n");
 	}
 }

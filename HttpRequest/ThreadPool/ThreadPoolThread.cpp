@@ -1,3 +1,4 @@
+//#include "stdafx.h"
 #include "ThreadPoolThread.h"
 #include "ThreadPool.h"
 #include "Task.h"
@@ -5,9 +6,8 @@
 #include <cassert>
 #include <iostream>
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-#include "../ClassMemoryTracer.h"
+#include "ClassMemoryTracer.h"
 #endif
-
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	: m_pThreadPool(threadPool)
@@ -21,14 +21,18 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
 #endif
 	m_hEvent = CreateEvent(nullptr, false, false, nullptr);
+	if (nullptr == m_hEvent)
+	{
+		std::cout << GetLastError() << std::endl;
+	}
 }
 
 ThreadPoolThread::~ThreadPoolThread()
 {
-	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
 #ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
 #endif
+	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
 
 	quit();
 	if (m_hEvent)
@@ -43,6 +47,7 @@ bool ThreadPoolThread::start()
 	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, &ThreadPoolThread::threadFunc, this, 0, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
+		std::cout << GetLastError() << std::endl;
 		return false;
 	}
 	return true;
@@ -57,7 +62,7 @@ void ThreadPoolThread::quit()
 	{
 		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
 		{
-			std::cout << "WaitForSingleObject 5s TIMEOUT. id:" << m_nThreadID << std::endl;
+			std::cout << "ThreadPoolThread WaitForSingleObject 5s TIMEOUT. id:" << m_nThreadID << std::endl;
 			_endthreadex(1);
 		}
 
@@ -86,19 +91,27 @@ void ThreadPoolThread::waitForDone()
 
 UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 {
-	ThreadPoolThread* pThread = (ThreadPoolThread*)pParam;
-	while (pThread && !pThread->m_bExit)
+	ThreadPoolThread* t = (ThreadPoolThread*)pParam;
+	if (t)
 	{
-		DWORD ret = WaitForSingleObject(pThread->m_hEvent, INFINITE);
-		switch (ret)
+		while (!t->m_bExit)
 		{
-		case WAIT_OBJECT_0:
+			DWORD ret = WaitForSingleObject(t->m_hEvent, INFINITE);
+			switch (ret)
 			{
-				pThread->exec();
+			case WAIT_OBJECT_0:
+				{
+					t->exec();
+				}
+				break;
+			case WAIT_FAILED:
+				{
+					std::cout << GetLastError() << std::endl;
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
 		}
 	}
 	return 0;

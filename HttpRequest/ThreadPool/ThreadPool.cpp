@@ -1,8 +1,9 @@
+//#include "stdafx.h"
 #include "ThreadPool.h"
 #include <cassert>
 #include <iostream>
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-#include "../ClassMemoryTracer.h"
+#include "ClassMemoryTracer.h"
 #endif
 
 ThreadPool::ThreadPool()
@@ -11,18 +12,17 @@ ThreadPool::ThreadPool()
 	, m_pCallBack(nullptr)
 {
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_CONSTRUCTOR(ThreadPool);
+	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
 #endif
 	m_pThread = new ScheduleThread;
 }
 
 ThreadPool::~ThreadPool()
 {
-	std::cout << __FUNCTION__ << "(B)" << std::endl;
 #ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_DESTRUCTOR(ThreadPool);
+	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
 #endif
-
+	std::cout << __FUNCTION__ << "(B)" << std::endl;
 	waitForDone();
 	if (m_pThread)
 	{
@@ -94,6 +94,11 @@ bool ThreadPool::addTask(std::shared_ptr<TaskBase> t, Priority p)
 		m_taskQueue.pushFront(t);	//高优先级任务
 	}
 
+	if (m_pThread->isSuspend())
+	{
+		m_pThread->resume();
+	}
+
 	return true;
 }
 
@@ -130,7 +135,11 @@ std::shared_ptr<TaskBase> ThreadPool::takeTask()
 	std::shared_ptr<TaskBase> task = m_taskQueue.pop();
 	if (!task.get())
 	{
-		std::cout << "error take task! id:" << task->id() << std::endl;
+		std::cout << "error task!" << std::endl;
+	}
+	else
+	{
+		std::cout << "take task id:" << task->id();
 	}
 	return task;
 }

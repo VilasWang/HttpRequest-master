@@ -30,7 +30,7 @@ public:
 	bool waitForDone();
 
 	//priority为优先级。高优先级的任务将被插入到队首
-	bool addTask(std::shared_ptr<TaskBase> t, Priority p);
+	bool addTask(std::shared_ptr<TaskBase> t, Priority p = Normal);
 	bool abortTask(int taskId);
 	bool abortAllTask();
 
