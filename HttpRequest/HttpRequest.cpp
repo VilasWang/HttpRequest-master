@@ -597,7 +597,11 @@ int CURLWrapper::doPostGet()
 
 		if (curl_code != CURLE_OK)
 		{
-			curl_slist_free_all(http_headers);
+			setFailed(true);
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
 			curl_easy_cleanup(curl);
 			return curl_code;
 		}
@@ -627,7 +631,10 @@ int CURLWrapper::doPostGet()
 			}
 		}
 
-		curl_slist_free_all(http_headers);
+		if (nullptr != http_headers)
+		{
+			curl_slist_free_all(http_headers);
+		}
 		curl_easy_cleanup(curl);
 		return curl_code;
 	}
@@ -753,7 +760,10 @@ int CURLWrapper::doUpload()
 				reply->m_error_string = err_string;
 			}
 			setFailed(true);
-			curl_slist_free_all(http_headers);
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
 			curl_easy_cleanup(curl);
 			return curl_code;
 		}
@@ -851,7 +861,10 @@ int CURLWrapper::doFormPostUpload()
 				reply->m_error_string = err_string;
 			}
 			setFailed(true);
-			curl_slist_free_all(http_headers);
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
 			curl_easy_cleanup(curl);
 			return curl_code;
 		}
@@ -959,7 +972,10 @@ int CURLWrapper::download(ThreadChunk* thread_chunk)
 				reply->m_error_string = err_string;
 			}
 			setFailed(true);
-			curl_slist_free_all(http_headers);
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
 			curl_easy_cleanup(curl);
 			return curl_code;
 		}
@@ -1087,7 +1103,10 @@ INT64 CURLWrapper::getDownloadFileSize()
 					reply->m_error_string = err_string;
 				}
 				setFailed(true);
-				curl_slist_free_all(http_headers);
+				if (nullptr != http_headers)
+				{
+					curl_slist_free_all(http_headers);
+				}
 				curl_easy_cleanup(curl_handle);
 				return -1;
 			}
@@ -1127,6 +1146,10 @@ INT64 CURLWrapper::getDownloadFileSize()
 				reply->m_http_code = http_code;
 			}
 
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
 			curl_easy_cleanup(curl_handle);
 		}
 

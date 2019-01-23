@@ -8,7 +8,7 @@ namespace Log
 {
 	inline void Debug(char *format, ...)
 	{
-		char buf[256] = {0};
+		char buf[64] = {0};
 
 		va_list args;
 		va_start(args, format);
@@ -23,7 +23,7 @@ namespace Log
 
 	inline void DebugW(wchar_t *format, ...)
 	{
-		wchar_t buf[256] = {0};
+		wchar_t buf[64] = {0};
 
 		va_list args;
 		va_start(args, format);

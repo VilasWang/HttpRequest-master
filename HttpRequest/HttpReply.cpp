@@ -1,6 +1,7 @@
 #include <curl/curl.h>
 #include "HttpReply.h"
 #include "ClassMemoryTracer.h"
+#include "log.h"
 
 HttpReply::HttpReply(int requestId)
 	: m_result_callback(0)
@@ -13,6 +14,7 @@ HttpReply::HttpReply(int requestId)
 
 HttpReply::~HttpReply()
 {
+	LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(HttpReply);
 }
 

@@ -14,10 +14,12 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_GET_TEST_NUMBER 1000
+#define POST_GET_TEST_NUMBER 10000
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
+
+QMutex m_mutex;
 
 //////////////////////////////////////////////////////////////////////////
 const int RequestFinish = QEvent::User + 150;
@@ -50,7 +52,7 @@ int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
 QTime CurlTool::m_timeStart;
-QMap<int, std::shared_ptr<HttpReply>> CurlTool::m_mapReplys;
+std::map<int, std::shared_ptr<HttpReply>> CurlTool::m_mapReplys;
 CurlTool *CurlTool::ms_instance = nullptr;
 
 CurlTool::CurlTool(QWidget* parent)
@@ -220,7 +222,7 @@ bool CurlTool::event(QEvent* event)
 		RequestFinishEvent* e = static_cast<RequestFinishEvent*>(event);
 		if (nullptr != e)
 		{
-			appendMsg(e->strMsg);
+			appendMsg(e->strMsg, false);
 			if (e->bFinishAll)
 			{
 				reset();
@@ -301,7 +303,15 @@ void CurlTool::onDownload()
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
 	if (reply.get())
 	{
-		m_mapReplys.insert(reply->id(), reply);
+		auto iter = m_mapReplys.find(reply->id());
+		if (iter == m_mapReplys.end())
+		{
+			m_mapReplys[reply->id()] = reply;
+		}
+		else
+		{
+			qDebug() << "error reply!!!";
+		}
 	}
 }
 
@@ -340,7 +350,15 @@ void CurlTool::onUpload()
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
 	if (reply.get())
 	{
-		m_mapReplys.insert(reply->id(), reply);
+		auto iter = m_mapReplys.find(reply->id());
+		if (iter == m_mapReplys.end())
+		{
+			m_mapReplys[reply->id()] = reply;
+		}
+		else
+		{
+			qDebug() << "error reply!!!";
+		}
 	}
 }
 
@@ -394,7 +412,15 @@ void CurlTool::onFormPost()
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload2, HttpRequest::Async);
 	if (reply.get())
 	{
-		m_mapReplys.insert(reply->id(), reply);
+		auto iter = m_mapReplys.find(reply->id());
+		if (iter == m_mapReplys.end())
+		{
+			m_mapReplys[reply->id()] = reply;
+		}
+		else
+		{
+			qDebug() << "error reply!!!";
+		}
 	}
 }
 
@@ -423,7 +449,15 @@ void CurlTool::onGetRequest()
 		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Get, HttpRequest::Async);
 		if (reply.get())
 		{
-			m_mapReplys.insert(reply->id(), reply);
+			auto iter = m_mapReplys.find(reply->id());
+			if (iter == m_mapReplys.end())
+			{
+				m_mapReplys[reply->id()] = reply;
+			}
+			else
+			{
+				qDebug() << "error reply!!!";
+			}
 		}
 	}
 }
@@ -463,13 +497,32 @@ void CurlTool::onPostRequest()
 		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Post, HttpRequest::Async);
 		if (reply.get())
 		{
-			m_mapReplys.insert(reply->id(), reply);
+			int id = reply->id();
+			auto iter = m_mapReplys.find(reply->id());
+			if (iter == m_mapReplys.end())
+			{
+				m_mapReplys[id] = reply;
+			}
+			else
+			{
+				qDebug() << "error reply!!!";
+			}
 		}
 	}
 }
 
 void CurlTool::onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string)
 {
+	std::shared_ptr<HttpReply> reply = nullptr;
+	m_mutex.lock();
+	auto iter = m_mapReplys.find(id);
+	if (iter != m_mapReplys.end())
+	{
+		reply = iter->second;
+		m_mapReplys.erase(iter);
+	}
+	m_mutex.unlock();
+
 	QString strMsg;
 	if (success)
 	{
@@ -488,7 +541,7 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 		event->strMsg = strMsg;
 		QCoreApplication::postEvent(CurlTool::instance(), event);
 	}
-	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
+	qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
 
 	if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
 	{
