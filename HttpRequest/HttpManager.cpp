@@ -80,7 +80,7 @@ void HttpManager::set_share_handle(CURL* curl_handle)
 	if (curl_handle && s_share_handle_)
 	{
 		curl_easy_setopt(curl_handle, CURLOPT_SHARE, s_share_handle_);
-		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, 60 * 5);
+		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, -1);
 	}
 }
 
