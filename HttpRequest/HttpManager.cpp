@@ -1,19 +1,15 @@
 #include "HttpManager.h"
 #include "HttpRequest.h"
 #include <iostream>
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 #include "ClassMemoryTracer.h"
-#endif
-
+#include "log.h"
 
 CURLSH* HttpManager::s_share_handle_ = nullptr;
 
 HttpManager::HttpManager()
 	: m_lock(new TPLock)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(HttpManager);
-#endif
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	s_share_handle_ = curl_share_init();
@@ -24,10 +20,8 @@ HttpManager::HttpManager()
 
 HttpManager::~HttpManager()
 {
-	std::cout << __FUNCTION__ << "(B)" << std::endl;
-#ifdef TRACE_CLASS_MEMORY_ENABLED
+	LOG_DEBUG("%s (B)\n", __FUNCTION__);
 	TRACE_CLASS_DESTRUCTOR(HttpManager);
-#endif
 
 	globalCleanup();
 	m_lock.reset();
@@ -35,7 +29,7 @@ HttpManager::~HttpManager()
 	curl_share_cleanup(s_share_handle_);
 	curl_global_cleanup();
 
-	std::cout << __FUNCTION__ << "(E)" << std::endl;
+	LOG_DEBUG("%s (E)\n", __FUNCTION__);
 }
 
 HttpManager* HttpManager::globalInstance()

@@ -8,16 +8,12 @@ HttpReply::HttpReply(int requestId)
 	, m_http_code(0)
 	, m_id(requestId)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(HttpReply);
-#endif
 }
 
 HttpReply::~HttpReply()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(HttpReply);
-#endif
 }
 
 void HttpReply::setResultCallback(ResultCallback rc)

@@ -2,27 +2,23 @@
 #include "ThreadPool.h"
 #include <cassert>
 #include <iostream>
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 #include "ClassMemoryTracer.h"
-#endif
+#include "log.h"
 
 ThreadPool::ThreadPool()
 	: m_nThreadNum(1)
 	, m_bInitialized(false)
 	, m_pCallBack(nullptr)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
-#endif
+	TRACE_CLASS_CONSTRUCTOR(ThreadPool);
 	m_pThread = new ScheduleThread;
 }
 
 ThreadPool::~ThreadPool()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
-#endif
-	std::cout << __FUNCTION__ << "(B)" << std::endl;
+	LOG_DEBUG("%s (B)\n", __FUNCTION__);
+	TRACE_CLASS_DESTRUCTOR(ThreadPool);
+
 	waitForDone();
 	if (m_pThread)
 	{
@@ -31,10 +27,9 @@ ThreadPool::~ThreadPool()
 		delete m_pThread;
 		m_pThread = nullptr;
 	}
-	std::cout << __FUNCTION__ << "(E)" << std::endl;
-#ifdef TRACE_CLASS_MEMORY_ENABLED
+	
 	TRACE_CLASS_PRINT();
-#endif
+	LOG_DEBUG("%s (E)\n", __FUNCTION__);
 }
 
 ThreadPool* ThreadPool::globalInstance()
@@ -50,7 +45,7 @@ bool ThreadPool::init(int threadCount)
 
 	if (threadCount < 1 || threadCount > 16)
 	{
-		std::cout << __FUNCTION__ << " failed! thread range(1-8)." << std::endl;
+		LOG_DEBUG("%s failed! thread range(1-16).\n", __FUNCTION__);
 		return false;
 	}
 
@@ -135,12 +130,12 @@ std::shared_ptr<TaskBase> ThreadPool::takeTask()
 	std::shared_ptr<TaskBase> task = m_taskQueue.pop();
 	if (!task.get())
 	{
-		std::cout << "error task!" << std::endl;
+		LOG_DEBUG("Error pop task!\n");
 	}
-	else
+	/*else
 	{
-		std::cout << "take task id:" << task->id();
-	}
+		LOG_DEBUG("Pop task, id:%d\n", task->id());
+	}*/
 	return task;
 }
 

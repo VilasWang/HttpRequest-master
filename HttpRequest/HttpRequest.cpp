@@ -9,9 +9,8 @@
 #include <process.h>
 #include "ThreadPool/mutex.h"
 #include "httprequestdef.h"
-#ifdef TRACE_CLASS_MEMORY_ENABLED
+#include "log.h"
 #include "ClassMemoryTracer.h"
-#endif
 
 #define DEFAULT_RETRY_COUNT					3
 #define DEFAULT_DOWNLOAD_THREAD_COUNT		5
@@ -28,9 +27,7 @@ struct ThreadChunk
 
 	ThreadChunk()
 	{
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 		TRACE_CLASS_CONSTRUCTOR(ThreadChunk);
-#endif
 		_helper = nullptr;
 		_fp = nullptr;
 		_startidx = 0;
@@ -38,9 +35,7 @@ struct ThreadChunk
 	}
 	~ThreadChunk()
 	{
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 		TRACE_CLASS_DESTRUCTOR(ThreadChunk);
-#endif
 	}
 };
 
@@ -51,17 +46,13 @@ struct UploadItem
 
 	UploadItem()
 	{
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 		TRACE_CLASS_CONSTRUCTOR(UploadItem);
-#endif
 		_helper = nullptr;
 		_fp = nullptr;
 	}
 	~UploadItem()
 	{
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 		TRACE_CLASS_DESTRUCTOR(UploadItem);
-#endif
 	}
 };
 
@@ -131,9 +122,15 @@ private:
 
 	int m_id;
 	HttpRequest::RequestType m_type;
+#if _MSC_VER >= 1700
 	std::atomic<bool> m_is_running;
 	std::atomic<bool> m_is_cancel;
 	std::atomic<bool> m_is_failed;
+#else
+	bool m_is_running;
+	bool m_is_cancel;
+	bool m_is_failed;
+#endif
 	bool m_follow_location;
 	int m_retry_times;
 	long m_time_out;
@@ -148,9 +145,15 @@ private:
 	//下载
 	std::string	m_file_path;
 	int	m_thread_count;
+#if _MSC_VER >= 1700
 	std::atomic<bool> m_multi_download;
 	std::atomic<INT64> m_total_size;
 	std::atomic<INT64> m_current_size;
+#else
+	bool m_multi_download;
+	INT64 m_total_size;
+	INT64 m_current_size;
+#endif
 
 	//上传
 	std::string m_strTargetName;
@@ -160,14 +163,14 @@ private:
 std::atomic<int> CURLWrapper::s_id = 0;
 
 //////////////////////////////////////////////////////////////////////////
-size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata)
+size_t header_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
 {
 	std::string* receive_header = reinterpret_cast<std::string*>(userdata);
 	if (nullptr == receive_header || nullptr == buffer)
 		return 0;
 
-	receive_header->append(reinterpret_cast<const char*>(buffer), size * nitems);
-	return nitems * size;
+	receive_header->append(reinterpret_cast<const char*>(buffer), size * nmemb);
+	return nmemb * size;
 }
 
 size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
@@ -182,9 +185,6 @@ size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 
 size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	size_t retcode = 0;
-	size_t nread = 0;
-
 	UploadItem *item = (UploadItem *)userdata;
 	if (!item || !item->_fp || !item->_helper || item->_helper->isFailed())
 		return 0;
@@ -192,8 +192,8 @@ size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 	if (item->_helper->isCanceled())
 		return CURL_READFUNC_ABORT;
 
-	retcode = fread(ptr, size, nmemb, (FILE *)item->_fp);
-	nread = retcode * size;
+	size_t retcode = fread(ptr, size, nmemb, (FILE *)item->_fp);
+	size_t nread = retcode * size;
 
 	fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
 			  " bytes from file\n", (curl_off_t)nread);
@@ -214,13 +214,7 @@ size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userda
 		return 0;
 
 	size_t written = 0;
-	int seek_error = fseek(thread_chunk->_fp, thread_chunk->_startidx, SEEK_SET);
-	if (seek_error != 0)
-	{
-		OutputDebugStringA("[HttpRequest]write_callback fseek error!");
-		return 0;
-	}
-	else
+	if (0 == fseek(thread_chunk->_fp, thread_chunk->_startidx, SEEK_SET))
 	{
 		written = fwrite(buffer, size, nmemb, thread_chunk->_fp);
 		if (written > 0)
@@ -228,6 +222,10 @@ size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userda
 			thread_chunk->_startidx += written;
 			helper->setCurrentBytes(helper->currentBytes() + written);
 		}
+	}
+	else
+	{
+		LOG_DEBUG("[HttpRequest] %s - fseek error! [%ul]\n", __FUNCTION__, GetLastError());
 	}
 
 	return written;
@@ -294,14 +292,12 @@ CURLWrapper::CURLWrapper()
 	, m_progress_callback(nullptr)
 	, m_result_callback(nullptr)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(CURLWrapper);
-#endif
 }
 
 CURLWrapper::~CURLWrapper()
 {
-	std::cout << __FUNCTION__ << " id:" << m_id << std::endl;
+	LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(CURLWrapper);
 	cancel();
 }
@@ -445,46 +441,73 @@ CURLcode CURLWrapper::publicSetoptMethod(CURL* curl_handle, curl_slist* http_hea
 
 bool CURLWrapper::isRunning() const
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	return m_is_running;
 }
 
 void CURLWrapper::setRunning(bool bRunning)
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	m_is_running = bRunning;
 }
 
 bool CURLWrapper::isCanceled() const
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	return m_is_cancel;
 }
 
 void CURLWrapper::setCanceled(bool bCancel)
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	m_is_cancel = bCancel;
 }
 
 bool CURLWrapper::isFailed() const
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	return m_is_failed;
 }
 
 void CURLWrapper::setFailed(bool bFailed)
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	m_is_failed = bFailed;
 }
 
 INT64 CURLWrapper::currentBytes() const
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	return m_current_size;
 }
 
 void CURLWrapper::setCurrentBytes(INT64 current_size)
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	m_current_size = current_size;
 }
 
 bool CURLWrapper::isMultiDownload() const
 {
+#if _MSC_VER < 1700
+	TPLocker locker(m_lock);
+#endif
 	return m_multi_download;
 }
 
@@ -616,9 +639,7 @@ int CURLWrapper::doDownload()
 {
 	m_total_size = getDownloadFileSize();
 	INT64 size = m_total_size;
-	char ch[64];
-	sprintf_s(ch, "[HttpRequest]file size: %lld\n", size);
-	OutputDebugStringA(ch);
+	LOG_DEBUG("[HttpRequest] file size: %lld\n", size);
 
 	if (m_total_size < 0)
 	{
@@ -651,8 +672,7 @@ int CURLWrapper::doDownload()
 			m_multi_download = false;
 		}
 	}
-	sprintf_s(ch, "[HttpRequest]multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
-	OutputDebugStringA(ch);
+	LOG_DEBUG("[HttpRequest]multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
 
 	//文件大小有分开下载的必要并且服务器支持多线程下载时，启用多线程下载
 	if (m_multi_download)
@@ -726,6 +746,7 @@ int CURLWrapper::doUpload()
 		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
 		if (curl_code != CURLE_OK)
 		{
+			LOG_DEBUG("[HttpRequest] publicSetoptMethod error! [%ul]\n", GetLastError());
 			if (reply.get())
 			{
 				const char* err_string = curl_easy_strerror(curl_code);
@@ -741,7 +762,7 @@ int CURLWrapper::doUpload()
 		errno_t err = fopen_s(&file, m_strUploadFile.c_str(), "rb");
 		if (err != 0 || nullptr == file)
 		{
-			OutputDebugStringA("[HttpRequest]open file error!");
+			LOG_DEBUG("[HttpRequest] fopen_s error! [%ul]\n", GetLastError());
 			curl_code = CURLE_READ_ERROR;
 			setFailed(true);
 			curl_slist_free_all(http_headers);
@@ -1175,17 +1196,13 @@ void CURLWrapper::reset()
 HttpRequest::HttpRequest()
 	: m_helper(new CURLWrapper)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(HttpRequest);
-#endif
 	HttpManager::globalInstance();
 }
 
 HttpRequest::~HttpRequest()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(HttpRequest);
-#endif
 	m_helper = nullptr;
 }
 

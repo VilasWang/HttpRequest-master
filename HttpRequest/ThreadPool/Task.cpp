@@ -1,25 +1,19 @@
 //#include "stdafx.h"
 #include "Task.h"
 #include "Mutex.h"
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 #include "ClassMemoryTracer.h"
-#endif
 
 std::atomic<int> TaskBase::s_id = 0;
 TaskBase::TaskBase(bool bAutoDelete)
 	: m_id(++s_id)
 	, m_bAutoDelete(bAutoDelete)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(TaskBase);
-#endif
 }
 
 TaskBase::~TaskBase()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(TaskBase);
-#endif
 }
 
 const int TaskBase::id() const

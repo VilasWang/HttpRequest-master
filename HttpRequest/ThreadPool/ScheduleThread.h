@@ -17,7 +17,7 @@ public:
 
 	bool start();
 	void quit();
-	bool wait(unsigned long time = ULONG_MAX);
+	bool wait(unsigned long time = ULONG_MAX); //dwMilliseconds
 	bool isSuspend();
 	bool suspend();
 	bool resume();

@@ -5,9 +5,8 @@
 #include <process.h>
 #include <cassert>
 #include <iostream>
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 #include "ClassMemoryTracer.h"
-#endif
+#include "log.h"
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	: m_pThreadPool(threadPool)
@@ -17,22 +16,18 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	, m_nThreadID(0)
 	, m_bExit(false)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
-#endif
 	m_hEvent = CreateEvent(nullptr, false, false, nullptr);
 	if (nullptr == m_hEvent)
 	{
-		std::cout << GetLastError() << std::endl;
+		LOG_DEBUG("ThreadPoolThread CreateEvent error! [%ul]\n", GetLastError());
 	}
 }
 
 ThreadPoolThread::~ThreadPoolThread()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
-#endif
-	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
+	LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_nThreadID);
 
 	quit();
 	if (m_hEvent)
@@ -47,7 +42,7 @@ bool ThreadPoolThread::start()
 	m_hThread = (HANDLE)_beginthreadex(nullptr, 0, &ThreadPoolThread::threadFunc, this, 0, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
-		std::cout << GetLastError() << std::endl;
+		LOG_DEBUG("%s error! [%ul]\n", __FUNCTION__, GetLastError());
 		return false;
 	}
 	return true;
@@ -62,7 +57,7 @@ void ThreadPoolThread::quit()
 	{
 		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
 		{
-			std::cout << "ThreadPoolThread WaitForSingleObject 5s TIMEOUT. id:" << m_nThreadID << std::endl;
+			LOG_DEBUG("ThreadPoolThread WaitForThread 5s TIMEOUT. id[%d]\n", m_nThreadID);
 			_endthreadex(1);
 		}
 
@@ -106,7 +101,7 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 				break;
 			case WAIT_FAILED:
 				{
-					std::cout << GetLastError() << std::endl;
+					LOG_DEBUG("ThreadPoolThread WaitForEvent error. [ul]\n", GetLastError());
 				}
 				break;
 			default:

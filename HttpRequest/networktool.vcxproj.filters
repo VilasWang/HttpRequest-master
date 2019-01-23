@@ -82,29 +82,32 @@
     <ClInclude Include="ThreadPool\Mutex.h">
       <Filter>ThreadPool</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\HttpRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\HttpRequest_global.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HttpTask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClassMemoryTracer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="httprequestdef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HttpManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\HttpReply.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool\ScheduleThread.h">
       <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpReply.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpRequest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpRequest_global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpRequestDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -3,9 +3,8 @@
 #include <process.h>
 #include <iostream>
 #include "ThreadPool.h"
-#ifdef TRACE_CLASS_MEMORY_ENABLED
+#include "log.h"
 #include "ClassMemoryTracer.h"
-#endif
 
 
 ScheduleThread::ScheduleThread()
@@ -14,29 +13,25 @@ ScheduleThread::ScheduleThread()
 	, m_bExit(false)
 	, m_bRunning(false)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
-#endif
+	TRACE_CLASS_CONSTRUCTOR(ScheduleThread);
 	m_hEvent = CreateEvent(0, TRUE, TRUE, 0);
 	if (nullptr == m_hEvent)
 	{
-		std::cout << GetLastError() << std::endl;
+		LOG_DEBUG("ScheduleThread CreateEvent error! [%ul]\n", GetLastError());
 	}
 }
 
 ScheduleThread::~ScheduleThread()
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
-	TRACE_CLASS_DESTRUCTOR(ThreadPoolThread);
-#endif
-	std::cout << __FUNCTION__ << " id:" << m_nThreadID << std::endl;
+	TRACE_CLASS_DESTRUCTOR(ScheduleThread);
+	LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_nThreadID);
 
 	quit();
 	if (m_hEvent)
 	{
 		if (WaitForSingleObject(m_hEvent, 1000) == WAIT_TIMEOUT)
 		{
-			std::cout << "ScheduleThread WaitForSingleObject Event 1s TIMEOUT." << std::endl;
+			LOG_DEBUG("ScheduleThread WaitForEvent 1s TIMEOUT.\n");
 		}
 
 		CloseHandle(m_hEvent);
@@ -50,7 +45,7 @@ bool ScheduleThread::start()
 	m_hThread = (HANDLE)_beginthreadex(NULL, 0, &ScheduleThread::ThreadFunc, this, NULL, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
-		std::cout << GetLastError() << std::endl;
+		LOG_DEBUG("%s error! [%ul]\n", __FUNCTION__, GetLastError());
 		return false;
 	}
 	return true;
@@ -65,7 +60,7 @@ void ScheduleThread::quit()
 	{
 		if (WaitForSingleObject(m_hThread, 5000) == WAIT_TIMEOUT)
 		{
-			std::cout << "ScheduleThread WaitForSingleObject Thread 5s TIMEOUT." << std::endl;
+			LOG_DEBUG("ScheduleThread WaitForThread 5s TIMEOUT.\n");
 			_endthreadex(1);
 		}
 
@@ -88,7 +83,7 @@ bool ScheduleThread::wait(unsigned long time)
 
 	if (WaitForSingleObject(m_hThread, time) == WAIT_TIMEOUT)
 	{
-		std::cout << "ScheduleThread::wait TIMEOUT. id:" << m_nThreadID << std::endl;
+		LOG_DEBUG("ScheduleThread::wait TIMEOUT. id[%d]\n", m_nThreadID);
 		_endthreadex(1);
 		return false;
 	}
@@ -165,7 +160,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 				break;
 			case WAIT_FAILED:
 				{
-					std::cout << GetLastError() << std::endl;
+					LOG_DEBUG("ScheduleThread WaitForEvent error. [%ul]\n", GetLastError());
 				}
 				break;
 			default:
@@ -210,12 +205,12 @@ void ScheduleThread::run()
 		}
 		else
 		{
-			OutputDebugString(L"ScheduleThread error1\n");
+			LOG_DEBUG("[ThreadPool] popIdleThread error!\n");
 		}
 	}
 	else
 	{
-		OutputDebugString(L"ScheduleThread error2\n");
+		LOG_DEBUG("[ThreadPool] takeTask error!\n");
 	}
 }
 
@@ -228,6 +223,6 @@ void ScheduleThread::switchToIdleThread(UINT threadId)
 	}
 	else
 	{
-		OutputDebugString(L"ScheduleThread error3\n");
+		LOG_DEBUG("[ThreadPool] takeActiveThread error!\n");
 	}
 }

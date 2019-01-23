@@ -6,7 +6,7 @@ std::unique_ptr<Lock> ClassMemoryTracer::m_lock(new Lock);
 TClassRefCount ClassMemoryTracer::s_mapRefConstructor;
 TClassRefCount ClassMemoryTracer::s_mapRefDestructor;
 
-void printLog(std::string str)
+void Log_Debug(std::string str)
 {
 	OutputDebugStringA(str.c_str());
 	//LOG_INFO(str);
@@ -23,7 +23,7 @@ void ClassMemoryTracer::printInfo()
 {
 	m_lock->lock();
 	std::string str = "ClassMemoryTracer[Constructor]\n";
-	printLog(str);
+	Log_Debug(str);
 	std::string str2;
 	auto iter = s_mapRefConstructor.cbegin();
 	for (; iter != s_mapRefConstructor.cend(); ++iter)
@@ -32,13 +32,13 @@ void ClassMemoryTracer::printInfo()
 		str2 += ": ";
 		str2 += intToString(iter->second);
 		str2 += "\n";
-		printLog(str2);
+		Log_Debug(str2);
 
 	}
-	printLog(str);
+	Log_Debug(str);
 
 	str = "ClassMemoryTracer[Destructor]\n";
-	printLog(str);
+	Log_Debug(str);
 	auto iter1 = s_mapRefDestructor.cbegin();
 	for (; iter1 != s_mapRefDestructor.cend(); ++iter1)
 	{
@@ -46,9 +46,9 @@ void ClassMemoryTracer::printInfo()
 		str2 += ": ";
 		str2 += intToString(iter1->second);
 		str2 += "\n";
-		printLog(str2);
+		Log_Debug(str2);
 	}
-	printLog(str);
+	Log_Debug(str);
 	m_lock->unLock();
 }
 

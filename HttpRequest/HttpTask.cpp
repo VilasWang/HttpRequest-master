@@ -1,24 +1,18 @@
 #include "HttpTask.h"
 #include <iostream>
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 #include "ClassMemoryTracer.h"
-#endif
+#include "log.h"
 
 
 HttpTask::HttpTask(bool bAutoDelete) : TaskBase(bAutoDelete)
 {
-#ifdef TRACE_CLASS_MEMORY_ENABLED
 	TRACE_CLASS_CONSTRUCTOR(HttpTask);
-#endif
 }
 
 HttpTask::~HttpTask()
 {
-	std::cout << __FUNCTION__ << " id:" << m_id << std::endl;
-
-#ifdef TRACE_CLASS_MEMORY_ENABLED
+	//LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(HttpTask);
-#endif
 
 	detach();
 }

@@ -49,8 +49,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\include;..\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;USE_LOG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\libcurl\include;inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -65,13 +65,13 @@
       <ImportLibrary>$(SolutionDir)\lib\$(Configuration)\HttpRequest.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\include .\inc</Command>
+      <Command>copy .\inc ..\include</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;NDEBUG;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\include;..\libcurl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>UNICODE;WIN32;WIN64;CURL_STATICLIB;NDEBUG;HTTP_REQUEST_LIB;TRACE_CLASS_MEMORY_ENABLED;USE_LOG_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);..\libcurl\include;inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -86,7 +86,7 @@
       <ImportLibrary>$(SolutionDir)\lib\$(Configuration)\HttpRequest.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\include .\inc</Command>
+      <Command>copy .\inc ..\include</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -102,13 +102,14 @@
     <ClCompile Include="ThreadPool\ThreadPoolThread.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\HttpReply.h" />
-    <ClInclude Include="..\include\HttpRequest.h" />
-    <ClInclude Include="..\include\HttpRequest_global.h" />
     <ClInclude Include="ClassMemoryTracer.h" />
-    <ClInclude Include="httprequestdef.h" />
     <ClInclude Include="HttpManager.h" />
+    <ClInclude Include="HttpRequestDef.h" />
     <ClInclude Include="HttpTask.h" />
+    <ClInclude Include="inc\HttpReply.h" />
+    <ClInclude Include="inc\HttpRequest.h" />
+    <ClInclude Include="inc\HttpRequest_global.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="ThreadPool\Mutex.h" />
     <ClInclude Include="ThreadPool\ScheduleThread.h" />
     <ClInclude Include="ThreadPool\Task.h" />
