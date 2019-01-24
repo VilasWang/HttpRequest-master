@@ -296,9 +296,9 @@ void CurlTool::onDownload()
 	request.setDownloadFile(strFilePath.toStdString(), ui.cmb_multiDownload->currentText().toInt());
 	request.setFollowLocation(true);
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
-							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
-								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
 	if (reply.get())
@@ -343,9 +343,9 @@ void CurlTool::onUpload()
 	request.setUrl(strUrl.toStdString());
 	request.setUploadFile(strUploadFilePath.toStdString());
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
-							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
-								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
 	if (reply.get())
@@ -405,9 +405,9 @@ void CurlTool::onFormPost()
 	request.setUrl(strUrl.toStdString());
 	request.setUploadFile(strUploadFilePath.toStdString(), strTargetName.toStdString(), strSavePath.toStdString());
 	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
-							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
-								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload2, HttpRequest::Async);
 	if (reply.get())
@@ -444,7 +444,7 @@ void CurlTool::onGetRequest()
 		HttpRequest request;
 		request.setUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
-								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
 		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Get, HttpRequest::Async);
 		if (reply.get())
@@ -490,7 +490,7 @@ void CurlTool::onPostRequest()
 		HttpRequest request;
 		request.setUrl(strUrl.toStdString());
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
-								  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 		std::string strSendData = strArg.toStdString();
 		request.setPostData(strSendData.c_str(), strSendData.size());
 
@@ -575,8 +575,8 @@ void CurlTool::onProgressCallback(int id, bool bDownload, qint64 total_size, qin
 void CurlTool::onGetSaveDirectory()
 {
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-													"/home",
-													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+		"/home",
+		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (!dir.isNull() && !dir.isEmpty())
 	{
@@ -587,8 +587,8 @@ void CurlTool::onGetSaveDirectory()
 void CurlTool::onGetUploadFile()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-													"/home",
-													tr("Files (*.*)"));
+		"/home",
+		tr("Files (*.*)"));
 
 	if (!fileName.isNull() && !fileName.isEmpty())
 	{
@@ -661,14 +661,14 @@ QString CurlTool::bytes2String(qint64 bytes)
 	else if (bytes < 1024 * 1024 * 1024)
 	{
 		qreal dSize = (qreal)bytes / 1024 / 1024;
-		char ch[8] = {0};
+		char ch[8] = { 0 };
 		sprintf_s(ch, "%.2f", dSize);
 		str = QString("%1MB").arg(ch);
 	}
 	else
 	{
 		qreal dSize = (qreal)bytes / 1024 / 1024 / 1024;
-		char ch[8] = {0};
+		char ch[8] = { 0 };
 		sprintf_s(ch, "%.2f", dSize);
 		str = QString("%1GB").arg(ch);
 	}

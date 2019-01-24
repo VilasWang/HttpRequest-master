@@ -27,7 +27,7 @@ ThreadPool::~ThreadPool()
 		delete m_pThread;
 		m_pThread = nullptr;
 	}
-	
+
 	TRACE_CLASS_PRINT();
 	LOG_DEBUG("%s (E)\n", __FUNCTION__);
 }

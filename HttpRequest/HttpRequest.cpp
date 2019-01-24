@@ -196,7 +196,7 @@ size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 	size_t nread = retcode * size;
 
 	fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
-			  " bytes from file\n", (curl_off_t)nread);
+		" bytes from file\n", (curl_off_t)nread);
 
 	return nread;
 }
@@ -784,7 +784,7 @@ int CURLWrapper::doUpload()
 		if (reply.get())
 		{
 			/* get the file size of the local file */
-			struct stat file_info = {0};
+			struct stat file_info = { 0 };
 			stat(m_strUploadFile.c_str(), &file_info);
 
 			item.reset(new UploadItem);
@@ -885,31 +885,31 @@ int CURLWrapper::doFormPostUpload()
 		the given file name when curl_easy_perform() is called.
 		*/
 		curl_formadd(&httppost,
-					 &lastpost,
-					 CURLFORM_COPYNAME, "sendfile",
-					 CURLFORM_FILE, m_strUploadFile.c_str(),
-					 CURLFORM_END);
+			&lastpost,
+			CURLFORM_COPYNAME, "sendfile",
+			CURLFORM_FILE, m_strUploadFile.c_str(),
+			CURLFORM_END);
 
 		/* Fill in the filename field */
 		curl_formadd(&httppost,
-					 &lastpost,
-					 CURLFORM_COPYNAME, "filename",
-					 CURLFORM_COPYCONTENTS, m_strTargetName.c_str(),
-					 CURLFORM_END);
+			&lastpost,
+			CURLFORM_COPYNAME, "filename",
+			CURLFORM_COPYCONTENTS, m_strTargetName.c_str(),
+			CURLFORM_END);
 
 		/* Fill in the path field */
 		curl_formadd(&httppost,
-					 &lastpost,
-					 CURLFORM_COPYNAME, "path",
-					 CURLFORM_COPYCONTENTS, m_strTargetPath.c_str(),
-					 CURLFORM_END);
+			&lastpost,
+			CURLFORM_COPYNAME, "path",
+			CURLFORM_COPYCONTENTS, m_strTargetPath.c_str(),
+			CURLFORM_END);
 
 		/* Fill in the submit field too, even if this is rarely needed */
 		curl_formadd(&httppost,
-					 &lastpost,
-					 CURLFORM_COPYNAME, "submit",
-					 CURLFORM_COPYCONTENTS, "send",
-					 CURLFORM_END);
+			&lastpost,
+			CURLFORM_COPYNAME, "submit",
+			CURLFORM_COPYCONTENTS, "send",
+			CURLFORM_END);
 
 		curl_easy_setopt(curl, CURLOPT_HTTPPOST, httppost);
 
@@ -927,7 +927,7 @@ int CURLWrapper::doFormPostUpload()
 				retry_count--;
 			}
 		}
-		
+
 		if (reply.get())
 		{
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &reply->m_http_code);
@@ -937,7 +937,7 @@ int CURLWrapper::doFormPostUpload()
 				reply->m_error_string = err_string;
 			}
 		}
-		
+
 		if (httppost)
 		{
 			curl_formfree(httppost);
