@@ -38,7 +38,7 @@ HttpRequest request;
 request.setUrl(strUrl);
 request.setDownloadFile(strFilePath);
 
-std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
+std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Sync);
 std::cout << reply->id() << reply->httpStatusCode() << reply->errorString() << reply->readAll() << std::endl;
 ```
 
