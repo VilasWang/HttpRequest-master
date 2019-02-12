@@ -5,7 +5,7 @@
 #include <map>
 #include "curl/curl.h"
 #include "ThreadPool/ThreadPool.h"
-#include "ThreadPool/mutex.h"
+#include "ThreadPool/cslock.h"
 #include "HttpReply.h"
 
 class TaskBase;
@@ -39,7 +39,7 @@ private:
 private:
 	static CURLSH* s_share_handle_;
 	std::map<int, std::shared_ptr<HttpReply>> m_map_replys;
-	std::shared_ptr<TPLock> m_lock;
+	std::shared_ptr<CSLock> m_lock;
 
 	friend class CURLWrapper;
 	friend class HttpRequest;

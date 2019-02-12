@@ -7,7 +7,7 @@
 CURLSH* HttpManager::s_share_handle_ = nullptr;
 
 HttpManager::HttpManager()
-	: m_lock(new TPLock)
+	: m_lock(new CSLock)
 {
 	TRACE_CLASS_CONSTRUCTOR(HttpManager);
 
@@ -71,7 +71,7 @@ bool HttpManager::abortAllTask()
 
 void HttpManager::clearReply()
 {
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 	m_map_replys.clear();
 }
 
@@ -86,13 +86,13 @@ void HttpManager::set_share_handle(CURL* curl_handle)
 
 void HttpManager::addReply(std::shared_ptr<HttpReply> reply)
 {
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 	m_map_replys[reply->id()] = reply;
 }
 
 void HttpManager::removeReply(int id)
 {
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())
@@ -104,7 +104,7 @@ void HttpManager::removeReply(int id)
 std::shared_ptr<HttpReply> HttpManager::takeReply(int id)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())
@@ -118,7 +118,7 @@ std::shared_ptr<HttpReply> HttpManager::takeReply(int id)
 std::shared_ptr<HttpReply> HttpManager::getReply(int id)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())

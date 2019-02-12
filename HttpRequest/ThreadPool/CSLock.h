@@ -2,11 +2,11 @@
 #include <windows.h>
 #include <memory>
 
-class TPLock
+class CSLock
 {
 public:
-	TPLock(void);
-	~TPLock(void);
+	CSLock(void);
+	~CSLock(void);
 
 public:
 	bool lock();
@@ -16,22 +16,22 @@ private:
 	CRITICAL_SECTION m_cs;
 };
 
-class TPLocker
+class CSLocker
 {
 public:
-	TPLocker(std::shared_ptr<TPLock> lock)
+	CSLocker(std::shared_ptr<CSLock> lock)
 		: m_lock(lock)
 	{
 		m_lock->lock();
 	}
 
-	~TPLocker()
+	~CSLocker()
 	{
 		m_lock->unLock();
 		m_lock = 0;
 	}
 
 private:
-	std::shared_ptr<TPLock> m_lock;
+	std::shared_ptr<CSLock> m_lock;
 };
 

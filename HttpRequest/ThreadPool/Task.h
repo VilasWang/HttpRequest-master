@@ -2,7 +2,7 @@
 
 #include <deque>
 #include <atomic>
-#include "Mutex.h"
+#include "CSLock.h"
 
 class TaskBase
 {
@@ -39,5 +39,5 @@ public:
 
 private:
     std::deque<std::shared_ptr<TaskBase>>m_TaskQueue;
-    TPLock m_lock;
+    CSLock m_lock;
 };

@@ -47,9 +47,6 @@
     <ClCompile Include="ThreadPool\ThreadPoolThread.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadPool\Mutex.cpp">
-      <Filter>ThreadPool</Filter>
-    </ClCompile>
     <ClCompile Include="HttpRequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -68,6 +65,9 @@
     <ClCompile Include="ThreadPool\ScheduleThread.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
+    <ClCompile Include="ThreadPool\CSLock.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadPool\Task.h">
@@ -77,9 +77,6 @@
       <Filter>ThreadPool</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool\ThreadPoolThread.h">
-      <Filter>ThreadPool</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadPool\Mutex.h">
       <Filter>ThreadPool</Filter>
     </ClInclude>
     <ClInclude Include="HttpTask.h">
@@ -108,6 +105,9 @@
     </ClInclude>
     <ClInclude Include="log.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool\CSLock.h">
+      <Filter>ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -99,7 +99,7 @@ bool ThreadPool::addTask(std::shared_ptr<TaskBase> t, Priority p)
 
 bool ThreadPool::abortTask(int taskId)
 {
-	ThreadPoolThread* p = m_activeThreads.take(taskId);
+	ThreadPoolThread* p = m_activeThreads.get(taskId);
 	if (p)
 	{
 		p->stopTask();
@@ -111,12 +111,7 @@ bool ThreadPool::abortTask(int taskId)
 bool ThreadPool::abortAllTask()
 {
 	m_taskQueue.clear();
-	ThreadPoolThread* p = m_activeThreads.pop_back();
-	while (p)
-	{
-		p->stopTask();
-		p = m_activeThreads.pop_back();
-	}
+	m_activeThreads.stopAll();
 	return true;
 }
 

@@ -201,6 +201,27 @@ bool ActiveThreadList::remove(ThreadPoolThread* t)
 	return true;
 }
 
+ThreadPoolThread* ActiveThreadList::get(int task_id)
+{
+	ThreadPoolThread* t = nullptr;
+	m_lock.lock();
+	auto iter = m_list.begin();
+	for (; iter != m_list.end();)
+	{
+		if ((*iter)->taskId() == task_id)
+		{
+			t = (*iter);
+			break;
+		}
+		else
+		{
+			++iter;
+		}
+	}
+	m_lock.unLock();
+	return t;
+}
+
 ThreadPoolThread* ActiveThreadList::take(int task_id)
 {
 	ThreadPoolThread* t = nullptr;
@@ -288,6 +309,20 @@ bool ActiveThreadList::clear()
 	m_list.clear();
 	m_lock.unLock();
 	return true;
+}
+
+void ActiveThreadList::stopAll()
+{
+	m_lock.lock();
+	auto iter = m_list.begin();
+	for (; iter != m_list.end(); iter++)
+	{
+		if (nullptr != (*iter))
+		{
+			(*iter)->stopTask();
+		}
+	}
+	m_lock.unLock();
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -644,6 +644,7 @@ void CurlTool::reset()
 
 	ui.btn_start->setEnabled(true);
 	ui.btn_abort->setEnabled(false);
+	m_mapReplys.clear();
 }
 
 QString CurlTool::bytes2String(qint64 bytes)

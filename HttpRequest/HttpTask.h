@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ThreadPool/Task.h"
-#include "ThreadPool/mutex.h"
+#include "ThreadPool/cslock.h"
 #include "HttpRequest.h"
 #include "httprequestdef.h"
 
@@ -19,5 +19,5 @@ public:
 
 private:
 	std::shared_ptr<CURLInterface> m_request;
-	TPLock m_lock;
+	CSLock m_lock;
 };

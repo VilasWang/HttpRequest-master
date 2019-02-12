@@ -7,7 +7,7 @@
 #include <sstream>
 #include <regex>
 #include <process.h>
-#include "ThreadPool/mutex.h"
+#include "ThreadPool/cslock.h"
 #include "httprequestdef.h"
 #include "log.h"
 #include "ClassMemoryTracer.h"
@@ -118,7 +118,7 @@ private:
 
 private:
 	static std::atomic<int> s_id;
-	std::shared_ptr<TPLock> m_lock;
+	std::shared_ptr<CSLock> m_lock;
 
 	int m_id;
 	HttpRequest::RequestType m_type;
@@ -288,7 +288,7 @@ CURLWrapper::CURLWrapper()
 	, m_is_failed(false)
 	, m_total_size(0)
 	, m_current_size(0)
-	, m_lock(new TPLock)
+	, m_lock(new CSLock)
 	, m_progress_callback(nullptr)
 	, m_result_callback(nullptr)
 {
@@ -442,7 +442,7 @@ CURLcode CURLWrapper::publicSetoptMethod(CURL* curl_handle, curl_slist* http_hea
 bool CURLWrapper::isRunning() const
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	return m_is_running;
 }
@@ -450,7 +450,7 @@ bool CURLWrapper::isRunning() const
 void CURLWrapper::setRunning(bool bRunning)
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	m_is_running = bRunning;
 }
@@ -458,7 +458,7 @@ void CURLWrapper::setRunning(bool bRunning)
 bool CURLWrapper::isCanceled() const
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	return m_is_cancel;
 }
@@ -466,7 +466,7 @@ bool CURLWrapper::isCanceled() const
 void CURLWrapper::setCanceled(bool bCancel)
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	m_is_cancel = bCancel;
 }
@@ -474,7 +474,7 @@ void CURLWrapper::setCanceled(bool bCancel)
 bool CURLWrapper::isFailed() const
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	return m_is_failed;
 }
@@ -482,7 +482,7 @@ bool CURLWrapper::isFailed() const
 void CURLWrapper::setFailed(bool bFailed)
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	m_is_failed = bFailed;
 }
@@ -490,7 +490,7 @@ void CURLWrapper::setFailed(bool bFailed)
 INT64 CURLWrapper::currentBytes() const
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	return m_current_size;
 }
@@ -498,7 +498,7 @@ INT64 CURLWrapper::currentBytes() const
 void CURLWrapper::setCurrentBytes(INT64 current_size)
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	m_current_size = current_size;
 }
@@ -506,7 +506,7 @@ void CURLWrapper::setCurrentBytes(INT64 current_size)
 bool CURLWrapper::isMultiDownload() const
 {
 #if _MSC_VER < 1700
-	TPLocker locker(m_lock);
+	CSLocker locker(m_lock);
 #endif
 	return m_multi_download;
 }

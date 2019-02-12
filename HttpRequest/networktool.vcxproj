@@ -168,7 +168,7 @@
     <ClCompile Include="HttpManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpTask.cpp" />
-    <ClCompile Include="ThreadPool\Mutex.cpp" />
+    <ClCompile Include="ThreadPool\CSLock.cpp" />
     <ClCompile Include="ThreadPool\ScheduleThread.cpp" />
     <ClCompile Include="ThreadPool\Task.cpp" />
     <ClCompile Include="ThreadPool\ThreadPool.cpp" />
@@ -183,7 +183,7 @@
     <ClInclude Include="inc\HttpRequest.h" />
     <ClInclude Include="inc\HttpRequest_global.h" />
     <ClInclude Include="log.h" />
-    <ClInclude Include="ThreadPool\Mutex.h" />
+    <ClInclude Include="ThreadPool\CSLock.h" />
     <ClInclude Include="ThreadPool\ScheduleThread.h" />
     <ClInclude Include="ThreadPool\Task.h" />
     <ClInclude Include="ThreadPool\ThreadPool.h" />

@@ -1,23 +1,23 @@
 //#include "stdafx.h"
-#include "Mutex.h"
+#include "CSLock.h"
 
-TPLock::TPLock(void)
+CSLock::CSLock(void)
 {
 	InitializeCriticalSection(&m_cs);
 }
 
-TPLock::~TPLock(void)
+CSLock::~CSLock(void)
 {
 	DeleteCriticalSection(&m_cs);
 }
 
-bool TPLock::lock()
+bool CSLock::lock()
 {
 	EnterCriticalSection(&m_cs);
 	return true;
 }
 
-bool TPLock::unLock()
+bool CSLock::unLock()
 {
 	LeaveCriticalSection(&m_cs);
 	return true;
