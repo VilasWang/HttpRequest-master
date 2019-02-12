@@ -130,18 +130,26 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 		t->onBeforeExec();
 
 		MSG msg = { 0 };
+		PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+
+		HANDLE h[1];
+		h[0] = t->m_hEvent;
+
 		DWORD ret = WAIT_FAILED;
-		BOOL hasMsg = FALSE;
 		while (!t->m_bExit)
 		{
-			ret = WaitForSingleObject(t->m_hEvent, INFINITE);
+			ret = MsgWaitForMultipleObjects(1, h, false, INFINITE, QS_ALLPOSTMESSAGE);
 			switch (ret)
 			{
 			case WAIT_OBJECT_0:
 				{
+					t->run();
+				}
+				break;
+			case WAIT_OBJECT_0 + 1:
+				{
 					msg = { 0 };
-					hasMsg = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
-					if (hasMsg)
+					if (TRUE == PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 					{
 						switch (msg.message)
 						{
@@ -155,7 +163,6 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 							break;
 						}
 					}
-					t->run();
 				}
 				break;
 			case WAIT_FAILED:
