@@ -65,7 +65,7 @@
     <ClCompile Include="ThreadPool\ScheduleThread.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadPool\CSLock.cpp">
+    <ClCompile Include="ThreadPool\Lock.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
   </ItemGroup>
@@ -106,7 +106,7 @@
     <ClInclude Include="log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool\CSLock.h">
+    <ClInclude Include="ThreadPool\Lock.h">
       <Filter>ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>

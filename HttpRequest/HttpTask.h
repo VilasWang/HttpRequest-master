@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ThreadPool/Task.h"
-#include "ThreadPool/cslock.h"
 #include "HttpRequest.h"
 #include "httprequestdef.h"
 
@@ -19,5 +18,4 @@ public:
 
 private:
 	std::shared_ptr<CURLInterface> m_request;
-	CSLock m_lock;
 };

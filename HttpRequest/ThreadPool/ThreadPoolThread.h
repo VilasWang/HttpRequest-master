@@ -3,7 +3,7 @@
 #include <list>
 #include <stack>
 #include <atomic>
-#include "CSLock.h"
+#include "Lock.h"
 
 class TaskBase;
 class ThreadPool;
@@ -46,7 +46,6 @@ private:
 	UINT m_nThreadID;
 	HANDLE m_hEvent;
 	std::atomic<bool> m_bExit;
-	CSLock m_lock;
 
 	std::shared_ptr<TaskBase> m_pTask;
 	ThreadPool* m_pThreadPool;

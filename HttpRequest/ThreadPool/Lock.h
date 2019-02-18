@@ -2,13 +2,13 @@
 #include <windows.h>
 #include <memory>
 
+//Class CSLock - ¹Ø¼ü¶ÎËø
 class CSLock
 {
 public:
 	CSLock(void);
 	~CSLock(void);
 
-public:
 	bool lock();
 	bool unLock();
 
@@ -33,5 +33,21 @@ public:
 
 private:
 	std::shared_ptr<CSLock> m_lock;
+};
+
+//Class SRWLock - slim ¶ÁÐ´Ëø
+class SRWLock
+{
+public:
+	SRWLock();
+	~SRWLock();
+
+	bool lock(bool bShared = false);
+	bool unLock();
+
+private:
+	SRWLOCK m_lock;
+	long m_bSharedLocked;
+	long m_bExclusiveLocked;
 };
 

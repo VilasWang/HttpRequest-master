@@ -4,22 +4,22 @@
 #include "ClassMemoryTracer.h"
 #include "log.h"
 
-CSLock s_lock;
+SRWLock s_lock;
 void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
 		  access, void *useptr)
 {
 	(void)handle;
-	(void)access; 
 	(void)useptr;
-	if (data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
+	if (data == CURL_LOCK_DATA_SHARE || data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
 	{
-		/*if (access == CURL_LOCK_ACCESS_SHARED)
+		if (access == CURL_LOCK_ACCESS_SHARED)
 		{
+			s_lock.lock(true);
 		}
 		else if (access == CURL_LOCK_ACCESS_SINGLE)
 		{
-		}*/
-		s_lock.lock();
+			s_lock.lock(false);
+		}
 	}
 }
 
@@ -27,7 +27,7 @@ void curlUnlock(CURL *handle, curl_lock_data data, void *useptr)
 {
 	(void)handle;
 	(void)useptr;
-	if (data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
+	if (data == CURL_LOCK_DATA_SHARE || data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
 	{
 		s_lock.unLock();
 	}

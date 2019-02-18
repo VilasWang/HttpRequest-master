@@ -37,6 +37,7 @@ namespace Log
 	}
 }
 
+#ifdef _DEBUG
 #ifdef USE_LOG_DEBUG
 
 #ifndef LOG_DEBUG
@@ -46,6 +47,18 @@ namespace Log
 #ifndef LOG_DEBUGW
 #define LOG_DEBUGW Log::DebugW
 #endif // !LOG_DEBUGW
+
+#else
+
+#ifndef LOG_DEBUG
+#define LOG_DEBUG __noop
+#endif // !LOG_DEBUG
+
+#ifndef LOG_DEBUGW
+#define LOG_DEBUGW __noop
+#endif // !LOG_DEBUGW
+
+#endif
 
 #else
 

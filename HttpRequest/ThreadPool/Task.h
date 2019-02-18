@@ -1,8 +1,9 @@
 #pragma once
 
 #include <deque>
+#include <memory>
 #include <atomic>
-#include "CSLock.h"
+#include "Lock.h"
 
 class TaskBase
 {
