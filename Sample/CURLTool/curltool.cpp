@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_GET_TEST_NUMBER 10
+#define POST_GET_TEST_NUMBER 1000
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -133,9 +133,9 @@ void CurlTool::onUpdateDefaultInfos()
 			QString str1 = "timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1547925666567&di=52db6d8b1f0da19f118cfdbe3d969b10&imgtype=0&src=http%3A%2F%2Fimg.pconline.com.cn%2Fimages%2Fupload%2Fupc%2Ftx%2Fwallpaper%2F1207%2F02%2Fc0%2F12195456_1341200893045.jpg";
 			QString str2 = "https://www.python.org/ftp/python/3.7.2/python-3.7.2.exe";
 			QString str3 = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
-			const QString& strUrl = str2;
+			const QString& strUrl = str1;
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_targetname->setText("python.exe");
+			ui.lineEdit_targetname->setText("mysql-8.0.13-winx64.zip");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())

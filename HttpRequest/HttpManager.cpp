@@ -4,8 +4,36 @@
 #include "ClassMemoryTracer.h"
 #include "log.h"
 
-CURLSH* HttpManager::s_share_handle_ = nullptr;
+CSLock s_lock;
+void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
+		  access, void *useptr)
+{
+	(void)handle;
+	(void)access; 
+	(void)useptr;
+	if (data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
+	{
+		/*if (access == CURL_LOCK_ACCESS_SHARED)
+		{
+		}
+		else if (access == CURL_LOCK_ACCESS_SINGLE)
+		{
+		}*/
+		s_lock.lock();
+	}
+}
 
+void curlUnlock(CURL *handle, curl_lock_data data, void *useptr)
+{
+	(void)handle;
+	(void)useptr;
+	if (data == CURL_LOCK_DATA_SSL_SESSION || data == CURL_LOCK_DATA_DNS)
+	{
+		s_lock.unLock();
+	}
+}
+
+CURLSH* HttpManager::s_share_handle_ = nullptr;
 HttpManager::HttpManager()
 	: m_lock(new CSLock)
 {
@@ -13,7 +41,9 @@ HttpManager::HttpManager()
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 	s_share_handle_ = curl_share_init();
-	curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+	curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION | CURL_LOCK_DATA_DNS);
+	curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
+	curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
 
 	ThreadPool::globalInstance()->init();
 }
@@ -80,7 +110,7 @@ void HttpManager::set_share_handle(CURL* curl_handle)
 	if (curl_handle && s_share_handle_)
 	{
 		curl_easy_setopt(curl_handle, CURLOPT_SHARE, s_share_handle_);
-		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, -1);
+		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, 60*5);
 	}
 }
 
