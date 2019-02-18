@@ -135,7 +135,7 @@ void CurlTool::onUpdateDefaultInfos()
 			QString str3 = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
 			const QString& strUrl = str1;
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_targetname->setText("mysql-8.0.13-winx64.zip");
+			ui.lineEdit_targetname->setText("tmp.png");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
