@@ -40,10 +40,10 @@ HttpManager::HttpManager()
 	TRACE_CLASS_CONSTRUCTOR(HttpManager);
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
-	s_share_handle_ = curl_share_init();
-	curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION | CURL_LOCK_DATA_DNS);
-	curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
-	curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
+	//s_share_handle_ = curl_share_init();
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION | CURL_LOCK_DATA_DNS);
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
 
 	ThreadPool::globalInstance()->init();
 }
@@ -56,7 +56,7 @@ HttpManager::~HttpManager()
 	globalCleanup();
 	m_lock.reset();
 
-	curl_share_cleanup(s_share_handle_);
+	//curl_share_cleanup(s_share_handle_);
 	curl_global_cleanup();
 
 	LOG_DEBUG("%s (E)\n", __FUNCTION__);

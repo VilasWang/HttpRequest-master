@@ -571,8 +571,6 @@ int CURLWrapper::doPostGet()
 	CURL* curl = curl_easy_init();
 	if (curl)
 	{
-		HttpManager::set_share_handle(curl);
-
 		curl_slist*	http_headers = nullptr;
 		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
 
@@ -746,8 +744,8 @@ int CURLWrapper::doUpload()
 	CURL* curl = curl_easy_init();
 	if (curl)
 	{
+		//HttpManager::set_share_handle(curl);
 		std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
-		HttpManager::set_share_handle(curl);
 
 		curl_slist*	http_headers = nullptr;
 		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
@@ -849,7 +847,6 @@ int CURLWrapper::doFormPostUpload()
 	if (curl)
 	{
 		std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
-		HttpManager::set_share_handle(curl);
 
 		curl_slist*	http_headers = nullptr;
 		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
@@ -960,7 +957,6 @@ int CURLWrapper::download(ThreadChunk* thread_chunk)
 	if (curl)
 	{
 		std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
-		HttpManager::set_share_handle(curl);
 
 		curl_slist*	http_headers = nullptr;
 		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
@@ -1091,7 +1087,6 @@ INT64 CURLWrapper::getDownloadFileSize()
 		if (curl_handle)
 		{
 			std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
-			HttpManager::set_share_handle(curl_handle);
 
 			curl_slist*	http_headers = nullptr;
 			CURLcode curl_code = publicSetoptMethod(curl_handle, http_headers);
