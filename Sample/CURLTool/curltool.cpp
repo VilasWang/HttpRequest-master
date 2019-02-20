@@ -312,7 +312,7 @@ void CurlTool::onDownload()
 		}
 		else
 		{
-			qDebug() << "error reply!!!";
+			qDebug() << "error reply! repeat reply id!";
 		}
 	}
 }
