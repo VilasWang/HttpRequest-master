@@ -17,6 +17,7 @@ namespace Log
 
 		if (len != -1)
 		{
+			buf[127] = '\0';
 			OutputDebugStringA(buf);
 		}
 	}
@@ -32,6 +33,7 @@ namespace Log
 
 		if (len != -1)
 		{
+			buf[127] = '\0';
 			OutputDebugStringW(buf);
 		}
 	}
