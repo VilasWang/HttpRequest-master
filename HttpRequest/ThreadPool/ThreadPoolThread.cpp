@@ -15,8 +15,13 @@ ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	, m_hEvent(nullptr)
 	, m_nThreadID(0)
 	, m_bExit(false)
+	, m_bRunning(false)
+#if _MSC_VER < 1700
+	, m_lock(new CSLock)
+#endif
 {
 	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
+
 	m_hEvent = CreateEvent(nullptr, false, false, nullptr);
 	if (nullptr == m_hEvent)
 	{
@@ -35,6 +40,9 @@ ThreadPoolThread::~ThreadPoolThread()
 		CloseHandle(m_hEvent);
 		m_hEvent = nullptr;
 	}
+#if _MSC_VER < 1700
+	m_lock.reset();
+#endif
 }
 
 bool ThreadPoolThread::start()
@@ -45,12 +53,13 @@ bool ThreadPoolThread::start()
 		LOG_DEBUG("%s error! [%ul]\n", __FUNCTION__, GetLastError());
 		return false;
 	}
+	setExit(false);
 	return true;
 }
 
 void ThreadPoolThread::quit()
 {
-	m_bExit = true;
+	setExit(true);
 	waitForDone();
 
 	if (m_hThread)
@@ -89,7 +98,14 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 	ThreadPoolThread* t = (ThreadPoolThread*)pParam;
 	if (t)
 	{
-		while (!t->m_bExit)
+		{
+#if _MSC_VER < 1700
+			CSLocker locker(t->m_lock);
+#endif
+			t->m_bRunning = true;
+		}
+
+		while (!t->isExit())
 		{
 			DWORD ret = WaitForSingleObject(t->m_hEvent, INFINITE);
 			switch (ret)
@@ -107,6 +123,13 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 			default:
 				break;
 			}
+		}
+
+		{
+#if _MSC_VER < 1700
+			CSLocker locker(t->m_lock);
+#endif
+			t->m_bRunning = false;
 		}
 	}
 	return 0;
@@ -149,7 +172,7 @@ bool ThreadPoolThread::stopTask()
 
 void ThreadPoolThread::exec()
 {
-	if (m_bExit)
+	if (isExit())
 		return;
 
 	if (m_pTask.get())
@@ -158,11 +181,35 @@ void ThreadPoolThread::exec()
 		m_pTask->exec();
 		m_pTask.reset();
 
-		if (m_pThreadPool && !m_bExit)
+		if (m_pThreadPool && !isExit())
 		{
 			m_pThreadPool->onTaskFinished(id, m_nThreadID);
 		}
 	}
+}
+
+bool ThreadPoolThread::isRunning() const
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	return m_bRunning;
+}
+
+bool ThreadPoolThread::isExit() const
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	return m_bExit;
+}
+
+void ThreadPoolThread::setExit(bool bExit)
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	m_bExit = bExit;
 }
 
 //////////////////////////////////////////////////////////////////////////

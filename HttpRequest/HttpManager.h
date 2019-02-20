@@ -14,8 +14,10 @@ class HttpManager
 {
 public:
 	~HttpManager();
+#if _MSC_VER >= 1700
 	HttpManager(const HttpManager &) = delete;
 	HttpManager &operator=(const HttpManager &) = delete;
+#endif
 
 	static HttpManager* globalInstance();
 	static void globalInit();
@@ -26,8 +28,12 @@ public:
 	std::shared_ptr<HttpReply> takeReply(int);
 	std::shared_ptr<HttpReply> getReply(int);
 
-protected:
-	explicit HttpManager();
+private:
+	HttpManager();
+#if _MSC_VER < 1700
+	HttpManager(const HttpManager &);
+	HttpManager &operator=(const HttpManager &);
+#endif
 
 private:
 	static void set_share_handle(CURL* curl_handle);

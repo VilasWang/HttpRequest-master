@@ -2,7 +2,12 @@
 #include "Task.h"
 #include "ClassMemoryTracer.h"
 
+#if _MSC_VER >= 1700
 std::atomic<int> TaskBase::s_id = 0;
+#else
+int TaskBase::s_id = 0;
+#endif
+
 TaskBase::TaskBase(bool bAutoDelete)
 	: m_id(++s_id)
 	, m_bAutoDelete(bAutoDelete)
@@ -32,11 +37,12 @@ TaskQueue::TaskQueue(void)
 
 TaskQueue::~TaskQueue(void)
 {
+	clear();
 }
 
 std::shared_ptr<TaskBase> TaskQueue::pop()
 {
-	std::shared_ptr<TaskBase> t;
+	std::shared_ptr<TaskBase> t = nullptr;
 	m_lock.lock();
 	if (!m_TaskQueue.empty())
 	{

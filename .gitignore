@@ -51,3 +51,6 @@
 /bin/Release/HttpRequest.dll
 *.rar
 *.bak
+*.lastbuildstate
+*.ipch
+/HttpRequest.sdf

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <regex>
 #include <process.h>
+#include <sys/stat.h>
 #include "ThreadPool/lock.h"
 #include "log.h"
 #include "ClassMemoryTracer.h"
@@ -27,6 +28,7 @@ struct DownloadChunk
 	DownloadChunk()
 	{
 		TRACE_CLASS_CONSTRUCTOR(DownloadChunk);
+
 		_helper = nullptr;
 		_fp = nullptr;
 		_startidx = 0;
@@ -46,6 +48,7 @@ struct UploadChannel
 	UploadChannel()
 	{
 		TRACE_CLASS_CONSTRUCTOR(UploadChannel);
+
 		_helper = nullptr;
 		_fp = nullptr;
 	}
@@ -117,16 +120,17 @@ private:
 	static UINT WINAPI downloadProc(LPVOID param);
 
 private:
-	static std::atomic<int> s_id;
 	std::shared_ptr<CSLock> m_lock;
 
 	int m_id;
 	HttpRequestType m_type;
 #if _MSC_VER >= 1700
+	static std::atomic<int> s_id;
 	std::atomic<bool> m_is_running;
 	std::atomic<bool> m_is_cancel;
 	std::atomic<bool> m_is_failed;
 #else
+	static int s_id;
 	bool m_is_running;
 	bool m_is_cancel;
 	bool m_is_failed;
@@ -160,7 +164,11 @@ private:
 	std::string m_strTargetPath;
 	std::string m_strUploadFile;
 };
+#if _MSC_VER >= 1700
 std::atomic<int> CURLWrapper::s_id = 0;
+#else
+int CURLWrapper::s_id = 0;
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 size_t header_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
@@ -715,7 +723,7 @@ int CURLWrapper::doDownload()
 			else
 			{
 				chunk->_startidx = i * gap;
-				chunk->_endidx = chunk->_startidx + gap - 1;
+				chunk->_endidx = m_total_size - 1;
 			}
 			LOG_DEBUG("[HttpRequest]Part %d, Range: %d - %d\n", i, chunk->_startidx, chunk->_endidx);
 
@@ -828,8 +836,8 @@ int CURLWrapper::doUpload()
 		if (reply.get())
 		{
 			/* get the file size of the local file */
-			struct stat file_info = { 0 };
-			stat(m_strUploadFile.c_str(), &file_info);
+			struct _stat64 file_info = { 0 };
+			_stat64(m_strUploadFile.c_str(), &file_info);
 
 			item.reset(new UploadChannel);
 			item->_fp = file;

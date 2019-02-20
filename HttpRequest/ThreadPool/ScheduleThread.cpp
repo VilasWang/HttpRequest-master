@@ -12,8 +12,12 @@ ScheduleThread::ScheduleThread()
 	, m_nThreadID(0)
 	, m_bExit(false)
 	, m_bRunning(false)
+#if _MSC_VER < 1700
+	, m_lock(new CSLock)
+#endif
 {
 	TRACE_CLASS_CONSTRUCTOR(ScheduleThread);
+
 	m_hEvent = CreateEvent(0, TRUE, TRUE, 0);
 	if (nullptr == m_hEvent)
 	{
@@ -37,23 +41,26 @@ ScheduleThread::~ScheduleThread()
 		CloseHandle(m_hEvent);
 		m_hEvent = nullptr;
 	}
+#if _MSC_VER < 1700
+	m_lock.reset();
+#endif
 }
 
 bool ScheduleThread::start()
 {
-	m_bExit = false;
 	m_hThread = (HANDLE)_beginthreadex(NULL, 0, &ScheduleThread::ThreadFunc, this, NULL, &m_nThreadID);
 	if (m_hThread == INVALID_HANDLE_VALUE)
 	{
 		LOG_DEBUG("%s error! [%ul]\n", __FUNCTION__, GetLastError());
 		return false;
 	}
+	setExit(false);
 	return true;
 }
 
 void ScheduleThread::quit()
 {
-	m_bExit = true;
+	setExit(true);
 	resume();
 
 	if (m_hThread)
@@ -126,7 +133,12 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 	ScheduleThread *t = (ScheduleThread *)(pParam);
 	if (t)
 	{
-		t->m_bRunning = true;
+		{
+#if _MSC_VER < 1700
+			CSLocker locker(t->m_lock);
+#endif
+			t->m_bRunning = true;
+		}
 		t->onBeforeExec();
 
 		MSG msg = { 0 };
@@ -136,7 +148,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 		h[0] = t->m_hEvent;
 
 		DWORD ret = WAIT_FAILED;
-		while (!t->m_bExit)
+		while (!t->isExit())
 		{
 			ret = MsgWaitForMultipleObjects(1, h, false, INFINITE, QS_ALLPOSTMESSAGE);
 			switch (ret)
@@ -148,7 +160,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 				break;
 			case WAIT_OBJECT_0 + 1:
 				{
-					msg = { 0 };
+					ZeroMemory(&msg, sizeof(msg));
 					if (TRUE == PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 					{
 						switch (msg.message)
@@ -157,7 +169,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 							t->switchToIdleThread((UINT)msg.wParam);
 							break;
 						case WM_QUIT:
-							t->m_bExit = true;
+							t->setExit(true);
 							break;
 						default:
 							break;
@@ -176,14 +188,19 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 		}
 
 		t->onBeforeExit();
-		t->m_bRunning = false;
+		{
+#if _MSC_VER < 1700
+			CSLocker locker(t->m_lock);
+#endif
+			t->m_bRunning = false;
+		}
 	}
 	return 0;
 }
 
 void ScheduleThread::run()
 {
-	if (m_bExit)
+	if (isExit())
 		return;
 
 	if (!ThreadPool::globalInstance()->hasTask())
@@ -232,4 +249,28 @@ void ScheduleThread::switchToIdleThread(UINT threadId)
 	{
 		LOG_DEBUG("[ThreadPool] takeActiveThread error!\n");
 	}
+}
+
+bool ScheduleThread::isRunning() const
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	return m_bRunning;
+}
+
+bool ScheduleThread::isExit() const
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	return m_bExit;
+}
+
+void ScheduleThread::setExit(bool bExit)
+{
+#if _MSC_VER < 1700
+	CSLocker locker(m_lock);
+#endif
+	m_bExit = bExit;
 }

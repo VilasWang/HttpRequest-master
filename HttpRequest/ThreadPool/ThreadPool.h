@@ -18,8 +18,10 @@ public:
 	};
 
 	~ThreadPool();
+#if _MSC_VER >= 1700
 	ThreadPool(const ThreadPool &) = delete;
 	ThreadPool &operator=(const ThreadPool &) = delete;
+#endif
 
 	static ThreadPool* globalInstance();
 
@@ -49,6 +51,10 @@ public:
 
 private:
 	ThreadPool();
+#if _MSC_VER < 1700
+	ThreadPool(const ThreadPool &);
+	ThreadPool &operator=(const ThreadPool &);
+#endif
 
 	std::shared_ptr<TaskBase> takeTask();
 	ThreadPoolThread* popIdleThread();
@@ -60,7 +66,11 @@ private:
 
 private:
 	int m_nThreadNum;
+#if _MSC_VER >= 1700
 	std::atomic<bool> m_bInitialized;
+#else
+	bool m_bInitialized;
+#endif
 	ThreadPoolCallBack* m_pCallBack;
 	ScheduleThread *m_pThread;
 	IdleThreadStack m_idleThreads;

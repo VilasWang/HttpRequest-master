@@ -2,7 +2,11 @@
 //#include "Log4cplusWrapper.h"
 #include <sstream>
 
+#if _MSC_VER >= 1700
 std::unique_ptr<Lock> ClassMemoryTracer::m_lock(new Lock);
+#else
+std::shared_ptr<Lock> ClassMemoryTracer::m_lock(new Lock);
+#endif
 TClassRefCount ClassMemoryTracer::s_mapRefConstructor;
 TClassRefCount ClassMemoryTracer::s_mapRefDestructor;
 

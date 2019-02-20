@@ -2,7 +2,9 @@
 
 #include <deque>
 #include <memory>
+#if _MSC_VER >= 1700
 #include <atomic>
+#endif
 #include "Lock.h"
 
 class TaskBase
@@ -21,7 +23,11 @@ protected:
 	int m_id;
 
 private:
+#if _MSC_VER >= 1700
     static std::atomic<int> s_id;
+#else
+	static int s_id;
+#endif
 	bool m_bAutoDelete;
 };
 

@@ -2,7 +2,9 @@
 #include <windows.h>
 #include <list>
 #include <stack>
+#if _MSC_VER >= 1700
 #include <atomic>
+#endif
 #include "Lock.h"
 
 class TaskBase;
@@ -13,8 +15,10 @@ class ThreadPoolThread
 {
 public:
 	explicit ThreadPoolThread(ThreadPool* threadPool);
+#if _MSC_VER >= 1700
 	ThreadPoolThread(const ThreadPoolThread &) = delete;
 	ThreadPoolThread &operator=(const ThreadPoolThread &) = delete;
+#endif
 	~ThreadPoolThread();
 
 public:
@@ -24,6 +28,8 @@ public:
 	bool suspend();
 	//Ïß³Ì¹ÒÆð»Ö¸´
 	bool resume();
+
+	bool isRunning() const;
 
 	const UINT threadId() const { return m_nThreadID; }
 	const int taskId();
@@ -39,13 +45,27 @@ protected:
 	virtual void waitForDone();
 
 private:
+#if _MSC_VER < 1700
+	ThreadPoolThread(const ThreadPoolThread &);
+	ThreadPoolThread &operator=(const ThreadPoolThread &);
+#endif
 	static UINT WINAPI threadFunc(LPVOID pParam);
+
+	bool isExit() const;
+	void setExit(bool bExit);
 
 private:
 	HANDLE m_hThread;
 	UINT m_nThreadID;
 	HANDLE m_hEvent;
+#if _MSC_VER >= 1700
 	std::atomic<bool> m_bExit;
+	std::atomic<bool> m_bRunning;
+#else
+	std::shared_ptr<CSLock> m_lock;
+	bool m_bExit;
+	bool m_bRunning;
+#endif
 
 	std::shared_ptr<TaskBase> m_pTask;
 	ThreadPool* m_pThreadPool;

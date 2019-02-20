@@ -22,17 +22,11 @@ TRACE_CLASS_PRINT();
 
 #pragma once
 #include <windows.h>
+#include <string>
 #include <memory>
 #include <map>
-#if _MSC_VER >= 1700
-#include <atomic>
-#endif
 
-#if _MSC_VER >= 1700
-typedef std::map<std::string, std::atomic<int>> TClassRefCount;
-#else
 typedef std::map<std::string, int> TClassRefCount;
-#endif
 
 class Lock;
 class ClassMemoryTracer
@@ -43,6 +37,10 @@ public:
 	{
 		const char *name = typeid(T).name();
 		std::string str(name);
+		if (str.empty())
+		{
+			return;
+		}
 		m_lock->lock();
 		auto iter = s_mapRefConstructor.find(str);
 		if (iter == s_mapRefConstructor.end())
@@ -61,6 +59,10 @@ public:
 	{
 		const char *name = typeid(T).name();
 		std::string str(name);
+		if (str.empty())
+		{
+			return;
+		}
 		m_lock->lock();
 		auto iter = s_mapRefDestructor.find(str);
 		if (iter == s_mapRefDestructor.end())
