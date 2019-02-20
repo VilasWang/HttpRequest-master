@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_GET_TEST_NUMBER 100
+#define POST_GET_TEST_NUMBER 1000
 //¾ÖÓòÍøApache http·şÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
