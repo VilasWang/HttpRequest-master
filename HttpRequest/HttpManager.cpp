@@ -4,7 +4,10 @@
 #include "ClassMemoryTracer.h"
 #include "log.h"
 
-SRWLock s_lock;
+namespace{
+	SRWLock s_lock;
+}
+
 void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
 		  access, void *useptr)
 {

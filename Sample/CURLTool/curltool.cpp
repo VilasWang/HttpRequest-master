@@ -20,7 +20,7 @@
 #define HTTP_SERVER_PORT "80"
 
 //////////////////////////////////////////////////////////////////////////
-namespace CURLTOOL
+namespace
 {
 	QMutex m_mutex;
 	const int RequestFinish = QEvent::User + 150;
@@ -30,7 +30,7 @@ namespace CURLTOOL
 class RequestFinishEvent : public QEvent
 {
 public:
-	RequestFinishEvent() : QEvent(QEvent::Type(CURLTOOL::RequestFinish)), bFinishAll(false) {}
+	RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish)), bFinishAll(false) {}
 	QString strMsg;
 	bool bFinishAll;
 };
@@ -38,7 +38,7 @@ public:
 class ProgressEvent : public QEvent
 {
 public:
-	ProgressEvent() : QEvent(QEvent::Type(CURLTOOL::Rrogress))
+	ProgressEvent() : QEvent(QEvent::Type(Rrogress))
 		, total(0)
 		, current(0)
 		, isDownload(false)
@@ -51,7 +51,6 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
-using namespace CURLTOOL;
 int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
@@ -220,7 +219,7 @@ void CurlTool::onAbortTask()
 
 bool CurlTool::event(QEvent* event)
 {
-	if (event->type() == QEvent::Type(CURLTOOL::RequestFinish))
+	if (event->type() == QEvent::Type(RequestFinish))
 	{
 		RequestFinishEvent* e = static_cast<RequestFinishEvent*>(event);
 		if (nullptr != e)
@@ -234,7 +233,7 @@ bool CurlTool::event(QEvent* event)
 
 		return true;
 	}
-	else if (event->type() == QEvent::Type(CURLTOOL::Rrogress))
+	else if (event->type() == QEvent::Type(Rrogress))
 	{
 		ProgressEvent* e = static_cast<ProgressEvent*>(event);
 		if (nullptr != e)
