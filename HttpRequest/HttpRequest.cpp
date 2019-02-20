@@ -1419,11 +1419,11 @@ std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOMode mode)
 		reply = std::make_shared<HttpReply>(nId);
 		HttpManager::globalInstance()->addReply(reply);
 
-		if (mode == SyncIO)
+		if (mode == Sync)
 		{
 			m_helper->perform();
 		}
-		else if (mode == AsyncIO)
+		else if (mode == Async)
 		{
 			std::shared_ptr<HttpTask> task = std::make_shared<HttpTask>(true);
 			task->attach(m_helper);
