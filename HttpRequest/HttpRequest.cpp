@@ -1405,7 +1405,7 @@ int	HttpRequest::setProgressCallback(ProgressCallback pc)
 	return REQUEST_INIT_ERROR;
 }
 
-std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOType ctype)
+std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOMode mode)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
 	if (m_helper.get())
@@ -1419,11 +1419,11 @@ std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOType ctype)
 		reply = std::make_shared<HttpReply>(nId);
 		HttpManager::globalInstance()->addReply(reply);
 
-		if (ctype == Sync)
+		if (mode == SyncIO)
 		{
 			m_helper->perform();
 		}
-		else if (ctype == Async)
+		else if (mode == AsyncIO)
 		{
 			std::shared_ptr<HttpTask> task = std::make_shared<HttpTask>(true);
 			task->attach(m_helper);

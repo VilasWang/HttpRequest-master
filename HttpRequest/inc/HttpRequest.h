@@ -25,10 +25,10 @@ public:
 		Unkonwn = -1
 	};
 
-	enum IOType
+	enum IOMode
 	{
-		Sync,
-		Async,
+		SyncIO,
+		AsyncIO,
 	};
 
 	enum RequestResult
@@ -57,7 +57,7 @@ public:
 	//				等收到结束回调的时候，再把std::shared_ptr<HttpReply>置空，不然会收不到结束回调。
 	//			2.异步请求的回调接口都是在curl执行的工作线程调用，所以根据不同情况，自己再做一些处理。
 	//				比如回调接口中加锁访问资源或者把回调结果再post的你自己的线程中处理。(比较好的是后者)
-	std::shared_ptr<HttpReply> perform(RequestType rtype, IOType ctype = Async);
+	std::shared_ptr<HttpReply> perform(RequestType rtype, IOMode mode = AsyncIO);
 	// 取消请求
 	static bool cancel(int requestId);
 	// 取消所有请求
