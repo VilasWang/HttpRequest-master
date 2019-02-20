@@ -88,6 +88,7 @@ CurlTool::CurlTool(QWidget* parent)
 	bg1->addButton(ui.cb_get);
 	bg1->addButton(ui.cb_post);
 	bg1->addButton(ui.cb_formpost);
+	bg1->addButton(ui.cb_head);
 	bg1->setExclusive(true);
 
 	connect(ui.btn_start, SIGNAL(clicked()), this, SLOT(onStartTask()));
@@ -174,6 +175,10 @@ void CurlTool::onUpdateDefaultInfos()
 			ui.lineEdit_url->setText("https://passportservice.7fgame.com/HttpService/PlatService.ashx");
 			ui.lineEdit_arg->setText(strArg);
 		}
+		else if (ui.cb_head->isChecked())
+		{
+			ui.lineEdit_url->setText("http://iso.mirrors.ustc.edu.cn/qtproject/archive/qt/5.12/5.12.1/single/qt-everywhere-src-5.12.1.zip");
+		}
 	}
 }
 
@@ -210,6 +215,10 @@ void CurlTool::onStartTask()
 	else if (ui.cb_post->isChecked())
 	{
 		onPostRequest();
+	}
+	else if (ui.cb_head->isChecked())
+	{
+		onHeadRequest();
 	}
 }
 
@@ -315,7 +324,7 @@ void CurlTool::onDownload()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Download, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Download, HttpRequest::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -351,7 +360,6 @@ void CurlTool::onUpload()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapReplys.clear();
 	m_nTotalNum = 1;
 
 	HttpRequest request;
@@ -362,7 +370,7 @@ void CurlTool::onUpload()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Upload, HttpRequest::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -413,7 +421,6 @@ void CurlTool::onFormPost()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapReplys.clear();
 	m_nTotalNum = 1;
 
 	HttpRequest request;
@@ -424,7 +431,7 @@ void CurlTool::onFormPost()
 	request.setProgressCallback(std::bind(&CurlTool::onProgressCallback,
 		std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Upload2, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Upload2, HttpRequest::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -452,7 +459,6 @@ void CurlTool::onGetRequest()
 	m_timeStart = QTime::currentTime();
 	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-	m_mapReplys.clear();
 	m_nTotalNum = POST_GET_TEST_NUMBER;
 	for (int i = 0; i < m_nTotalNum; ++i)
 	{
@@ -461,7 +467,7 @@ void CurlTool::onGetRequest()
 		request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
 			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 
-		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Get, HttpRequest::Async);
+		std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Get, HttpRequest::Async);
 		if (reply.get())
 		{
 			auto iter = m_mapReplys.find(reply->id());
@@ -509,7 +515,7 @@ void CurlTool::onPostRequest()
 		std::string strSendData = strArg.toStdString();
 		request.setPostData(strSendData.c_str(), strSendData.size());
 
-		std::shared_ptr<HttpReply> reply = request.perform(HttpRequest::Post, HttpRequest::Async);
+		std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Post, HttpRequest::Async);
 		if (reply.get())
 		{
 			int id = reply->id();
@@ -526,18 +532,54 @@ void CurlTool::onPostRequest()
 	}
 }
 
+void CurlTool::onHeadRequest()
+{
+	const QString& strUrl = ui.lineEdit_url->text().trimmed();
+	if (strUrl.isEmpty())
+	{
+		QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+		reset();
+		return;
+	}
+
+	m_timeStart = QTime::currentTime();
+	appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
+
+	m_nTotalNum = 1;
+
+	HttpRequest request;
+	request.setUrl(strUrl.toStdString());
+	request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback,
+							  std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Head, HttpRequest::Async);
+	if (reply.get())
+	{
+		int id = reply->id();
+		auto iter = m_mapReplys.find(reply->id());
+		if (iter == m_mapReplys.end())
+		{
+			m_mapReplys[id] = reply;
+		}
+		else
+		{
+			qDebug() << "error reply!!!";
+		}
+	}
+}
+
 void CurlTool::onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string)
 {
 	QString strMsg;
 	if (success)
 	{
 		m_nSuccessNum++;
-		strMsg = QString("[async][%1] success. %2").arg(id).arg(QString::fromStdString(data));
+		strMsg = QString("[async][%1] success.\n%2").arg(id).arg(QString::fromStdString(data));
 	}
 	else
 	{
 		m_nFailedNum++;
-		strMsg = QString("[async][%1] failed. %2").arg(id).arg(QString::fromStdString(error_string));
+		strMsg = QString("[async][%1] failed.\n%2").arg(id).arg(QString::fromStdString(error_string));
 	}
 	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
 

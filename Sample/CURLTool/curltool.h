@@ -32,6 +32,7 @@ public:
 	void onFormPost();
 	void onGetRequest();
 	void onPostRequest();
+	void onHeadRequest();
 
 	void onUpdateDefaultInfos();
 	void onGetSaveDirectory();

@@ -8,7 +8,6 @@
 #include <regex>
 #include <process.h>
 #include "ThreadPool/lock.h"
-#include "httprequestdef.h"
 #include "log.h"
 #include "ClassMemoryTracer.h"
 
@@ -81,7 +80,7 @@ public:
 	int setUploadFile(const std::string& file_name, const std::string& target_name, const std::string& target_path);
 	void setResultCallback(ResultCallback rc);
 	void setProgressCallback(ProgressCallback pc);
-	void setRequestType(HttpRequest::RequestType);
+	void setRequestType(HttpRequestType);
 
 public:
 	int	perform() override;
@@ -109,6 +108,7 @@ private:
 	int doDownload();
 	int doUpload();
 	int doFormPostUpload();//实际上是httppost的方式
+	int doHead();
 
 	int	download(DownloadChunk* download_chunk);
 	int	splitDownloadCount(INT64 file_size);
@@ -121,7 +121,7 @@ private:
 	std::shared_ptr<CSLock> m_lock;
 
 	int m_id;
-	HttpRequest::RequestType m_type;
+	HttpRequestType m_type;
 #if _MSC_VER >= 1700
 	std::atomic<bool> m_is_running;
 	std::atomic<bool> m_is_cancel;
@@ -275,7 +275,7 @@ int progress_upload_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow
 }
 
 CURLWrapper::CURLWrapper()
-	: m_type(HttpRequest::Unkonwn)
+	: m_type(HttpRequestType::Unkonwn)
 	, m_id(++s_id)
 	, m_is_running(false)
 	, m_is_cancel(false)
@@ -390,7 +390,7 @@ void CURLWrapper::setProgressCallback(ProgressCallback pc)
 	m_progress_callback = pc;
 }
 
-void CURLWrapper::setRequestType(HttpRequest::RequestType type)
+void CURLWrapper::setRequestType(HttpRequestType type)
 {
 	m_type = type;
 }
@@ -524,25 +524,30 @@ int CURLWrapper::perform()
 	std::shared_ptr<HttpReply> rly = HttpManager::globalInstance()->getReply(m_id);
 	if (rly.get())
 	{
+		rly->setRequestType(m_type);
 		rly->setProgressCallback(m_progress_callback);
 		rly->setResultCallback(m_result_callback);
 	}
 
-	if (m_type == HttpRequest::Post || m_type == HttpRequest::Get)
+	if (m_type == HttpRequestType::Post || m_type == HttpRequestType::Get)
 	{
 		curl_code = doPostGet();
 	}
-	else if (m_type == HttpRequest::Download)
+	else if (m_type == HttpRequestType::Download)
 	{
 		curl_code = doDownload();
 	}
-	else if (m_type == HttpRequest::Upload)
+	else if (m_type == HttpRequestType::Upload)
 	{
 		curl_code = doUpload();
 	}
-	else if (m_type == HttpRequest::Upload2)
+	else if (m_type == HttpRequestType::Upload2)
 	{
 		curl_code = doFormPostUpload();
+	}
+	else if (m_type == HttpRequestType::Head)
+	{
+		curl_code = doHead();
 	}
 	else
 	{
@@ -583,7 +588,7 @@ int CURLWrapper::doPostGet()
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &reply->m_receive_content);
 		}
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
-		if (m_type == HttpRequest::Post)
+		if (m_type == HttpRequestType::Post)
 		{
 			curl_code = curl_easy_setopt(curl, CURLOPT_POST, 1);
 			if (curl_code == CURLE_OK)
@@ -705,13 +710,14 @@ int CURLWrapper::doDownload()
 			if (i < m_thread_count - 1)
 			{
 				chunk->_startidx = i * gap;
-				chunk->_endidx = chunk->_startidx + gap - 1;
+				chunk->_endidx = chunk->_startidx + gap;
 			}
 			else
 			{
 				chunk->_startidx = i * gap;
-				chunk->_endidx = -1;
+				chunk->_endidx = chunk->_startidx + gap - 1;
 			}
+			LOG_DEBUG("[HttpRequest]Part %d, Range: %d - %d\n", i, chunk->_startidx, chunk->_endidx);
 
 			UINT thread_id;
 #if _MSC_VER >= 1700
@@ -990,7 +996,77 @@ int CURLWrapper::doFormPostUpload()
 	return CURLE_FAILED_INIT;
 }
 
-int CURLWrapper::download(DownloadChunk* download_chunk)
+int CURLWrapper::doHead()
+{
+	CURLcode curl_code = CURLE_FAILED_INIT;
+	CURL* curl = curl_easy_init();
+	if (curl)
+	{
+		std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
+
+		curl_slist*	http_headers = nullptr;
+		CURLcode curl_code = publicSetoptMethod(curl, http_headers);
+		if (curl_code != CURLE_OK)
+		{
+			if (reply.get())
+			{
+				const char* err_string = curl_easy_strerror(curl_code);
+				reply->m_error_string = err_string;
+			}
+			setFailed(true);
+			if (nullptr != http_headers)
+			{
+				curl_slist_free_all(http_headers);
+			}
+			curl_easy_cleanup(curl);
+			return curl_code;
+		}
+
+		curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+		if (reply.get())
+		{
+			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+			curl_easy_setopt(curl, CURLOPT_HEADERDATA, &reply->m_receive_header);
+		}
+
+		long http_code = 0;
+		curl_code = curl_easy_perform(curl);
+		if (curl_code == CURLE_OPERATION_TIMEDOUT)
+		{
+			int retry_count = m_retry_times;
+			while (!isCanceled() && retry_count > 0)
+			{
+				curl_code = curl_easy_perform(curl);
+				if (curl_code != CURLE_OPERATION_TIMEDOUT)
+				{
+					break;
+				}
+				retry_count--;
+			}
+		}
+
+		if (reply.get())
+		{
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &reply->m_http_code);
+			if (curl_code != CURLE_OK || reply->m_http_code != 200)
+			{
+				const char* err_string = curl_easy_strerror(curl_code);
+				reply->m_error_string = err_string;
+			}
+		}
+
+		if (http_headers)
+		{
+			curl_slist_free_all(http_headers);
+		}
+		curl_easy_cleanup(curl);
+		return curl_code;
+	}
+	return CURLE_FAILED_INIT;
+}
+
+int CURLWrapper::download(DownloadChunk* chunk)
 {
 	CURLcode curl_code = CURLE_FAILED_INIT;
 	CURL* curl = curl_easy_init();
@@ -1020,9 +1096,9 @@ int CURLWrapper::download(DownloadChunk* download_chunk)
 		if (reply.get())
 		{
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file_callback);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, download_chunk);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, chunk);
 			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_download_callback);
-			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, download_chunk);
+			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, chunk);
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
 			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 5L);
@@ -1031,17 +1107,17 @@ int CURLWrapper::download(DownloadChunk* download_chunk)
 		//const char* user_agent = ("Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0");
 		//curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, user_agent);
 
-		if (download_chunk && download_chunk->_endidx != 0)
+		if (chunk && chunk->_endidx != 0)
 		{
 			std::string range;
 			std::ostringstream ostr;
-			if (download_chunk->_endidx > 0)
+			if (chunk->_endidx > 0)
 			{
-				ostr << download_chunk->_startidx << "-" << download_chunk->_endidx;
+				ostr << chunk->_startidx << "-" << chunk->_endidx;
 			}
 			else
 			{
-				ostr << download_chunk->_startidx << "-";
+				ostr << chunk->_startidx << "-";
 			}
 
 			range = ostr.str();
@@ -1405,7 +1481,7 @@ int	HttpRequest::setProgressCallback(ProgressCallback pc)
 	return REQUEST_INIT_ERROR;
 }
 
-std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOMode mode)
+std::shared_ptr<HttpReply> HttpRequest::perform(HttpRequestType rtype, IOMode mode)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
 	if (m_helper.get())

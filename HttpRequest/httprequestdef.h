@@ -7,6 +7,17 @@
 #define INT64 long long int
 #endif
 
+enum HttpRequestType
+{
+	Post,
+	Get,
+	Download,
+	Upload,		//HTTP put 方式上次文件 (文件名和路径需在url中指定)
+	Upload2,	//HTTP Multipart formpost 方式上次文件(大小受限于服务器post数据的大小)
+	Head,
+	Unkonwn = -1
+};
+
 #if _MSC_VER >= 1700
 // int id, bool success, const std::string& data, const std::string& error_string
 using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;

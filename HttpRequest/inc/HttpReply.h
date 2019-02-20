@@ -18,6 +18,7 @@ public:
 	std::string errorString() const {return m_error_string;}
 
 private:
+	void setRequestType(HttpRequestType type);
 	void setResultCallback(ResultCallback rc);
 	void setProgressCallback(ProgressCallback pc);
 
@@ -33,9 +34,10 @@ private:
 
 	//·µ»ØÖµ
 	long m_http_code;
-	std::string	m_receive_content;
 	std::string	m_receive_header;
+	std::string	m_receive_content;
 	std::string	m_error_string;
 	int m_id;
+	HttpRequestType m_type;
 };
 
