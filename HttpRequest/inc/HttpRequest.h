@@ -64,7 +64,7 @@ public:
 	static bool cancelAll();
 
 	// 异步回调api
-	// 最好不要用类的非静态方法。以免回调时类已析构
+	// 最好不要用类的非静态成员函数。以免回调返回时类已析构
 	int setResultCallback(ResultCallback rc);
 	int	setProgressCallback(ProgressCallback pc);
 

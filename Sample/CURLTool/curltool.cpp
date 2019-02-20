@@ -22,7 +22,6 @@
 //////////////////////////////////////////////////////////////////////////
 namespace
 {
-	QMutex m_mutex;
 	const int RequestFinish = QEvent::User + 150;
 	const int Rrogress = QEvent::User + 151;
 }
@@ -30,7 +29,13 @@ namespace
 class RequestFinishEvent : public QEvent
 {
 public:
-	RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish)), bFinishAll(false) {}
+	RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish))
+		, bFinishAll(false)
+		, success(false)
+		, id(0){}
+
+	int id; 
+	bool success;
 	QString strMsg;
 	bool bFinishAll;
 };
@@ -228,6 +233,14 @@ bool CurlTool::event(QEvent* event)
 			if (e->bFinishAll)
 			{
 				reset();
+			}
+			else
+			{
+				auto iter = m_mapReplys.find(e->id);
+				if (iter != m_mapReplys.end())
+				{
+					m_mapReplys.erase(iter);
+				}
 			}
 		}
 
@@ -515,16 +528,6 @@ void CurlTool::onPostRequest()
 
 void CurlTool::onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string)
 {
-	std::shared_ptr<HttpReply> reply = nullptr;
-	m_mutex.lock();
-	auto iter = m_mapReplys.find(id);
-	if (iter != m_mapReplys.end())
-	{
-		reply = iter->second;
-		m_mapReplys.erase(iter);
-	}
-	m_mutex.unlock();
-
 	QString strMsg;
 	if (success)
 	{
@@ -536,15 +539,17 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 		m_nFailedNum++;
 		strMsg = QString("[async][%1] failed. %2").arg(id).arg(QString::fromStdString(error_string));
 	}
+	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
 
 	if (CurlTool::isInstantiated())
 	{
 		RequestFinishEvent* event = new RequestFinishEvent;
+		event->id = id;
+		event->success = success;
 		event->strMsg = strMsg;
 		QCoreApplication::postEvent(CurlTool::instance(), event);
 	}
-	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
-
+	
 	if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
 	{
 		if (CurlTool::isInstantiated())
