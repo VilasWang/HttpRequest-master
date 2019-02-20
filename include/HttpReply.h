@@ -17,15 +17,15 @@ public:
 	std::string header() const { return m_receive_header; }
 	std::string errorString() const {return m_error_string;}
 
-public:
-	void replyProgress(int id, bool is_download, INT64 total_size, INT64 current_size);
-
 private:
-	void replyResult(bool bSuccess);
 	void setResultCallback(ResultCallback rc);
 	void setProgressCallback(ProgressCallback pc);
 
 	friend class CURLWrapper;
+
+public:
+	void replyProgress(int id, bool is_download, INT64 total_size, INT64 current_size);
+	void replyResult(bool bSuccess);
 
 private:
 	ResultCallback  m_result_callback;

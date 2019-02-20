@@ -53,8 +53,10 @@ public:
 	// 开始请求，并返回HttpReply. 
 	// 1：同步请求可以直接调用HttpReply的接口获取结果
 	// 2：异步请求可以设置异步回调接口，请求结束时自动回调获取结果
-	// 注意点：异步请求的时候， 需要把返回的std::shared_ptr<HttpReply>根据id保存起来；
-	//		等收到结束回调的时候，再把std::shared_ptr<HttpReply>置空，不然会收不到结束回调。
+	// 注意点：	1.异步请求的时候， 需要把返回的std::shared_ptr<HttpReply>根据id保存起来；
+	//				等收到结束回调的时候，再把std::shared_ptr<HttpReply>置空，不然会收不到结束回调。
+	//			2.异步请求的回调接口都是在curl执行的工作线程调用，所以根据不同情况，自己再做一些处理。
+	//				比如回调接口中加锁访问资源或者把回调结果再post的你自己的线程中处理。(比较好的是后者)
 	std::shared_ptr<HttpReply> perform(RequestType rtype, IOType ctype = Async);
 	// 取消请求
 	static bool cancel(int requestId);
