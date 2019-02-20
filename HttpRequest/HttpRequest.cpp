@@ -18,41 +18,41 @@
 #define DEFAULT_TIMEOUT						600		//传输最长时间
 #define MINIMAL_PROGRESS_INTERVAL			3
 
-struct ThreadChunk
+struct DownloadChunk
 {
 	CURLInterface* _helper;
 	FILE* _fp;
 	long _startidx;
 	long _endidx;
 
-	ThreadChunk()
+	DownloadChunk()
 	{
-		TRACE_CLASS_CONSTRUCTOR(ThreadChunk);
+		TRACE_CLASS_CONSTRUCTOR(DownloadChunk);
 		_helper = nullptr;
 		_fp = nullptr;
 		_startidx = 0;
 		_endidx = 0;
 	}
-	~ThreadChunk()
+	~DownloadChunk()
 	{
-		TRACE_CLASS_DESTRUCTOR(ThreadChunk);
+		TRACE_CLASS_DESTRUCTOR(DownloadChunk);
 	}
 };
 
-struct UploadItem
+struct UploadChannel
 {
 	CURLInterface* _helper;
 	FILE* _fp;
 
-	UploadItem()
+	UploadChannel()
 	{
-		TRACE_CLASS_CONSTRUCTOR(UploadItem);
+		TRACE_CLASS_CONSTRUCTOR(UploadChannel);
 		_helper = nullptr;
 		_fp = nullptr;
 	}
-	~UploadItem()
+	~UploadChannel()
 	{
-		TRACE_CLASS_DESTRUCTOR(UploadItem);
+		TRACE_CLASS_DESTRUCTOR(UploadChannel);
 	}
 };
 
@@ -110,7 +110,7 @@ private:
 	int doUpload();
 	int doFormPostUpload();//实际上是httppost的方式
 
-	int	download(ThreadChunk* thread_chunk);
+	int	download(DownloadChunk* download_chunk);
 	int	splitDownloadCount(INT64 file_size);
 	INT64 getDownloadFileSize();
 
@@ -185,14 +185,14 @@ size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
 
 size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	UploadItem *item = (UploadItem *)userdata;
-	if (!item || !item->_fp || !item->_helper || item->_helper->isFailed())
+	UploadChannel *uc = (UploadChannel *)userdata;
+	if (!uc || !uc->_fp || !uc->_helper || uc->_helper->isFailed())
 		return 0;
 
-	if (item->_helper->isCanceled())
+	if (uc->_helper->isCanceled())
 		return CURL_READFUNC_ABORT;
 
-	size_t retcode = fread(ptr, size, nmemb, (FILE *)item->_fp);
+	size_t retcode = fread(ptr, size, nmemb, (FILE *)uc->_fp);
 	size_t nread = retcode * size;
 
 	fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
@@ -204,22 +204,22 @@ size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
 {
 	CURLInterface* helper = nullptr;
-	ThreadChunk* thread_chunk = reinterpret_cast<ThreadChunk*>(userdata);
-	if (thread_chunk)
+	DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(userdata);
+	if (download_chunk)
 	{
-		helper = thread_chunk->_helper;
+		helper = download_chunk->_helper;
 	}
 
-	if (!thread_chunk || !helper || helper->isCanceled() || helper->isFailed())
+	if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
 		return 0;
 
 	size_t written = 0;
-	if (0 == fseek(thread_chunk->_fp, thread_chunk->_startidx, SEEK_SET))
+	if (0 == fseek(download_chunk->_fp, download_chunk->_startidx, SEEK_SET))
 	{
-		written = fwrite(buffer, size, nmemb, thread_chunk->_fp);
+		written = fwrite(buffer, size, nmemb, download_chunk->_fp);
 		if (written > 0)
 		{
-			thread_chunk->_startidx += written;
+			download_chunk->_startidx += written;
 			helper->setCurrentBytes(helper->currentBytes() + written);
 		}
 	}
@@ -234,13 +234,13 @@ size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userda
 int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	CURLInterface* helper = nullptr;
-	ThreadChunk* thread_chunk = reinterpret_cast<ThreadChunk*>(clientp);
-	if (thread_chunk)
+	DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(clientp);
+	if (download_chunk)
 	{
-		helper = thread_chunk->_helper;
+		helper = download_chunk->_helper;
 	}
 
-	if (!thread_chunk || !helper || helper->isCanceled() || helper->isFailed())
+	if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
 		return -1;
 
 	std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
@@ -680,30 +680,47 @@ int CURLWrapper::doDownload()
 	LOG_DEBUG("[HttpRequest]multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
 
 	//文件大小有分开下载的必要并且服务器支持多线程下载时，启用多线程下载
-	if (m_multi_download)
+	if (m_multi_download && m_thread_count > 1)
 	{
 		long gap = static_cast<long>(m_total_size) / m_thread_count;
 		std::vector<HANDLE> threads;
 
+#if _MSC_VER >= 1700
+		std::vector<std::unique_ptr<DownloadChunk>> chunks;
+#else
+		std::vector<DownloadChunk *> chunks;
+#endif
+		chunks.reserve(m_thread_count);
+
 		for (int i = 0; i < m_thread_count; i++)
 		{
-			ThreadChunk* thread_chunk = new ThreadChunk;
-			thread_chunk->_fp = fp;
-			thread_chunk->_helper = this;
+#if _MSC_VER >= 1700
+			std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
+#else
+			DownloadChunk *chunk = new DownloadChunk;
+#endif
+			chunk->_fp = fp;
+			chunk->_helper = this;
 
 			if (i < m_thread_count - 1)
 			{
-				thread_chunk->_startidx = i * gap;
-				thread_chunk->_endidx = thread_chunk->_startidx + gap - 1;
+				chunk->_startidx = i * gap;
+				chunk->_endidx = chunk->_startidx + gap - 1;
 			}
 			else
 			{
-				thread_chunk->_startidx = i * gap;
-				thread_chunk->_endidx = -1;
+				chunk->_startidx = i * gap;
+				chunk->_endidx = -1;
 			}
 
 			UINT thread_id;
-			HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, thread_chunk, 0, &thread_id);
+#if _MSC_VER >= 1700
+			HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, chunk.get(), 0, &thread_id);
+			chunks.emplace_back(std::move(chunk));
+#else
+			HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, chunk, 0, &thread_id);
+			chunks.push_back(chunk);
+#endif
 			threads.push_back(hThread);
 		}
 
@@ -713,15 +730,35 @@ int CURLWrapper::doDownload()
 			HANDLE handle = threads[i];
 			CloseHandle(handle);
 		}
+#if _MSC_VER < 1700
+		for (int i = 0; i < chunks.size(); ++i)
+		{
+			DownloadChunk *c = chunks[i];
+			if (nullptr != c)
+			{
+				delete c;
+			}
+		}
+#endif
+		chunks.clear();
 	}
 	else
 	{
-		ThreadChunk* thread_chunk = new ThreadChunk;
-		thread_chunk->_fp = fp;
-		thread_chunk->_helper = this;
-		thread_chunk->_startidx = 0;
-		thread_chunk->_endidx = 0;
-		download(thread_chunk);
+#if _MSC_VER >= 1700
+		std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
+#else
+		DownloadChunk *chunk = new DownloadChunk;
+#endif
+		chunk->_fp = fp;
+		chunk->_helper = this;
+		chunk->_startidx = 0;
+		chunk->_endidx = 0;
+#if _MSC_VER >= 1700
+		download(chunk.get());
+#else
+		download(chunk);
+		delete chunk;
+#endif
 	}
 
 	fclose(fp);
@@ -744,7 +781,6 @@ int CURLWrapper::doUpload()
 	CURL* curl = curl_easy_init();
 	if (curl)
 	{
-		//HttpManager::set_share_handle(curl);
 		std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
 
 		curl_slist*	http_headers = nullptr;
@@ -778,14 +814,18 @@ int CURLWrapper::doUpload()
 			return curl_code;
 		}
 
-		std::unique_ptr<UploadItem> item = nullptr;
+#if _MSC_VER >= 1700
+		std::unique_ptr<UploadChannel> item = nullptr;
+#else
+		std::shared_ptr<UploadChannel> item = nullptr;
+#endif
 		if (reply.get())
 		{
 			/* get the file size of the local file */
 			struct stat file_info = { 0 };
 			stat(m_strUploadFile.c_str(), &file_info);
 
-			item.reset(new UploadItem);
+			item.reset(new UploadChannel);
 			item->_fp = file;
 			item->_helper = this;
 
@@ -950,7 +990,7 @@ int CURLWrapper::doFormPostUpload()
 	return CURLE_FAILED_INIT;
 }
 
-int CURLWrapper::download(ThreadChunk* thread_chunk)
+int CURLWrapper::download(DownloadChunk* download_chunk)
 {
 	CURLcode curl_code = CURLE_FAILED_INIT;
 	CURL* curl = curl_easy_init();
@@ -980,9 +1020,9 @@ int CURLWrapper::download(ThreadChunk* thread_chunk)
 		if (reply.get())
 		{
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file_callback);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, thread_chunk);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, download_chunk);
 			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_download_callback);
-			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, thread_chunk);
+			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, download_chunk);
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
 			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 5L);
@@ -991,17 +1031,17 @@ int CURLWrapper::download(ThreadChunk* thread_chunk)
 		//const char* user_agent = ("Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0");
 		//curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, user_agent);
 
-		if (thread_chunk && thread_chunk->_endidx != 0)
+		if (download_chunk && download_chunk->_endidx != 0)
 		{
 			std::string range;
 			std::ostringstream ostr;
-			if (thread_chunk->_endidx > 0)
+			if (download_chunk->_endidx > 0)
 			{
-				ostr << thread_chunk->_startidx << "-" << thread_chunk->_endidx;
+				ostr << download_chunk->_startidx << "-" << download_chunk->_endidx;
 			}
 			else
 			{
-				ostr << thread_chunk->_startidx << "-";
+				ostr << download_chunk->_startidx << "-";
 			}
 
 			range = ostr.str();
@@ -1064,11 +1104,6 @@ int CURLWrapper::download(ThreadChunk* thread_chunk)
 
 		curl_slist_free_all(http_headers);
 		curl_easy_cleanup(curl);
-	}
-
-	if (thread_chunk)
-	{
-		delete thread_chunk;
 	}
 
 	return curl_code;
@@ -1183,7 +1218,7 @@ int CURLWrapper::splitDownloadCount(INT64 total_size)
 
 UINT WINAPI CURLWrapper::downloadProc(LPVOID param)
 {
-	ThreadChunk* thread_chunk = reinterpret_cast<ThreadChunk*>(param);
+	DownloadChunk* thread_chunk = reinterpret_cast<DownloadChunk*>(param);
 	if (thread_chunk)
 	{
 		CURLInterface* helper = thread_chunk->_helper;

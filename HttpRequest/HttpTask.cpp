@@ -13,7 +13,6 @@ HttpTask::~HttpTask()
 {
 	//LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(HttpTask);
-
 	detach();
 }
 

@@ -15,12 +15,12 @@ using ResultCallback = std::function<void(int, bool, const std::string&, const s
 using ProgressCallback = std::function<void(int, bool, INT64, INT64)>;
 
 #else
-
 // int id, bool success, const std::string& data, const std::string& error_string
 typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
 
 // int id, bool is_download, INT64 total_size, INT64 current_size
 typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
+
 #endif
 
 

@@ -82,7 +82,11 @@ private:
 	ClassMemoryTracer &operator=(const ClassMemoryTracer &) {}
 
 private:
+#if _MSC_VER >= 1700
 	static std::unique_ptr<Lock> m_lock;
+#else
+	static std::shared_ptr<Lock> m_lock;
+#endif
 	static TClassRefCount s_mapRefConstructor;
 	static TClassRefCount s_mapRefDestructor;
 };

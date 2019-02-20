@@ -14,28 +14,31 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_GET_TEST_NUMBER 1000
+#define POST_GET_TEST_NUMBER 100
 //局域网Apache http服务器
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
 
-QMutex m_mutex;
-
 //////////////////////////////////////////////////////////////////////////
-const int RequestFinish = QEvent::User + 150;
-const int Rrogress = QEvent::User + 151;
+namespace CURLTOOL
+{
+	QMutex m_mutex;
+	const int RequestFinish = QEvent::User + 150;
+	const int Rrogress = QEvent::User + 151;
+}
+
 class RequestFinishEvent : public QEvent
 {
 public:
-	RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish)), bFinishAll(false) {}
+	RequestFinishEvent() : QEvent(QEvent::Type(CURLTOOL::RequestFinish)), bFinishAll(false) {}
 	QString strMsg;
 	bool bFinishAll;
 };
 
-class RrogressEvent : public QEvent
+class ProgressEvent : public QEvent
 {
 public:
-	RrogressEvent() : QEvent(QEvent::Type(Rrogress))
+	ProgressEvent() : QEvent(QEvent::Type(CURLTOOL::Rrogress))
 		, total(0)
 		, current(0)
 		, isDownload(false)
@@ -48,6 +51,7 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////
 
+using namespace CURLTOOL;
 int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
@@ -132,10 +136,9 @@ void CurlTool::onUpdateDefaultInfos()
 		{
 			QString str1 = "timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1547925666567&di=52db6d8b1f0da19f118cfdbe3d969b10&imgtype=0&src=http%3A%2F%2Fimg.pconline.com.cn%2Fimages%2Fupload%2Fupc%2Ftx%2Fwallpaper%2F1207%2F02%2Fc0%2F12195456_1341200893045.jpg";
 			QString str2 = "https://www.python.org/ftp/python/3.7.2/python-3.7.2.exe";
-			QString str3 = "https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-8.0.13-winx64.zip";
-			const QString& strUrl = str1;
+			const QString& strUrl = str2;
 			ui.lineEdit_url->setText(strUrl);
-			ui.lineEdit_targetname->setText("tmp.png");
+			ui.lineEdit_targetname->setText("python-3.7.2.exe");
 			ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
 		}
 		else if (ui.cb_upload->isChecked())
@@ -146,9 +149,9 @@ void CurlTool::onUpdateDefaultInfos()
 		else if (ui.cb_formpost->isChecked())
 		{
 			ui.lineEdit_url->setText("http://127.0.0.1:80/_php/formpost.php");
-			ui.lineEdit_saveDir->setText("./upload");//对应上传服务器的根目录的相对路径
-			ui.lineEdit_targetname->setText("test.rar");
 			ui.lineEdit_uploadFile->setText("test.rar");
+			ui.lineEdit_saveDir->setText("./upload");		//对应上传服务器的根目录的相对路径
+			ui.lineEdit_targetname->setText("test.rar");
 		}
 		else if (ui.cb_get->isChecked())
 		{
@@ -217,7 +220,7 @@ void CurlTool::onAbortTask()
 
 bool CurlTool::event(QEvent* event)
 {
-	if (event->type() == QEvent::Type(RequestFinish))
+	if (event->type() == QEvent::Type(CURLTOOL::RequestFinish))
 	{
 		RequestFinishEvent* e = static_cast<RequestFinishEvent*>(event);
 		if (nullptr != e)
@@ -231,9 +234,9 @@ bool CurlTool::event(QEvent* event)
 
 		return true;
 	}
-	else if (event->type() == QEvent::Type(Rrogress))
+	else if (event->type() == QEvent::Type(CURLTOOL::Rrogress))
 	{
-		RrogressEvent* e = static_cast<RrogressEvent*>(event);
+		ProgressEvent* e = static_cast<ProgressEvent*>(event);
 		if (nullptr != e)
 		{
 			if (e->isDownload)
@@ -541,7 +544,7 @@ void CurlTool::onRequestResultCallback(int id, bool success, const std::string& 
 		event->strMsg = strMsg;
 		QCoreApplication::postEvent(CurlTool::instance(), event);
 	}
-	qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
+	//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
 
 	if (m_nSuccessNum + m_nFailedNum == m_nTotalNum)
 	{
@@ -564,7 +567,7 @@ void CurlTool::onProgressCallback(int id, bool bDownload, qint64 total_size, qin
 {
 	if (CurlTool::isInstantiated())
 	{
-		RrogressEvent* event = new RrogressEvent;
+		ProgressEvent* event = new ProgressEvent;
 		event->isDownload = bDownload;
 		event->total = total_size;
 		event->current = current_size;
