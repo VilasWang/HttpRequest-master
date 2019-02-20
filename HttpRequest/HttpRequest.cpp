@@ -1405,7 +1405,7 @@ int	HttpRequest::setProgressCallback(ProgressCallback pc)
 	return REQUEST_INIT_ERROR;
 }
 
-std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, CallType ctype)
+std::shared_ptr<HttpReply> HttpRequest::perform(RequestType rtype, IOType ctype)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
 	if (m_helper.get())
