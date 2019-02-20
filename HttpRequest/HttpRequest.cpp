@@ -557,7 +557,7 @@ int CURLWrapper::perform()
 		reply.reset();
 	}
 
-	setRunning(true);
+	setRunning(false);
 	return curl_code;
 }
 
