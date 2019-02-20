@@ -62,7 +62,7 @@ struct UploadChannel
 class CURLWrapper : public CURLInterface
 {
 public:
-	CURLWrapper();
+	explicit CURLWrapper();
 	~CURLWrapper();
 
 	friend class HttpRequest;
@@ -120,10 +120,11 @@ private:
 	static UINT WINAPI downloadProc(LPVOID param);
 
 private:
-	std::shared_ptr<CSLock> m_lock;
+	mutable CSLock m_lock;
 
 	int m_id;
 	HttpRequestType m_type;
+
 #if _MSC_VER >= 1700
 	static std::atomic<int> s_id;
 	std::atomic<bool> m_is_running;
@@ -287,16 +288,15 @@ CURLWrapper::CURLWrapper()
 	, m_id(++s_id)
 	, m_is_running(false)
 	, m_is_cancel(false)
+	, m_is_failed(false)
 	, m_follow_location(true)
 	, m_retry_times(DEFAULT_RETRY_COUNT)
 	, m_time_out(0)
 	, m_proxy_port(0)
 	, m_thread_count(0)
 	, m_multi_download(true)
-	, m_is_failed(false)
 	, m_total_size(0)
 	, m_current_size(0)
-	, m_lock(new CSLock)
 	, m_progress_callback(nullptr)
 	, m_result_callback(nullptr)
 {
@@ -450,7 +450,7 @@ CURLcode CURLWrapper::publicSetoptMethod(CURL* curl_handle, curl_slist* http_hea
 bool CURLWrapper::isRunning() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_is_running;
 }
@@ -458,7 +458,7 @@ bool CURLWrapper::isRunning() const
 void CURLWrapper::setRunning(bool bRunning)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_is_running = bRunning;
 }
@@ -466,7 +466,7 @@ void CURLWrapper::setRunning(bool bRunning)
 bool CURLWrapper::isCanceled() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_is_cancel;
 }
@@ -474,7 +474,7 @@ bool CURLWrapper::isCanceled() const
 void CURLWrapper::setCanceled(bool bCancel)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_is_cancel = bCancel;
 }
@@ -482,7 +482,7 @@ void CURLWrapper::setCanceled(bool bCancel)
 bool CURLWrapper::isFailed() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_is_failed;
 }
@@ -490,7 +490,7 @@ bool CURLWrapper::isFailed() const
 void CURLWrapper::setFailed(bool bFailed)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_is_failed = bFailed;
 }
@@ -498,7 +498,7 @@ void CURLWrapper::setFailed(bool bFailed)
 INT64 CURLWrapper::currentBytes() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_current_size;
 }
@@ -506,7 +506,7 @@ INT64 CURLWrapper::currentBytes() const
 void CURLWrapper::setCurrentBytes(INT64 current_size)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_current_size = current_size;
 }
@@ -514,7 +514,7 @@ void CURLWrapper::setCurrentBytes(INT64 current_size)
 bool CURLWrapper::isMultiDownload() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_multi_download;
 }

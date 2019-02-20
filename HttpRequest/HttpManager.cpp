@@ -32,21 +32,20 @@ void curlUnlock(CURL *handle, curl_lock_data data, void *useptr)
 	(void)useptr;
 	if (data == CURL_LOCK_DATA_DNS)
 	{
-		s_lock.unLock();
+		s_lock.unlock();
 	}
 }
 
 CURLSH* HttpManager::s_share_handle_ = nullptr;
 HttpManager::HttpManager()
-	: m_lock(new CSLock)
 {
 	TRACE_CLASS_CONSTRUCTOR(HttpManager);
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
-	s_share_handle_ = curl_share_init();
-	curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-	curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
-	curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
+	//s_share_handle_ = curl_share_init();
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
+	//curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
 
 	ThreadPool::globalInstance()->init();
 }
@@ -57,9 +56,7 @@ HttpManager::~HttpManager()
 	TRACE_CLASS_DESTRUCTOR(HttpManager);
 
 	globalCleanup();
-	m_lock.reset();
-
-	curl_share_cleanup(s_share_handle_);
+	//curl_share_cleanup(s_share_handle_);
 	curl_global_cleanup();
 
 	LOG_DEBUG("%s (E)\n", __FUNCTION__);
@@ -104,7 +101,7 @@ bool HttpManager::abortAllTask()
 
 void HttpManager::clearReply()
 {
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 	m_map_replys.clear();
 }
 
@@ -119,13 +116,13 @@ void HttpManager::set_share_handle(CURL* curl_handle)
 
 void HttpManager::addReply(std::shared_ptr<HttpReply> reply)
 {
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 	m_map_replys[reply->id()] = reply;
 }
 
 void HttpManager::removeReply(int id)
 {
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())
@@ -137,7 +134,7 @@ void HttpManager::removeReply(int id)
 std::shared_ptr<HttpReply> HttpManager::takeReply(int id)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())
@@ -151,7 +148,7 @@ std::shared_ptr<HttpReply> HttpManager::takeReply(int id)
 std::shared_ptr<HttpReply> HttpManager::getReply(int id)
 {
 	std::shared_ptr<HttpReply> reply = nullptr;
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 
 	auto iter = m_map_replys.find(id);
 	if (iter != m_map_replys.end())

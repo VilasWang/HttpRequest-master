@@ -8,13 +8,10 @@
 
 
 ScheduleThread::ScheduleThread()
-	: m_hThread(nullptr)
+	: m_hThread(INVALID_HANDLE_VALUE)
 	, m_nThreadID(0)
 	, m_bExit(false)
 	, m_bRunning(false)
-#if _MSC_VER < 1700
-	, m_lock(new CSLock)
-#endif
 {
 	TRACE_CLASS_CONSTRUCTOR(ScheduleThread);
 
@@ -41,9 +38,6 @@ ScheduleThread::~ScheduleThread()
 		CloseHandle(m_hEvent);
 		m_hEvent = nullptr;
 	}
-#if _MSC_VER < 1700
-	m_lock.reset();
-#endif
 }
 
 bool ScheduleThread::start()
@@ -135,7 +129,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 	{
 		{
 #if _MSC_VER < 1700
-			CSLocker locker(t->m_lock);
+			Locker<CSLock> locker(t->m_lock);
 #endif
 			t->m_bRunning = true;
 		}
@@ -190,7 +184,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 		t->onBeforeExit();
 		{
 #if _MSC_VER < 1700
-			CSLocker locker(t->m_lock);
+			Locker<CSLock> locker(t->m_lock);
 #endif
 			t->m_bRunning = false;
 		}
@@ -254,7 +248,7 @@ void ScheduleThread::switchToIdleThread(UINT threadId)
 bool ScheduleThread::isRunning() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_bRunning;
 }
@@ -262,7 +256,7 @@ bool ScheduleThread::isRunning() const
 bool ScheduleThread::isExit() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_bExit;
 }
@@ -270,7 +264,7 @@ bool ScheduleThread::isExit() const
 void ScheduleThread::setExit(bool bExit)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_bExit = bExit;
 }

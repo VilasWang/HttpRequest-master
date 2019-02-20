@@ -45,7 +45,7 @@ private:
 private:
 	static CURLSH* s_share_handle_;
 	std::map<int, std::shared_ptr<HttpReply>> m_map_replys;
-	std::shared_ptr<CSLock> m_lock;
+	mutable CSLock m_lock;
 
 	friend class CURLWrapper;
 	friend class HttpRequest;

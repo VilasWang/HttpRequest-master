@@ -6,44 +6,26 @@
 class CSLock
 {
 public:
-	CSLock(void);
-	~CSLock(void);
+	explicit CSLock();
+	~CSLock();
 
-	bool lock();
-	bool unLock();
+	void lock();
+	bool tryLock();
+	void unlock();
 
 private:
 	CRITICAL_SECTION m_cs;
-};
-
-class CSLocker
-{
-public:
-	CSLocker(std::shared_ptr<CSLock> lock)
-		: m_lock(lock)
-	{
-		m_lock->lock();
-	}
-
-	~CSLocker()
-	{
-		m_lock->unLock();
-		m_lock = 0;
-	}
-
-private:
-	std::shared_ptr<CSLock> m_lock;
 };
 
 //Class SRWLock - slim ¶ÁÐ´Ëø
 class SRWLock
 {
 public:
-	SRWLock();
+	explicit SRWLock();
 	~SRWLock();
 
-	bool lock(bool bShared = false);
-	bool unLock();
+	void lock(bool bShared = false);
+	void unlock();
 
 private:
 	SRWLOCK m_lock;
@@ -51,3 +33,42 @@ private:
 	long m_bExclusiveLocked;
 };
 
+template<class _Lock>
+class Locker
+{
+public:
+	explicit Locker(_Lock& lock)
+		: m_lock(lock)
+	{
+		m_lock.lock();
+	}
+
+	Locker(_Lock& lock, bool bShared)
+		: m_lock(lock)
+	{
+		m_lock.lock(bShared);
+	}
+
+#if _MSC_VER >= 1700
+	~Locker() _NOEXCEPT
+#else
+	~Locker()
+#endif
+	{
+		m_lock.unlock();
+	}
+
+#if _MSC_VER >= 1700
+	Locker(const Locker&) = delete;
+	Locker& operator=(const Locker&) = delete;
+#endif
+
+private:
+#if _MSC_VER < 1700
+	Locker(const Locker&);
+	Locker& operator=(const Locker&);
+#endif
+
+private:
+	_Lock& m_lock;
+};

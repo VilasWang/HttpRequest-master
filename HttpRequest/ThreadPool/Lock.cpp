@@ -2,26 +2,29 @@
 #include "Lock.h"
 #include <winnt.h>
 
-CSLock::CSLock(void)
+CSLock::CSLock()
 {
 	InitializeCriticalSection(&m_cs);
 }
 
-CSLock::~CSLock(void)
+CSLock::~CSLock()
 {
 	DeleteCriticalSection(&m_cs);
 }
 
-bool CSLock::lock()
+bool CSLock::tryLock()
 {
-	EnterCriticalSection(&m_cs);
-	return true;
+	return TryEnterCriticalSection(&m_cs);
 }
 
-bool CSLock::unLock()
+void CSLock::lock()
+{
+	EnterCriticalSection(&m_cs);
+}
+
+void CSLock::unlock()
 {
 	LeaveCriticalSection(&m_cs);
-	return true;
 }
 
 
@@ -34,38 +37,31 @@ SRWLock::SRWLock()
 
 SRWLock::~SRWLock()
 {
-	unLock();
+	unlock();
 }
 
-bool SRWLock::lock(bool bShared)
+void SRWLock::lock(bool bShared)
 {
 	if (bShared)
 	{
 		AcquireSRWLockShared(&m_lock);
 		InterlockedExchange(&m_bSharedLocked, TRUE);
-		return true;
 	}
 	else
 	{
 		AcquireSRWLockExclusive(&m_lock);
 		InterlockedExchange(&m_bExclusiveLocked, TRUE);
-		return true;
 	}
-	_ASSERT(false);
-	return false;
 }
 
-bool SRWLock::unLock()
+void SRWLock::unlock()
 {
 	if (TRUE == InterlockedExchange(&m_bSharedLocked, FALSE))
 	{
 		ReleaseSRWLockShared(&m_lock);
-		return true;
 	}
 	else if (TRUE == InterlockedExchange(&m_bExclusiveLocked, FALSE))
 	{
 		ReleaseSRWLockExclusive(&m_lock);
-		return true;
 	}
-	return true;
 }

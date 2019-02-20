@@ -62,7 +62,7 @@ private:
 	std::atomic<bool> m_bExit;
 	std::atomic<bool> m_bRunning;
 #else
-	std::shared_ptr<CSLock> m_lock;
+	mutable CSLock m_lock;
 	bool m_bExit;
 	bool m_bRunning;
 #endif
@@ -91,7 +91,7 @@ public:
 
 private:
 	std::list<ThreadPoolThread*>m_list;
-	CSLock m_lock;
+	mutable CSLock m_lock;
 };
 
 class IdleThreadStack
@@ -109,5 +109,5 @@ public:
 
 private:
 	std::stack<ThreadPoolThread*> m_stack;
-	CSLock m_lock;
+	mutable CSLock m_lock;
 };

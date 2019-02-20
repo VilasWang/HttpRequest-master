@@ -11,14 +11,11 @@
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
 	: m_pThreadPool(threadPool)
 	, m_pTask(nullptr)
-	, m_hThread(INVALID_HANDLE_VALUE)
 	, m_hEvent(nullptr)
+	, m_hThread(INVALID_HANDLE_VALUE)
 	, m_nThreadID(0)
 	, m_bExit(false)
 	, m_bRunning(false)
-#if _MSC_VER < 1700
-	, m_lock(new CSLock)
-#endif
 {
 	TRACE_CLASS_CONSTRUCTOR(ThreadPoolThread);
 
@@ -40,9 +37,6 @@ ThreadPoolThread::~ThreadPoolThread()
 		CloseHandle(m_hEvent);
 		m_hEvent = nullptr;
 	}
-#if _MSC_VER < 1700
-	m_lock.reset();
-#endif
 }
 
 bool ThreadPoolThread::start()
@@ -100,7 +94,7 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 	{
 		{
 #if _MSC_VER < 1700
-			CSLocker locker(t->m_lock);
+			Locker<CSLock> locker(t->m_lock);
 #endif
 			t->m_bRunning = true;
 		}
@@ -127,7 +121,7 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 
 		{
 #if _MSC_VER < 1700
-			CSLocker locker(t->m_lock);
+			Locker<CSLock> locker(t->m_lock);
 #endif
 			t->m_bRunning = false;
 		}
@@ -191,7 +185,7 @@ void ThreadPoolThread::exec()
 bool ThreadPoolThread::isRunning() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_bRunning;
 }
@@ -199,7 +193,7 @@ bool ThreadPoolThread::isRunning() const
 bool ThreadPoolThread::isExit() const
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	return m_bExit;
 }
@@ -207,7 +201,7 @@ bool ThreadPoolThread::isExit() const
 void ThreadPoolThread::setExit(bool bExit)
 {
 #if _MSC_VER < 1700
-	CSLocker locker(m_lock);
+	Locker<CSLock> locker(m_lock);
 #endif
 	m_bExit = bExit;
 }
@@ -229,9 +223,8 @@ bool ActiveThreadList::append(ThreadPoolThread* t)
 		return false;
 	}
 
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	m_list.push_back(t);
-	m_lock.unLock();
 	return true;
 }
 
@@ -242,16 +235,15 @@ bool ActiveThreadList::remove(ThreadPoolThread* t)
 		return false;
 	}
 
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	m_list.remove(t);
-	m_lock.unLock();
 	return true;
 }
 
 ThreadPoolThread* ActiveThreadList::get(int task_id)
 {
 	ThreadPoolThread* t = nullptr;
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	auto iter = m_list.begin();
 	for (; iter != m_list.end();)
 	{
@@ -265,14 +257,13 @@ ThreadPoolThread* ActiveThreadList::get(int task_id)
 			++iter;
 		}
 	}
-	m_lock.unLock();
 	return t;
 }
 
 ThreadPoolThread* ActiveThreadList::take(int task_id)
 {
 	ThreadPoolThread* t = nullptr;
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	auto iter = m_list.begin();
 	for (; iter != m_list.end();)
 	{
@@ -287,14 +278,13 @@ ThreadPoolThread* ActiveThreadList::take(int task_id)
 			++iter;
 		}
 	}
-	m_lock.unLock();
 	return t;
 }
 
 ThreadPoolThread* ActiveThreadList::take(UINT thread_id)
 {
 	ThreadPoolThread* t = nullptr;
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	auto iter = m_list.begin();
 	for (; iter != m_list.end();)
 	{
@@ -309,42 +299,36 @@ ThreadPoolThread* ActiveThreadList::take(UINT thread_id)
 			++iter;
 		}
 	}
-	m_lock.unLock();
 	return t;
 }
 
 ThreadPoolThread* ActiveThreadList::pop_back()
 {
 	ThreadPoolThread* t = nullptr;
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	if (!m_list.empty())
 	{
 		t = m_list.back();
 		m_list.remove(t);
 	}
-	m_lock.unLock();
 	return t;
 }
 
 int ActiveThreadList::size()
 {
-	m_lock.lock();
-	int size = m_list.size();
-	m_lock.unLock();
-	return size;
+	Locker<CSLock> locker(m_lock);
+	return m_list.size();
 }
 
 bool ActiveThreadList::isEmpty()
 {
-	m_lock.lock();
-	bool ret = m_list.empty();
-	m_lock.unLock();
-	return ret;
+	Locker<CSLock> locker(m_lock);
+	return m_list.empty();
 }
 
 bool ActiveThreadList::clear()
 {
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	auto iter = m_list.begin();
 	for (; iter != m_list.end(); iter++)
 	{
@@ -354,13 +338,12 @@ bool ActiveThreadList::clear()
 		}
 	}
 	m_list.clear();
-	m_lock.unLock();
 	return true;
 }
 
 void ActiveThreadList::stopAll()
 {
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	auto iter = m_list.begin();
 	for (; iter != m_list.end(); iter++)
 	{
@@ -369,7 +352,6 @@ void ActiveThreadList::stopAll()
 			(*iter)->stopTask();
 		}
 	}
-	m_lock.unLock();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -384,15 +366,13 @@ IdleThreadStack::~IdleThreadStack()
 
 ThreadPoolThread* IdleThreadStack::pop()
 {
-	m_lock.lock();
+	Locker<CSLock> locker(m_lock);
 	if (!m_stack.empty())
 	{
 		ThreadPoolThread* t = m_stack.top();
 		m_stack.pop();
-		m_lock.unLock();
 		return t;
 	}
-	m_lock.unLock();
 	return nullptr;
 }
 
@@ -403,33 +383,31 @@ bool IdleThreadStack::push(ThreadPoolThread* t)
 	{
 		return false;
 	}
-	m_lock.lock();
+
+	Locker<CSLock> locker(m_lock);
 	t->suspend();
 	m_stack.push(t);
-	m_lock.unLock();
+
 	return true;
 }
 
 int IdleThreadStack::size()
 {
-	m_lock.lock();
-	int size = m_stack.size();
-	m_lock.unLock();
-	return size;
+	Locker<CSLock> locker(m_lock);
+	return m_stack.size();
 }
 
 bool IdleThreadStack::isEmpty()
 {
-	m_lock.lock();
-	bool ret = m_stack.empty();
-	m_lock.unLock();
-	return ret;
+	Locker<CSLock> locker(m_lock);
+	return m_stack.empty();
 }
 
 bool IdleThreadStack::clear()
 {
-	m_lock.lock();
 	ThreadPoolThread* pThread = nullptr;
+	Locker<CSLock> locker(m_lock);
+
 	while (!m_stack.empty())
 	{
 		pThread = m_stack.top();
@@ -440,6 +418,5 @@ bool IdleThreadStack::clear()
 			delete pThread;
 		}
 	}
-	m_lock.unLock();
 	return true;
 }

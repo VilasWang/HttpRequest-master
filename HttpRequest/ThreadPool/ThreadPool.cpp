@@ -9,6 +9,7 @@ ThreadPool::ThreadPool()
 	: m_nThreadNum(1)
 	, m_bInitialized(false)
 	, m_pCallBack(nullptr)
+	, m_pThread(nullptr)
 {
 	TRACE_CLASS_CONSTRUCTOR(ThreadPool);
 	m_pThread = new ScheduleThread;

@@ -55,7 +55,7 @@ private:
 	std::atomic<bool> m_bExit;
 	std::atomic<bool> m_bRunning;
 #else
-	std::shared_ptr<CSLock> m_lock;
+	mutable CSLock m_lock;
 	bool m_bExit;
 	bool m_bRunning;
 #endif

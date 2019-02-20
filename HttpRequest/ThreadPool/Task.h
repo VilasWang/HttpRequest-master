@@ -46,5 +46,5 @@ public:
 
 private:
     std::deque<std::shared_ptr<TaskBase>>m_TaskQueue;
-    CSLock m_lock;
+    mutable CSLock m_lock;
 };
