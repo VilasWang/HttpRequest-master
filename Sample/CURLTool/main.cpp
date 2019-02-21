@@ -7,7 +7,8 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	CurlTool w;
-	w.show();
-	return a.exec();
+	CurlTool::instance()->show();
+	int ret = a.exec();
+	CurlTool::destroyInstance();
+	return ret;
 }
