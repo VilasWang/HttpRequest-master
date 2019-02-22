@@ -55,7 +55,23 @@ public:
 	static bool cancelAll();
 
 	// 异步回调api
-	// 最好不要用类的非静态成员函数。以免回调返回时类已析构
+	// 注：最好不要用类的普通成员函数。以免回调返回时类已析构。
+	// 推荐用lambda。如：
+	//		auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string){
+	//			if (CurlTool::isInstantiated())
+	//			{
+	//				RequestFinishEvent* event = new RequestFinishEvent;
+	//				event->id = id;
+	//				event->success = success;
+	//				event->strContent = QString::fromStdString(data);
+	//				event->strError = QString::fromStdString(error_string);
+	//				QCoreApplication::postEvent(CurlTool::instance(), event);
+	//			}
+	//		};
+	//		HttpRequest req;
+	//		req.setUrl("...");
+	//		req.setResultCallback(onRequestResultCallback);
+	//		req.perform(HttpRequestType::Get, HttpRequest::Async);
 	int setResultCallback(ResultCallback rc);
 	int	setProgressCallback(ProgressCallback pc);
 

@@ -55,9 +55,6 @@ private Q_SLOTS:
 	void onGetSaveDirectory();
 	void onGetUploadFile();
 
-	static void onRequestResultCallback(int id, bool success, const std::string& data, const std::string& error_string);
-	static void onProgressCallback(int id, bool bDownload, qint64 total_size, qint64 downloaded_size);
-
 private:
 	CurlTool(QWidget* parent = 0);
 
