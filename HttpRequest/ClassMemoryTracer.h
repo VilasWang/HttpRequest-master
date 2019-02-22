@@ -41,6 +41,7 @@ public:
 		{
 			return;
 		}
+
 		m_lock->lock();
 		auto iter = s_mapRefConstructor.find(str);
 		if (iter == s_mapRefConstructor.end())
@@ -51,7 +52,7 @@ public:
 		{
 			s_mapRefConstructor[str] = ++iter->second;
 		}
-		m_lock->unLock();
+		m_lock->unlock();
 	}
 
 	template <class T>
@@ -63,6 +64,7 @@ public:
 		{
 			return;
 		}
+
 		m_lock->lock();
 		auto iter = s_mapRefDestructor.find(str);
 		if (iter == s_mapRefDestructor.end())
@@ -73,7 +75,7 @@ public:
 		{
 			s_mapRefDestructor[str] = ++iter->second;
 		}
-		m_lock->unLock();
+		m_lock->unlock();
 	}
 
 	static void printInfo();
@@ -96,17 +98,60 @@ private:
 class Lock
 {
 public:
-	Lock(void);
-	~Lock(void);
+	Lock();
+	~Lock();
 
 public:
-	bool lock();
-	bool unLock();
+	void lock();
+	void unlock();
+
+private:
+	Lock(const Lock &);
+	Lock &operator=(const Lock &);
 
 private:
 	CRITICAL_SECTION m_cs;
 };
 
+template<class _Lock>
+class Locker2
+{
+public:
+	explicit Locker2(_Lock& lock)
+		: m_lock(lock)
+	{
+		m_lock.lock();
+	}
+
+	Locker2(_Lock& lock, bool bShared)
+		: m_lock(lock)
+	{
+		m_lock.lock(bShared);
+	}
+
+#if _MSC_VER >= 1700
+	~Locker2() _NOEXCEPT
+#else
+	~Locker2()
+#endif
+	{
+		m_lock.unlock();
+	}
+
+#if _MSC_VER >= 1700
+	Locker2(const Locker2&) = delete;
+	Locker2& operator=(const Locker2&) = delete;
+#endif
+
+private:
+#if _MSC_VER < 1700
+	Locker2(const Locker2&);
+	Locker2& operator=(const Locker2&);
+#endif
+
+private:
+	_Lock& m_lock;
+};
 
 #ifndef TRACE_CLASS_CONSTRUCTOR
 #ifdef TRACE_CLASS_MEMORY_ENABLED

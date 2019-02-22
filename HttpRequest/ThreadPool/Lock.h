@@ -14,6 +14,10 @@ public:
 	void unlock();
 
 private:
+	CSLock(const CSLock &);
+	CSLock &operator=(const CSLock &);
+
+private:
 	CRITICAL_SECTION m_cs;
 };
 
@@ -26,6 +30,10 @@ public:
 
 	void lock(bool bShared = false);
 	void unlock();
+
+private:
+	SRWLock(const SRWLock &);
+	SRWLock &operator=(const SRWLock &);
 
 private:
 	SRWLOCK m_lock;
