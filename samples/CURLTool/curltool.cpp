@@ -283,7 +283,7 @@ bool CurlTool::event(QEvent* event)
 			}
 
 			//qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
-			if (m_nTotalNum = m_nSuccessNum + m_nFailedNum)
+			if (m_nTotalNum == m_nSuccessNum + m_nFailedNum)
 			{
 				QTime time = QTime::currentTime();
 				int msec = m_timeStart.msecsTo(time);

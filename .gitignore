@@ -55,3 +55,7 @@
 *.ipch
 /HttpRequest.sdf
 /samples/CURLTool/GeneratedFiles/Release
+/samples/CURLTool/Debug/vc140.pdb
+/samples/CURLTool/GeneratedFiles/Debug/moc_curltool.cpp
+/samples/CURLTool/GeneratedFiles/ui_curltool.h
+/src/Debug/vc140.pdb

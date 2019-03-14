@@ -30,7 +30,7 @@ public:
 	};
 
 public:
-	explicit HttpRequest();
+	HttpRequest();
 	~HttpRequest();
 
 	// 初始化libcurl资源，初始化线程池(需在主线程中)
