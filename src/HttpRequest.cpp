@@ -1,16 +1,17 @@
 //#include "stdafx.h"
-#include <curl/curl.h>
 #include "HttpRequest.h"
-#include "HttpTask.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <regex>
 #include <process.h>
 #include <sys/stat.h>
+#include <curl/curl.h>
 #include "ThreadPool/lock.h"
 #include "log.h"
 #include "ClassMemoryTracer.h"
+#include "HttpTask.h"
+#include "HttpManager.h"
 
 #define DEFAULT_RETRY_COUNT					3
 #define DEFAULT_DOWNLOAD_THREAD_COUNT		5

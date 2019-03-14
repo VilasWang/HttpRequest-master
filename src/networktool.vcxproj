@@ -177,10 +177,10 @@
   <ItemGroup>
     <ClInclude Include="ClassMemoryTracer.h" />
     <ClInclude Include="HttpManager.h" />
-    <ClInclude Include="HttpRequestDef.h" />
     <ClInclude Include="HttpTask.h" />
     <ClInclude Include="inc\HttpReply.h" />
     <ClInclude Include="inc\HttpRequest.h" />
+    <ClInclude Include="inc\HttpRequestDef.h" />
     <ClInclude Include="inc\HttpRequest_global.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="ThreadPool\Lock.h" />

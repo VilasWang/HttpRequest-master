@@ -5,9 +5,8 @@
 #include <map>
 #include <vector>
 
-#include "HttpManager.h"
 #include "HttpReply.h"
-#include "httprequestdef.h"
+#include "httpRequestDef.h"
 #include "HttpRequest_global.h"
 
 

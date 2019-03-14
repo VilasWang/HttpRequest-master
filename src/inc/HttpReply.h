@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <string>
-#include "httprequestdef.h"
+#include "httpRequestDef.h"
 #include "HttpRequest_global.h"
 
 // class HttpReply - HttpœÏ”¶¿‡

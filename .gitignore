@@ -54,3 +54,4 @@
 *.lastbuildstate
 *.ipch
 /HttpRequest.sdf
+/samples/CURLTool/GeneratedFiles/Release

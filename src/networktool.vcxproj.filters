@@ -100,14 +100,14 @@
     <ClInclude Include="inc\HttpRequest_global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HttpRequestDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool\Lock.h">
       <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpRequestDef.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
