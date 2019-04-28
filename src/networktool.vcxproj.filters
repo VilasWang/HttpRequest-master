@@ -36,6 +36,9 @@
     <Filter Include="ThreadPool">
       <UniqueIdentifier>{fe22a54c-618a-4731-9c13-0c38171b3f38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Other Files">
+      <UniqueIdentifier>{4e62c1fa-e664-4a00-bbcb-5ab29023c813}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThreadPool\Task.cpp">
@@ -115,5 +118,10 @@
     <ClInclude Include="lock2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>Other Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
