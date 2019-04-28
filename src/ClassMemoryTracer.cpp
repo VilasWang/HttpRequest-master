@@ -1,17 +1,19 @@
 #include "ClassMemoryTracer.h"
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
-#if _MSC_VER >= 1700
-std::unique_ptr<Lock> ClassMemoryTracer::m_lock(new Lock);
-#else
-std::shared_ptr<Lock> ClassMemoryTracer::m_lock(new Lock);
-#endif
-TClassRefCount ClassMemoryTracer::s_mapRefConstructor;
-TClassRefCount ClassMemoryTracer::s_mapRefDestructor;
+using namespace CVC;
+
+Lock ClassMemoryTracer::m_lock;
+ClassMemoryTracer::TClassRefCount ClassMemoryTracer::s_mapRefCount;
 
 void Log_Debug(std::string str)
 {
-	OutputDebugStringA(str.c_str());
+    if (!str.empty())
+    {
+        OutputDebugStringA(str.c_str());
+    }
 }
 
 std::string intToString(const int n)
@@ -21,76 +23,52 @@ std::string intToString(const int n)
 	return str.str();
 }
 
-void ClassMemoryTracer::printInfo()
+void ClassMemoryTracer::checkMemoryLeaks()
 {
-	std::string str;
-	Locker2<Lock> locker(*m_lock.get());
-
+	Locker2<Lock> locker(m_lock);
+	std::ostringstream oss;
 	try
 	{
-		str = "ClassMemoryTracer[Constructor]\n";
-		Log_Debug(str);
-
-		auto iter = s_mapRefConstructor.cbegin();
-		for (; iter != s_mapRefConstructor.cend(); ++iter)
+        std::vector<std::string> vecString;
+		if (!s_mapRefCount.empty())
 		{
-			str = iter->first;
-			str += ": ";
-			str += intToString(iter->second);
-			str += "\n";
-			Log_Debug(str);
+			auto iter = s_mapRefCount.cbegin();
+			for (; iter != s_mapRefCount.cend(); ++iter)
+			{
+                oss.str("");
+                if (iter->second.second > 0)
+                {
+                    oss << iter->second.first;
+                    oss << ": leak ";
+                    oss << intToString(iter->second.second);
+                    oss << " objects \n";
+                    vecString.push_back(oss.str());
+                }
+			}
 
+            if (!vecString.empty())
+            {
+                Log_Debug("ClassMemoryTracer Detect Memory Leaks...\n");
+                std::for_each(vecString.cbegin(), vecString.cend(), [](const std::string& str) {
+                    Log_Debug(str);
+                });
+            }
 		}
-		str = "ClassMemoryTracer[Constructor]\n";
-		Log_Debug(str);
-
-		str = "ClassMemoryTracer[Destructor]\n";
-		Log_Debug(str);
-
-		auto iter1 = s_mapRefDestructor.cbegin();
-		for (; iter1 != s_mapRefDestructor.cend(); ++iter1)
-		{
-			str = iter1->first;
-			str += ": ";
-			str += intToString(iter1->second);
-			str += "\n";
-			Log_Debug(str);
-		}
-		str = "ClassMemoryTracer[Destructor]\n";
-		Log_Debug(str);
 	}
 	catch (std::exception* e)
 	{
-		str = "ClassMemoryTracer::printInfo() exception: ";
-		str += std::string(e->what());
-		str += "\n";
-		Log_Debug(str);
+		oss.str("");
+		oss << "ClassMemoryTracer::checkMemoryLeaks() exception(std::exception): "
+			<< std::string(e->what())
+			<< "\n";
+		Log_Debug(oss.str());
 	}
 	catch (...)
 	{
-		str = "ClassMemoryTracer::printInfo() exception: ";
-		str += intToString(GetLastError());
-		str += "\n";
-		Log_Debug(str);
+		oss.str("");
+		oss << "ClassMemoryTracer::checkMemoryLeaks() exception: "
+			<< intToString(GetLastError())
+			<< "\n";
+		Log_Debug(oss.str());
 	}
-}
-
-Lock::Lock(void)
-{
-	InitializeCriticalSection(&m_cs);
-}
-
-Lock::~Lock(void)
-{
-	DeleteCriticalSection(&m_cs);
-}
-
-void Lock::lock()
-{
-	EnterCriticalSection(&m_cs);
-}
-
-void Lock::unlock()
-{
-	LeaveCriticalSection(&m_cs);
 }

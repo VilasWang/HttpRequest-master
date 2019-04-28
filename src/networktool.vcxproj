@@ -168,6 +168,7 @@
     <ClCompile Include="HttpManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpTask.cpp" />
+    <ClCompile Include="lock2.cpp" />
     <ClCompile Include="ThreadPool\Lock.cpp" />
     <ClCompile Include="ThreadPool\ScheduleThread.cpp" />
     <ClCompile Include="ThreadPool\Task.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="inc\HttpRequest.h" />
     <ClInclude Include="inc\HttpRequestDef.h" />
     <ClInclude Include="inc\HttpRequest_global.h" />
+    <ClInclude Include="lock2.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="ThreadPool\Lock.h" />
     <ClInclude Include="ThreadPool\ScheduleThread.h" />
@@ -194,7 +196,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="Qt5.11.3" MocOptions="" />
+      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="Qt5.11.3" Qt5Version_x0020_x64="Qt5.6.3" MocOptions="" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

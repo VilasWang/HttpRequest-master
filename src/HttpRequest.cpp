@@ -306,7 +306,7 @@ CURLWrapper::CURLWrapper()
 
 CURLWrapper::~CURLWrapper()
 {
-	LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
+	//LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(CURLWrapper);
 	cancel();
 }

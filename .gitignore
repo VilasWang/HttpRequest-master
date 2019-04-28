@@ -59,3 +59,8 @@
 /samples/CURLTool/GeneratedFiles/Debug/moc_curltool.cpp
 /samples/CURLTool/GeneratedFiles/ui_curltool.h
 /src/Debug/vc140.pdb
+/samples/CURLTool/x64/Debug/vc140.pdb
+/src/x64/Debug/vc140.pdb
+/x64/Debug/CURLTool.pdb
+/x64/Debug/HttpRequest.pdb
+/x64/Debug/libcurld.pdb

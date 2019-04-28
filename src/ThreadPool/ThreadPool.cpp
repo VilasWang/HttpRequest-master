@@ -29,7 +29,7 @@ ThreadPool::~ThreadPool()
 		m_pThread = nullptr;
 	}
 
-	TRACE_CLASS_PRINT();
+    TRACE_CLASS_CHECK_LEAKS();
 	LOG_DEBUG("%s (E)\n", __FUNCTION__);
 }
 
