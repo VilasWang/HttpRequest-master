@@ -136,10 +136,8 @@ CurlTool::CurlTool(QWidget* parent)
 
 CurlTool::~CurlTool()
 {
-	qDebug() << __FUNCTION__ << "(B)";
 	unIntialize();
 	ms_instance = nullptr;
-	qDebug() << __FUNCTION__ << "(E)";
 }
 
 void CurlTool::initialize()

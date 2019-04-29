@@ -5,7 +5,7 @@
 #include "log.h"
 
 namespace{
-	SRWLock s_lock;
+	static SRWLock s_lock;
 }
 
 void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
