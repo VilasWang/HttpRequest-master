@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_TEST_COUNT 1000
+#define POST_TEST_COUNT 100
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -274,7 +274,7 @@ bool CurlTool::event(QEvent* event)
 				m_nFailedNum++;
 				strMsg = QString("[async][%1] failed.\n%2").arg(e->id).arg(e->strError);
 			}
-			appendMsg(strMsg, false);
+			appendMsg(strMsg, true);
 
 			auto iter = m_mapReplys.find(e->id);
 			if (iter != m_mapReplys.end())
@@ -289,7 +289,7 @@ bool CurlTool::event(QEvent* event)
 				int msec = m_timeStart.msecsTo(time);
 				float sec = (float)msec / 1000;
 				strMsg = QString("Time elapsed: %1s.").arg(sec);
-				appendMsg(strMsg, false);
+				appendMsg(strMsg, true);
 
 				reset();
 			}
