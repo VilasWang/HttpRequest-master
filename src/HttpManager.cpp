@@ -52,14 +52,14 @@ HttpManager::HttpManager()
 
 HttpManager::~HttpManager()
 {
-	LOG_DEBUG("%s (B)\n", __FUNCTION__);
+	//LOG_DEBUG("%s (B)\n", __FUNCTION__);
 	TRACE_CLASS_DESTRUCTOR(HttpManager);
 
 	globalCleanup();
 	//curl_share_cleanup(s_share_handle_);
 	curl_global_cleanup();
 
-	LOG_DEBUG("%s (E)\n", __FUNCTION__);
+	//LOG_DEBUG("%s (E)\n", __FUNCTION__);
 }
 
 HttpManager* HttpManager::globalInstance()
@@ -79,13 +79,13 @@ void HttpManager::globalCleanup()
 	ThreadPool::globalInstance()->waitForDone();
 }
 
-bool HttpManager::addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority)
+bool HttpManager::addTask(std::unique_ptr<TaskBase> t, ThreadPool::Priority priority)
 {
 	if (!t.get())
 	{
 		return false;
 	}
-	return ThreadPool::globalInstance()->addTask(t, priority);
+	return ThreadPool::globalInstance()->addTask(std::move(t), priority);
 }
 
 bool HttpManager::abortTask(int task_id)

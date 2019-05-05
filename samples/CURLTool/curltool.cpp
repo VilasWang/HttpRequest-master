@@ -64,7 +64,7 @@ namespace
 			event->success = success;
 			event->strContent = QString::fromStdString(data);
 			event->strError = QString::fromStdString(error_string);
-			QCoreApplication::postEvent(CurlTool::instance(), event);
+			QCoreApplication::postEvent(CurlTool::getInstance(), event);
 		}
 	};
 
@@ -75,7 +75,7 @@ namespace
 			event->isDownload = bDownload;
 			event->total = total_size;
 			event->current = current_size;
-			QCoreApplication::postEvent(CurlTool::instance(), event);
+			QCoreApplication::postEvent(CurlTool::getInstance(), event);
 		}
 	};
 }
@@ -136,10 +136,8 @@ CurlTool::CurlTool(QWidget* parent)
 
 CurlTool::~CurlTool()
 {
-	qDebug() << __FUNCTION__ << "(B)";
 	unIntialize();
 	ms_instance = nullptr;
-	qDebug() << __FUNCTION__ << "(E)";
 }
 
 void CurlTool::initialize()
@@ -363,7 +361,7 @@ void CurlTool::onDownload()
 	request.setResultCallback(onRequestResultCallback);
 	request.setProgressCallback(onProgressCallback);
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Download, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -406,7 +404,7 @@ void CurlTool::onUpload()
 	request.setResultCallback(onRequestResultCallback);
 	request.setProgressCallback(onProgressCallback);
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Upload, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -463,7 +461,7 @@ void CurlTool::onFormPost()
 	request.setResultCallback(onRequestResultCallback);
 	request.setProgressCallback(onProgressCallback);
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Upload2, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload2, HTTP::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -496,7 +494,7 @@ void CurlTool::onGetRequest()
 	request.setUrl(strUrl.toStdString());
 	request.setResultCallback(onRequestResultCallback);
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Get, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HTTP::Get, HTTP::Async);
 	if (reply.get())
 	{
 		auto iter = m_mapReplys.find(reply->id());
@@ -541,7 +539,7 @@ void CurlTool::onPostRequest()
 		std::string strSendData = strArg.toStdString();
 		request.setPostData(strSendData.c_str(), strSendData.size());
 
-		std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Post, HttpRequest::Async);
+		std::shared_ptr<HttpReply> reply = request.perform(HTTP::Post, HTTP::Async);
 		if (reply.get())
 		{
 			int id = reply->id();
@@ -576,7 +574,7 @@ void CurlTool::onHeadRequest()
 	request.setUrl(strUrl.toStdString());
 	request.setResultCallback(onRequestResultCallback);
 
-	std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Head, HttpRequest::Async);
+	std::shared_ptr<HttpReply> reply = request.perform(HTTP::Head, HTTP::Async);
 	if (reply.get())
 	{
 		int id = reply->id();

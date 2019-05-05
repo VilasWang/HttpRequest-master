@@ -210,15 +210,15 @@ void ScheduleThread::run()
 		return;
 	}
 
-	std::shared_ptr<TaskBase> pTask = ThreadPool::globalInstance()->takeTask();
-	if (pTask.get())
+	std::unique_ptr<TaskBase> task = ThreadPool::globalInstance()->takeTask();
+	if (task.get())
 	{
-		ThreadPoolThread* t = ThreadPool::globalInstance()->popIdleThread();
-		if (nullptr != t)
+        std::unique_ptr<ThreadPoolThread> th = ThreadPool::globalInstance()->popIdleThread();
+		if (th.get())
 		{
-			ThreadPool::globalInstance()->appendActiveThread(t);
-			t->assignTask(pTask);
-			t->resume();
+            th->assignTask(std::move(task));
+            th->resume();
+			ThreadPool::globalInstance()->appendActiveThread(std::move(th));
 			Sleep(1);
 		}
 		else
@@ -234,10 +234,10 @@ void ScheduleThread::run()
 
 void ScheduleThread::switchToIdleThread(UINT threadId)
 {
-	ThreadPoolThread* t = ThreadPool::globalInstance()->takeActiveThread(threadId);
-	if (nullptr != t)
+    std::unique_ptr<ThreadPoolThread> th = ThreadPool::globalInstance()->takeActiveThread(threadId);
+	if (th.get())
 	{
-		ThreadPool::globalInstance()->pushIdleThread(t);
+		ThreadPool::globalInstance()->pushIdleThread(std::move(th));
 	}
 	else
 	{

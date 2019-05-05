@@ -11,11 +11,11 @@ public:
 	HttpTask(bool bAutoDelete = true);
 	~HttpTask();
 
-	void attach(std::shared_ptr<CURLInterface>);
+	void attach(std::shared_ptr<ICURLInterface>);
 	void detach();
 	void exec() override;
 	void cancel() override;
 
 private:
-	std::shared_ptr<CURLInterface> m_request;
+	std::shared_ptr<ICURLInterface> m_interface;
 };

@@ -11,14 +11,14 @@ public:
 	explicit HttpReply(int requestId = 0);
 	~HttpReply();
 
-	int id() const { return m_id; }
+	int id() const { return m_request_id; }
 	long httpStatusCode() const { return m_http_code; }
 	std::string readAll() const { return m_receive_content; }
 	std::string header() const { return m_receive_header; }
 	std::string errorString() const {return m_error_string;}
 
 private:
-	void setRequestType(HttpRequestType type);
+	void setRequestType(HTTP::RequestType type);
 	void setResultCallback(ResultCallback rc);
 	void setProgressCallback(ProgressCallback pc);
 
@@ -37,7 +37,7 @@ private:
 	std::string	m_receive_header;
 	std::string	m_receive_content;
 	std::string	m_error_string;
-	int m_id;
-	HttpRequestType m_type;
+	int m_request_id;
+    HTTP::RequestType m_type;
 };
 

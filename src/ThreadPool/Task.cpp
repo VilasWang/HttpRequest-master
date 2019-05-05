@@ -40,20 +40,20 @@ TaskQueue::~TaskQueue(void)
 	clear();
 }
 
-std::shared_ptr<TaskBase> TaskQueue::pop()
+std::unique_ptr<TaskBase> TaskQueue::pop()
 {
-	std::shared_ptr<TaskBase> t = nullptr;
+	std::unique_ptr<TaskBase> t = nullptr;
 	Locker<CSLock> locker(m_lock);
 
 	if (!m_TaskQueue.empty())
 	{
-		t = m_TaskQueue.front();
+		t = std::move(m_TaskQueue.front());
 		m_TaskQueue.pop_front();
 	}
 	return t;
 }
 
-bool TaskQueue::push(std::shared_ptr<TaskBase> t)
+bool TaskQueue::push(std::unique_ptr<TaskBase> t)
 {
 	if (!t.get())
 	{
@@ -61,11 +61,11 @@ bool TaskQueue::push(std::shared_ptr<TaskBase> t)
 	}
 
 	Locker<CSLock> locker(m_lock);
-	m_TaskQueue.push_back(t);
+	m_TaskQueue.push_back(std::move(t));
 	return true;
 }
 
-bool TaskQueue::pushFront(std::shared_ptr<TaskBase> t)
+bool TaskQueue::pushFront(std::unique_ptr<TaskBase> t)
 {
 	if (!t.get())
 	{
@@ -73,7 +73,7 @@ bool TaskQueue::pushFront(std::shared_ptr<TaskBase> t)
 	}
 
 	Locker<CSLock> locker(m_lock);
-	m_TaskQueue.push_front(t);
+	m_TaskQueue.push_front(std::move(t));
 	return true;
 }
 

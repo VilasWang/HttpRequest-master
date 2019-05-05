@@ -11,38 +11,38 @@ HttpTask::HttpTask(bool bAutoDelete) : TaskBase(bAutoDelete)
 
 HttpTask::~HttpTask()
 {
-	//LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
+	///LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
 	TRACE_CLASS_DESTRUCTOR(HttpTask);
 	detach();
 }
 
-void HttpTask::attach(std::shared_ptr<CURLInterface> request)
+void HttpTask::attach(std::shared_ptr<ICURLInterface> request)
 {
-	m_request = request;
+	m_interface = request;
 	m_id = request->requestId();
 }
 
 void HttpTask::detach()
 {
-	if (m_request.get())
+	if (m_interface.get())
 	{
-		m_request.reset();
+		m_interface.reset();
 	}
 }
 
 void HttpTask::exec()
 {
-	if (m_request.get())
+	if (m_interface.get())
 	{
-		m_request->perform();
-		m_request.reset();
+		m_interface->perform();
+		m_interface.reset();
 	}
 }
 
 void HttpTask::cancel()
 {
-	if (m_request.get())
+	if (m_interface.get())
 	{
-		m_request->cancel();
+		m_interface->cancel();
 	}
 }

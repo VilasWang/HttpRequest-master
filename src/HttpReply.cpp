@@ -7,19 +7,19 @@ HttpReply::HttpReply(int requestId)
 	: m_result_callback(0)
 	, m_progress_callback(0)
 	, m_http_code(0)
-	, m_id(requestId)
-	, m_type(Unkonwn)
+	, m_request_id(requestId)
+	, m_type(HTTP::Unkonwn)
 {
 	TRACE_CLASS_CONSTRUCTOR(HttpReply);
 }
 
 HttpReply::~HttpReply()
 {
-	//LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_id);
+	///LOG_DEBUG("%s id[%d]\n", __FUNCTION__, m_request_id);
 	TRACE_CLASS_DESTRUCTOR(HttpReply);
 }
 
-void HttpReply::setRequestType(HttpRequestType type)
+void HttpReply::setRequestType(HTTP::RequestType type)
 {
 	m_type = type;
 }
@@ -38,13 +38,13 @@ void HttpReply::replyResult(bool bSuccess)
 {
 	if (m_result_callback)
 	{
-		if (m_type == Head)
+		if (m_type == HTTP::Head)
 		{
-			m_result_callback(m_id, (bSuccess && m_http_code == 200), m_receive_header, m_error_string);
+			m_result_callback(m_request_id, (bSuccess && m_http_code == 200), m_receive_header, m_error_string);
 		}
 		else
 		{
-			m_result_callback(m_id, (bSuccess && m_http_code == 200), m_receive_content, m_error_string);
+			m_result_callback(m_request_id, (bSuccess && m_http_code == 200), m_receive_content, m_error_string);
 		}
 	}
 }

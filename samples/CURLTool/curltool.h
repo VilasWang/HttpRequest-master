@@ -16,7 +16,7 @@ class CurlTool : public QMainWindow
 public:
 	~CurlTool();
 
-	static CurlTool *instance() 
+	static CurlTool *getInstance() 
 	{ 
 		if (nullptr == ms_instance)
 		{

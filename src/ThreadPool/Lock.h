@@ -6,7 +6,7 @@
 class CSLock
 {
 public:
-	explicit CSLock();
+	CSLock();
 	~CSLock();
 
 	void lock();
@@ -25,7 +25,7 @@ private:
 class SRWLock
 {
 public:
-	explicit SRWLock();
+	SRWLock();
 	~SRWLock();
 
 	void lock(bool bShared = false);

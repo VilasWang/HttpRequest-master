@@ -40,7 +40,7 @@ HttpRequest request;
 request.setUrl(strUrl);
 request.setDownloadFile(strFilePath);
 
-std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Download, HttpRequest::Sync);
+std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Sync);
 std::cout << reply->id() << reply->httpStatusCode() << reply->errorString() << reply->readAll() << std::endl;
 ```
 
@@ -62,7 +62,7 @@ request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this,
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Download, HttpRequest::Async);
+std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
 std::cout << reply->id();
 ```
 
@@ -85,7 +85,7 @@ request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, this,
 request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, this, 
 	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-std::shared_ptr<HttpReply> reply = request.perform(HttpRequestType::Upload, HttpRequest::Async);
+std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
 std::cout << reply->id();
 ```
 

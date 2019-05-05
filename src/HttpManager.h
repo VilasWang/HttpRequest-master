@@ -37,7 +37,7 @@ private:
 
 private:
 	static void set_share_handle(CURL* curl_handle);
-	static bool addTask(std::shared_ptr<TaskBase> t, ThreadPool::Priority priority = ThreadPool::Normal);
+	static bool addTask(std::unique_ptr<TaskBase> t, ThreadPool::Priority priority = ThreadPool::Normal);
 	static bool abortTask(int taskId);
 	static bool abortAllTask();
 	void clearReply();

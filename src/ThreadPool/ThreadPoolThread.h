@@ -35,7 +35,7 @@ public:
 	const int taskId();
 
 	//将任务关联到线程类
-	bool assignTask(std::shared_ptr<TaskBase> pTask);
+	bool assignTask(std::unique_ptr<TaskBase> pTask);
 	bool startTask();
 	bool stopTask();
 
@@ -67,7 +67,7 @@ private:
 	bool m_bRunning;
 #endif
 
-	std::shared_ptr<TaskBase> m_pTask;
+	std::unique_ptr<TaskBase> m_pTask;
 	ThreadPool* m_pThreadPool;
 };
 
@@ -75,22 +75,22 @@ class ActiveThreadList
 {
 public:
 	ActiveThreadList();
-	~ActiveThreadList();
+	virtual ~ActiveThreadList();
 
 public:
-	bool append(ThreadPoolThread* t);
-	bool remove(ThreadPoolThread* t);
-	ThreadPoolThread* get(int task_id);
-	ThreadPoolThread* take(int task_id);
-	ThreadPoolThread* take(UINT thread_id);
-	ThreadPoolThread* pop_back();
+	bool append(std::unique_ptr<ThreadPoolThread> t);
+	bool remove(std::unique_ptr<ThreadPoolThread> t);
+    ThreadPoolThread* get(int task_id);
+    std::unique_ptr<ThreadPoolThread> take(int task_id);
+    std::unique_ptr<ThreadPoolThread> take(UINT thread_id);
+    std::unique_ptr<ThreadPoolThread> pop_back();
 	int size();
 	bool isEmpty();
 	bool clear();
 	void stopAll();
 
 private:
-	std::list<ThreadPoolThread*>m_list;
+	std::list<std::unique_ptr<ThreadPoolThread>> m_list;
 	mutable CSLock m_lock;
 };
 
@@ -101,13 +101,13 @@ public:
 	~IdleThreadStack();
 
 public:
-	ThreadPoolThread* pop();
-	bool push(ThreadPoolThread*);
+    std::unique_ptr<ThreadPoolThread> pop();
+	bool push(std::unique_ptr<ThreadPoolThread>);
 	int size();
 	bool isEmpty();
 	bool clear();
 
 private:
-	std::stack<ThreadPoolThread*> m_stack;
+	std::stack<std::unique_ptr<ThreadPoolThread>> m_stack;
 	mutable CSLock m_lock;
 };

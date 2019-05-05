@@ -32,7 +32,7 @@ public:
 	bool waitForDone();
 
 	//priority为优先级。高优先级的任务将被插入到队首
-	bool addTask(std::shared_ptr<TaskBase> t, Priority p = Normal);
+	bool addTask(std::unique_ptr<TaskBase> t, Priority p = Normal);
 	bool abortTask(int taskId);
 	bool abortAllTask();
 
@@ -56,11 +56,11 @@ private:
 	ThreadPool &operator=(const ThreadPool &);
 #endif
 
-	std::shared_ptr<TaskBase> takeTask();
-	ThreadPoolThread* popIdleThread();
-	ThreadPoolThread* takeActiveThread(UINT threadId);
-	void appendActiveThread(ThreadPoolThread*);
-	void pushIdleThread(ThreadPoolThread*);
+	std::unique_ptr<TaskBase> takeTask();
+    std::unique_ptr<ThreadPoolThread> popIdleThread();
+    std::unique_ptr<ThreadPoolThread> takeActiveThread(UINT threadId);
+	void appendActiveThread(std::unique_ptr<ThreadPoolThread>);
+	void pushIdleThread(std::unique_ptr<ThreadPoolThread>);
 
 	friend class ScheduleThread;
 
@@ -72,7 +72,11 @@ private:
 	bool m_bInitialized;
 #endif
 	ThreadPoolCallBack* m_pCallBack;
-	ScheduleThread *m_pThread;
+#if _MSC_VER >= 1700
+	std::unique_ptr<ScheduleThread> m_pThread;
+#else
+    std::shared_ptr<ScheduleThread> m_pThread;
+#endif
 	IdleThreadStack m_idleThreads;
 	ActiveThreadList m_activeThreads;
 	TaskQueue m_taskQueue;
