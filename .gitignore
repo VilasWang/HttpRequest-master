@@ -64,3 +64,6 @@
 /x64/Debug/CURLTool.pdb
 /x64/Debug/HttpRequest.pdb
 /x64/Debug/libcurld.pdb
+/bin/Win32/Debug/CURLTool.pdb
+/bin/Win32/Debug/HttpRequest.dll
+/bin/Win32/Debug/HttpRequest.pdb
