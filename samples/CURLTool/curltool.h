@@ -11,81 +11,79 @@
 
 class CurlTool : public QMainWindow
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	~CurlTool();
+    ~CurlTool();
 
-	static CurlTool *getInstance() 
-	{ 
-		if (nullptr == ms_instance)
-		{
-			ms_instance = new CurlTool;
-		}
-		return ms_instance; 
-	}
+    static CurlTool *getInstance()
+    {
+        if (nullptr == ms_instance)
+        {
+            ms_instance = new CurlTool;
+        }
+        return ms_instance;
+    }
 
-	static void destroyInstance()
-	{
-		if (nullptr != ms_instance)
-		{
-			delete ms_instance;
-			ms_instance = nullptr;
-		}
-	}
+    static void destroyInstance()
+    {
+        if (nullptr != ms_instance)
+        {
+            delete ms_instance;
+            ms_instance = nullptr;
+        }
+    }
 
-	static bool isInstantiated() { return (ms_instance != nullptr); }
+    static bool isInstantiated() { return (ms_instance != nullptr); }
 
-	bool event(QEvent* event) Q_DECL_OVERRIDE;
-
-public Q_SLOTS:
-	void onStartTask();
-	void onAbortTask();
-	void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
+    bool event(QEvent* event) Q_DECL_OVERRIDE;
 
 private Q_SLOTS:
-	void onDownload();
-	void onUpload();
-	void onFormPost();
-	void onGetRequest();
-	void onPostRequest();
-	void onHeadRequest();
+    void onStartTask();
+    void onAbortTask();
+    void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
+    void onDownload();
+    void onUpload();
+    void onFormPost();
+    void onGetRequest();
+    void onPostRequest();
+    void onHeadRequest();
 
-	void onUpdateDefaultInfos();
-	void onGetSaveDirectory();
-	void onGetUploadFile();
-
-private:
-	CurlTool(QWidget* parent = 0);
-
-	void initialize();
-	void unIntialize();
-
-	//获取系统默认下载目录
-	QString getDefaultDownloadDir();
-	QString bytes2String(qint64 bytes);
-	void appendMsg(const QString& strMsg, bool bQDebug = true);
-	void reset();
+    void onUpdateDefaultInfos();
+    void onGetSaveDirectory();
+    void onGetUploadFile();
 
 private:
-	Ui::networkClass ui;
+    CurlTool(QWidget* parent = 0);
 
-	qint64 m_nbytesReceived;
-	qint64 m_nbytesTotalDownload;
-	QString m_strTotalDownload;
-	qint64 m_nbytesSent;
-	qint64 m_nbytesTotalUpload;
-	QString m_strTotalUpload;
+    void initialize();
+    void unIntialize();
+
+    //获取系统默认下载目录
+    QString getDefaultDownloadDir();
+    QString bytes2String(qint64 bytes);
+    void appendMsg(const QString& strMsg, bool bQDebug = true);
+    void reset();
 
 private:
-	static CurlTool *ms_instance;
+    Ui::networkClass ui;
 
-	static int m_nTotalNum;
-	static int m_nFailedNum;
-	static int m_nSuccessNum;
+    qint64 m_nbytesReceived;
+    qint64 m_nbytesTotalDownload;
+    QString m_strTotalDownload;
+    qint64 m_nbytesSent;
+    qint64 m_nbytesTotalUpload;
+    QString m_strTotalUpload;
 
-	static QTime m_timeStart;
-	static std::map<int, std::shared_ptr<HttpReply>> m_mapReplys;
+private:
+    static CurlTool *ms_instance;
+
+    static int m_nTotalNum;
+    static int m_nFailedNum;
+    static int m_nSuccessNum;
+
+    static QTime m_timeStart;
+    static std::map<int, std::shared_ptr<HttpReply>> m_mapReplys;
 };
 
 #endif // INTERNET_H

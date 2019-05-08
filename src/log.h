@@ -6,37 +6,37 @@
 
 namespace Log
 {
-	inline void Debug(char *format, ...)
-	{
-		char buf[128] = {0};
+    inline void Debug(char *format, ...)
+    {
+        char buf[128] = { 0 };
 
-		va_list args;
-		va_start(args, format);
-		int len = _vsnprintf_s(buf, _countof(buf)-1, format, args);
-		va_end(args);
+        va_list args;
+        va_start(args, format);
+        int len = _vsnprintf_s(buf, _countof(buf) - 1, format, args);
+        va_end(args);
 
-		if (len != -1)
-		{
-			buf[127] = '\0';
-			OutputDebugStringA(buf);
-		}
-	}
+        if (len != -1)
+        {
+            buf[127] = '\0';
+            OutputDebugStringA(buf);
+        }
+    }
 
-	inline void DebugW(wchar_t *format, ...)
-	{
-		wchar_t buf[128] = {0};
+    inline void DebugW(wchar_t *format, ...)
+    {
+        wchar_t buf[128] = { 0 };
 
-		va_list args;
-		va_start(args, format);
-		int len = _vsnwprintf_s(buf, _countof(buf)-1, format, args);
-		va_end(args);
+        va_list args;
+        va_start(args, format);
+        int len = _vsnwprintf_s(buf, _countof(buf) - 1, format, args);
+        va_end(args);
 
-		if (len != -1)
-		{
-			buf[127] = '\0';
-			OutputDebugStringW(buf);
-		}
-	}
+        if (len != -1)
+        {
+            buf[127] = '\0';
+            OutputDebugStringW(buf);
+        }
+    }
 }
 
 #ifdef _DEBUG

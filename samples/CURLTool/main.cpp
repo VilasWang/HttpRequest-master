@@ -5,10 +5,10 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+    QApplication a(argc, argv);
 
-	CurlTool::getInstance()->show();
-	int ret = a.exec();
-	CurlTool::destroyInstance();
-	return ret;
+    CurlTool::getInstance()->show();
+    int ret = a.exec();
+    CurlTool::destroyInstance();
+    return ret;
 }

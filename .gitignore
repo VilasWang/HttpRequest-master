@@ -44,3 +44,7 @@
 *.ipch
 /samples/CURLTool/GeneratedFiles/Release
 /samples/CURLTool/GeneratedFiles/Debug/
+/bin/Win32/Debug/HttpRequest.dll
+/bin/x64/Debug/HttpRequest.dll
+/lib/Debug/HttpRequest.lib
+/samples/CURLTool/GeneratedFiles

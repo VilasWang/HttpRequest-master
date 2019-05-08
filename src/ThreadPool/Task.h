@@ -17,18 +17,18 @@ public:
     virtual void cancel() = 0;
 
     const int id() const;
-	bool isAutoDelete() const;
+    bool isAutoDelete() const;
 
 protected:
-	int m_id;
+    int m_id;
 
 private:
 #if _MSC_VER >= 1700
     static std::atomic<int> s_id;
 #else
-	static int s_id;
+    static int s_id;
 #endif
-	bool m_bAutoDelete;
+    bool m_bAutoDelete;
 };
 
 class TaskQueue
@@ -38,7 +38,7 @@ public:
     ~TaskQueue();
 
 public:
-	std::unique_ptr<TaskBase> pop();
+    std::unique_ptr<TaskBase> pop();
     bool push(std::unique_ptr<TaskBase> t);
     bool pushFront(std::unique_ptr<TaskBase> t);//²åµ½¶ÓÊ×
     bool isEmpty();
