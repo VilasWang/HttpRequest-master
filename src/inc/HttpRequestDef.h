@@ -44,11 +44,11 @@ typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
 #endif
 
 
-class ICURLInterface
+class IRequest
 {
 public:
-    ICURLInterface() {}
-    virtual ~ICURLInterface() {}
+    IRequest() {}
+    virtual ~IRequest() {}
 public:
     virtual int	perform() = 0;
     virtual void cancel() = 0;
@@ -56,10 +56,6 @@ public:
     virtual bool isRunning() const = 0;
     virtual bool isCanceled() const = 0;
     virtual bool isFailed() const = 0;
-    virtual bool isMultiDownload() const = 0;
-    virtual INT64 totalBytes() const = 0;
-    virtual INT64 currentBytes() const = 0;
-    virtual void setCurrentBytes(INT64) = 0;
 };
 
 

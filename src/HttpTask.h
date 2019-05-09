@@ -8,14 +8,14 @@
 class HttpTask : public TaskBase
 {
 public:
-    HttpTask(bool bAutoDelete = true);
+    explicit HttpTask(bool bAutoDelete = true);
     ~HttpTask();
 
-    void attach(std::shared_ptr<ICURLInterface>);
+    void attach(std::shared_ptr<IRequest>);
     void detach();
     void exec() override;
     void cancel() override;
 
 private:
-    std::shared_ptr<ICURLInterface> m_interface;
+    std::shared_ptr<IRequest> m_interface;
 };

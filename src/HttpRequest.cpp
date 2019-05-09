@@ -21,19 +21,14 @@
 
 struct DownloadChunk
 {
-    ICURLInterface* _helper;
+    CURLWrapper* _helper;
     FILE* _fp;
     long _startidx;
     long _endidx;
 
-    DownloadChunk()
+    DownloadChunk() : _helper(nullptr), _fp(nullptr), _startidx(0), _endidx(0)
     {
         TRACE_CLASS_CONSTRUCTOR(DownloadChunk);
-
-        _helper = nullptr;
-        _fp = nullptr;
-        _startidx = 0;
-        _endidx = 0;
     }
     ~DownloadChunk()
     {
@@ -43,15 +38,12 @@ struct DownloadChunk
 
 struct UploadChannel
 {
-    ICURLInterface* _helper;
+    CURLWrapper* _helper;
     FILE* _fp;
 
-    UploadChannel()
+    UploadChannel() : _helper(nullptr), _fp(nullptr)
     {
         TRACE_CLASS_CONSTRUCTOR(UploadChannel);
-
-        _helper = nullptr;
-        _fp = nullptr;
     }
     ~UploadChannel()
     {
@@ -60,10 +52,10 @@ struct UploadChannel
 };
 
 
-class CURLWrapper : public ICURLInterface
+class CURLWrapper : public IRequest
 {
 public:
-    explicit CURLWrapper();
+    CURLWrapper();
     ~CURLWrapper();
 
     friend class HttpRequest;
@@ -94,15 +86,16 @@ public:
     bool isRunning() const override;
     bool isCanceled() const override;
     bool isFailed() const override;
-    bool isMultiDownload() const override;
-
-    INT64 totalBytes() const { return m_total_size; }
-    INT64 currentBytes() const override;
-    void setCurrentBytes(INT64) override;
 
     void setRunning(bool bRunning);
     void setCanceled(bool bCancel);
     void setFailed(bool bFail);
+
+    INT64 totalBytes() const { return m_total_size; }
+    INT64 currentBytes() const;
+    void setCurrentBytes(INT64);
+
+    bool isMultiDownload() const;
 
     void reset();
 
@@ -111,7 +104,7 @@ private:
     int doPostGet();
     int doDownload();
     int doUpload();
-    int doFormPostUpload();//实际上是httppost的方式
+    int doFormPostUpload();//实际上是执行curl httppost的方式
     int doHead();
 
     int	download(DownloadChunk* download_chunk);
@@ -213,7 +206,7 @@ size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
 {
-    ICURLInterface* helper = nullptr;
+    CURLWrapper* helper = nullptr;
     DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(userdata);
     if (download_chunk)
     {
@@ -243,7 +236,7 @@ size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userda
 
 int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
-    ICURLInterface* helper = nullptr;
+    CURLWrapper* helper = nullptr;
     DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(clientp);
     if (download_chunk)
     {
@@ -271,7 +264,7 @@ int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dln
 
 int progress_upload_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
-    ICURLInterface* helper = reinterpret_cast<ICURLInterface*>(clientp);
+    IRequest* helper = reinterpret_cast<IRequest*>(clientp);
     if (!helper || helper->isCanceled() || helper->isFailed())
         return -1;
 
@@ -1292,7 +1285,7 @@ UINT WINAPI CURLWrapper::downloadProc(LPVOID param)
     DownloadChunk* thread_chunk = reinterpret_cast<DownloadChunk*>(param);
     if (thread_chunk)
     {
-        ICURLInterface* helper = thread_chunk->_helper;
+        IRequest* helper = thread_chunk->_helper;
         if (helper)
         {
             CURLWrapper *pcurl = dynamic_cast<CURLWrapper *>(helper);

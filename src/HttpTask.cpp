@@ -16,7 +16,7 @@ HttpTask::~HttpTask()
     detach();
 }
 
-void HttpTask::attach(std::shared_ptr<ICURLInterface> request)
+void HttpTask::attach(std::shared_ptr<IRequest> request)
 {
     m_interface = request;
     m_id = request->requestId();
