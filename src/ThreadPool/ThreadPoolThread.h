@@ -14,12 +14,12 @@ class ThreadPool;
 class ThreadPoolThread
 {
 public:
-    explicit ThreadPoolThread(ThreadPool* threadPool);
+    explicit ThreadPoolThread(ThreadPool* threadpool);
 #if _MSC_VER >= 1700
     ThreadPoolThread(const ThreadPoolThread &) = delete;
     ThreadPoolThread &operator=(const ThreadPoolThread &) = delete;
 #endif
-    ~ThreadPoolThread();
+    virtual ~ThreadPoolThread();
 
 public:
     bool start();
@@ -36,8 +36,8 @@ public:
 
     //将任务关联到线程类
     bool assignTask(std::unique_ptr<TaskBase> pTask);
-    bool startTask();
-    bool stopTask();
+    bool runTask();
+    bool terminateTask();
 
 protected:
     virtual void exec();
@@ -90,7 +90,7 @@ public:
     void stopAll();
 
 private:
-    std::list<std::unique_ptr<ThreadPoolThread>> m_list;
+    std::list<std::unique_ptr<ThreadPoolThread>> m_threads;
     mutable CSLock m_lock;
 };
 
@@ -108,6 +108,6 @@ public:
     bool clear();
 
 private:
-    std::stack<std::unique_ptr<ThreadPoolThread>> m_stack;
+    std::stack<std::unique_ptr<ThreadPoolThread>> m_threads;
     mutable CSLock m_lock;
 };

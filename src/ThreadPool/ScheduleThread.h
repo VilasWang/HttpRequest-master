@@ -13,7 +13,7 @@
 class ScheduleThread
 {
 public:
-    explicit ScheduleThread();
+    ScheduleThread();
     virtual ~ScheduleThread();
 #if _MSC_VER >= 1700
     ScheduleThread(const ScheduleThread &) = delete;
@@ -33,7 +33,7 @@ public:
 
 protected:
     virtual void run();
-    virtual void onBeforeExec() {}
+    virtual void onBeforeRun() {}
     virtual void onBeforeExit() {}
 
 private:

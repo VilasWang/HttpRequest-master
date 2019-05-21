@@ -729,7 +729,7 @@ int CURLWrapper::doDownload()
             HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, chunk, 0, &thread_id);
             chunks.push_back(chunk);
 #endif
-            threads.push_back(hThread);
+            threads.emplace_back(hThread);
         }
 
         WaitForMultipleObjects(threads.size(), &threads[0], TRUE, INFINITE);

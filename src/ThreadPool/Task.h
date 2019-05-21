@@ -45,6 +45,6 @@ public:
     bool clear();
 
 private:
-    std::deque<std::unique_ptr<TaskBase>> m_TaskQueue;
+    std::deque<std::unique_ptr<TaskBase>> m_queTasks;
     mutable CSLock m_lock;
 };

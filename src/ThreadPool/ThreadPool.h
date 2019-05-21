@@ -1,10 +1,10 @@
 #pragma once
 
+#include <functional>
 #include "ThreadPoolThread.h"
 #include "ScheduleThread.h"
 #include "Task.h"
 
-#define DEFAULT_THREAD_COUNT 4
 #define WM_THREAD_TASK_FINISHED (WM_USER + 1000)
 
 // class ThreadPool - 线程池
@@ -17,7 +17,7 @@ public:
         High
     };
 
-    ~ThreadPool();
+    virtual ~ThreadPool();
 #if _MSC_VER >= 1700
     ThreadPool(const ThreadPool &) = delete;
     ThreadPool &operator=(const ThreadPool &) = delete;
@@ -27,7 +27,7 @@ public:
 
 public:
     //初始化线程池，创建n个线程的线程池。
-    bool init(int threadCount = DEFAULT_THREAD_COUNT);
+    bool init(int threadCount = 4);
     //停止所有的任务，并且将所有线程退出。
     bool waitForDone();
 
@@ -40,13 +40,9 @@ public:
     bool hasIdleThread() { return !m_idleThreads.isEmpty(); }
 
 public:
-    class ThreadPoolCallBack
-    {
-    public:
-        virtual void onTaskFinished(int task_id) = 0;
-    };
+    void setNotifyCallBack(std::function<void(int)> callback);
 
-    void setCallBack(ThreadPoolCallBack* pCallBack);
+protected:
     void onTaskFinished(int taskId, UINT threadId);
 
 private:
@@ -63,21 +59,19 @@ private:
     void pushIdleThread(std::unique_ptr<ThreadPoolThread>);
 
     friend class ScheduleThread;
+    friend class ThreadPoolThread;
 
 private:
     int m_nThreadNum;
 #if _MSC_VER >= 1700
     std::atomic<bool> m_bInitialized;
-#else
-    bool m_bInitialized;
-#endif
-    ThreadPoolCallBack* m_pCallBack;
-#if _MSC_VER >= 1700
     std::unique_ptr<ScheduleThread> m_pThread;
 #else
+    bool m_bInitialized;
     std::shared_ptr<ScheduleThread> m_pThread;
 #endif
     IdleThreadStack m_idleThreads;
     ActiveThreadList m_activeThreads;
     TaskQueue m_taskQueue;
+    std::function<void(int)> m_pCallBack;
 };

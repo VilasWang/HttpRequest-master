@@ -8,8 +8,8 @@
 #include "ClassMemoryTracer.h"
 #include "log.h"
 
-ThreadPoolThread::ThreadPoolThread(ThreadPool* threadPool)
-    : m_pThreadPool(threadPool)
+ThreadPoolThread::ThreadPoolThread(ThreadPool* threadpool)
+    : m_pThreadPool(threadpool)
     , m_pTask(nullptr)
     , m_hEvent(nullptr)
     , m_hThread(INVALID_HANDLE_VALUE)
@@ -84,7 +84,7 @@ bool ThreadPoolThread::resume()
 
 void ThreadPoolThread::waitForDone()
 {
-    stopTask();
+    terminateTask();
 }
 
 UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
@@ -148,13 +148,13 @@ const int ThreadPoolThread::taskId()
     return 0;
 }
 
-bool ThreadPoolThread::startTask()
+bool ThreadPoolThread::runTask()
 {
     resume();
     return true;
 }
 
-bool ThreadPoolThread::stopTask()
+bool ThreadPoolThread::terminateTask()
 {
     if (m_pTask.get())
     {
@@ -175,7 +175,7 @@ void ThreadPoolThread::exec()
         m_pTask->exec();
         m_pTask.reset();
 
-        if (m_pThreadPool && !isExit())
+        if (!isExit() && m_pThreadPool)
         {
             m_pThreadPool->onTaskFinished(id, m_nThreadID);
         }
@@ -219,63 +219,67 @@ ActiveThreadList::~ActiveThreadList()
 bool ActiveThreadList::append(std::unique_ptr<ThreadPoolThread> th)
 {
     if (!th.get())
-    {
         return false;
-    }
 
-    Locker<CSLock> locker(m_lock);
-    m_list.push_back(std::move(th));
+    {
+        Locker<CSLock> locker(m_lock);
+        m_threads.emplace_back(std::move(th));
+    }
     return true;
 }
 
 bool ActiveThreadList::remove(std::unique_ptr<ThreadPoolThread> th)
 {
     if (!th.get())
-    {
         return false;
-    }
 
-    Locker<CSLock> locker(m_lock);
-    m_list.remove(th);
+    {
+        Locker<CSLock> locker(m_lock);
+        m_threads.remove(th);
+    }
     return true;
 }
 
 ThreadPoolThread* ActiveThreadList::get(int task_id)
 {
-    ThreadPoolThread* t = nullptr;
-    Locker<CSLock> locker(m_lock);
-    auto iter = m_list.begin();
-    for (; iter != m_list.end();)
+    ThreadPoolThread* th = nullptr;
     {
-        if ((*iter)->taskId() == task_id)
+        Locker<CSLock> locker(m_lock);
+        auto iter = m_threads.begin();
+        for (; iter != m_threads.end();)
         {
-            t = iter->get();
-            break;
-        }
-        else
-        {
-            ++iter;
+            if ((*iter)->taskId() == task_id)
+            {
+                th = iter->get();
+                break;
+            }
+            else
+            {
+                ++iter;
+            }
         }
     }
-    return t;
+    return th;
 }
 
 std::unique_ptr<ThreadPoolThread> ActiveThreadList::take(int task_id)
 {
-    std::unique_ptr<ThreadPoolThread> th = nullptr;
-    Locker<CSLock> locker(m_lock);
-    auto iter = m_list.begin();
-    for (; iter != m_list.end();)
+    std::unique_ptr<ThreadPoolThread> th;
     {
-        if ((*iter)->taskId() == task_id)
+        Locker<CSLock> locker(m_lock);
+        auto iter = m_threads.begin();
+        for (; iter != m_threads.end();)
         {
-            th = std::move(*iter);
-            iter = m_list.erase(iter);
-            break;
-        }
-        else
-        {
-            ++iter;
+            if ((*iter)->taskId() == task_id)
+            {
+                th = std::move(*iter);
+                iter = m_threads.erase(iter);
+                break;
+            }
+            else
+            {
+                ++iter;
+            }
         }
     }
     return th;
@@ -283,20 +287,22 @@ std::unique_ptr<ThreadPoolThread> ActiveThreadList::take(int task_id)
 
 std::unique_ptr<ThreadPoolThread> ActiveThreadList::take(UINT thread_id)
 {
-    std::unique_ptr<ThreadPoolThread> th = nullptr;
-    Locker<CSLock> locker(m_lock);
-    auto iter = m_list.begin();
-    for (; iter != m_list.end();)
+    std::unique_ptr<ThreadPoolThread> th;
     {
-        if ((*iter)->threadId() == thread_id)
+        Locker<CSLock> locker(m_lock);
+        auto iter = m_threads.begin();
+        for (; iter != m_threads.end();)
         {
-            th = std::move(*iter);
-            iter = m_list.erase(iter);
-            break;
-        }
-        else
-        {
-            ++iter;
+            if ((*iter)->threadId() == thread_id)
+            {
+                th = std::move(*iter);
+                iter = m_threads.erase(iter);
+                break;
+            }
+            else
+            {
+                ++iter;
+            }
         }
     }
     return th;
@@ -304,12 +310,14 @@ std::unique_ptr<ThreadPoolThread> ActiveThreadList::take(UINT thread_id)
 
 std::unique_ptr<ThreadPoolThread> ActiveThreadList::pop_back()
 {
-    std::unique_ptr<ThreadPoolThread> th = nullptr;
-    Locker<CSLock> locker(m_lock);
-    if (!m_list.empty())
+    std::unique_ptr<ThreadPoolThread> th;
     {
-        th = std::move(m_list.back());
-        m_list.remove(th);
+        Locker<CSLock> locker(m_lock);
+        if (!m_threads.empty())
+        {
+            th = std::move(m_threads.back());
+            m_threads.remove(th);
+        }
     }
     return th;
 }
@@ -317,31 +325,31 @@ std::unique_ptr<ThreadPoolThread> ActiveThreadList::pop_back()
 int ActiveThreadList::size()
 {
     Locker<CSLock> locker(m_lock);
-    return m_list.size();
+    return m_threads.size();
 }
 
 bool ActiveThreadList::isEmpty()
 {
     Locker<CSLock> locker(m_lock);
-    return m_list.empty();
+    return m_threads.empty();
 }
 
 bool ActiveThreadList::clear()
 {
     Locker<CSLock> locker(m_lock);
-    m_list.clear();
+    m_threads.clear();
     return true;
 }
 
 void ActiveThreadList::stopAll()
 {
     Locker<CSLock> locker(m_lock);
-    auto iter = m_list.begin();
-    for (; iter != m_list.end(); iter++)
+    auto iter = m_threads.begin();
+    for (; iter != m_threads.end(); iter++)
     {
         if (nullptr != iter->get())
         {
-            (*iter)->stopTask();
+            (*iter)->terminateTask();
         }
     }
 }
@@ -359,10 +367,10 @@ IdleThreadStack::~IdleThreadStack()
 std::unique_ptr<ThreadPoolThread> IdleThreadStack::pop()
 {
     Locker<CSLock> locker(m_lock);
-    if (!m_stack.empty())
+    if (!m_threads.empty())
     {
-        std::unique_ptr<ThreadPoolThread> th = std::move(m_stack.top());
-        m_stack.pop();
+        std::unique_ptr<ThreadPoolThread> th = std::move(m_threads.top());
+        m_threads.pop();
         return th;
     }
     return nullptr;
@@ -371,13 +379,11 @@ std::unique_ptr<ThreadPoolThread> IdleThreadStack::pop()
 bool IdleThreadStack::push(std::unique_ptr<ThreadPoolThread> th)
 {
     if (!th.get())
-    {
         return false;
-    }
 
     Locker<CSLock> locker(m_lock);
     th->suspend();
-    m_stack.push(std::move(th));
+    m_threads.push(std::move(th));
 
     return true;
 }
@@ -385,21 +391,21 @@ bool IdleThreadStack::push(std::unique_ptr<ThreadPoolThread> th)
 int IdleThreadStack::size()
 {
     Locker<CSLock> locker(m_lock);
-    return m_stack.size();
+    return m_threads.size();
 }
 
 bool IdleThreadStack::isEmpty()
 {
     Locker<CSLock> locker(m_lock);
-    return m_stack.empty();
+    return m_threads.empty();
 }
 
 bool IdleThreadStack::clear()
 {
     Locker<CSLock> locker(m_lock);
-    while (!m_stack.empty())
+    while (!m_threads.empty())
     {
-        m_stack.pop();
+        m_threads.pop();
     }
     return true;
 }

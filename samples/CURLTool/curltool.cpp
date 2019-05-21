@@ -31,8 +31,7 @@ namespace
         RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish))
             , success(false)
             , id(0)
-        {
-        }
+        {}
 
         int id;
         bool success;
@@ -47,8 +46,7 @@ namespace
             , total(0)
             , current(0)
             , isDownload(false)
-        {
-        }
+        {}
 
         qint64 total;
         qint64 current;

@@ -42,7 +42,7 @@ namespace CVC
                         oss << ": leak ";
                         oss << intToString(iter->second.second);
                         oss << " objects \n";
-                        vecString.push_back(oss.str());
+                        vecString.emplace_back(oss.str());
                     }
                 }
 

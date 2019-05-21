@@ -133,7 +133,7 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 #endif
             t->m_bRunning = true;
         }
-        t->onBeforeExec();
+        t->onBeforeRun();
 
         MSG msg = { 0 };
         PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);

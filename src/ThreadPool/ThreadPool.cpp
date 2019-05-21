@@ -104,7 +104,7 @@ bool ThreadPool::abortTask(int taskId)
     ThreadPoolThread* th = m_activeThreads.get(taskId);
     if (th)
     {
-        th->stopTask();
+        th->terminateTask();
         return true;
     }
     return false;
@@ -146,11 +146,11 @@ std::unique_ptr<ThreadPoolThread> ThreadPool::takeActiveThread(UINT threadId)
     return m_activeThreads.take(threadId);
 }
 
-void ThreadPool::setCallBack(ThreadPoolCallBack* pCallBack)
+void ThreadPool::setNotifyCallBack(std::function<void(int)> callback)
 {
-    if (pCallBack)
+    if (callback)
     {
-        m_pCallBack = pCallBack;
+        m_pCallBack = callback;
     }
 }
 
@@ -166,6 +166,6 @@ void ThreadPool::onTaskFinished(int taskId, UINT threadId)
 
     if (m_pCallBack && taskId > 0)
     {
-        m_pCallBack->onTaskFinished(taskId);
+        m_pCallBack(taskId);
     }
 }

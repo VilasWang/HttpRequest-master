@@ -43,12 +43,13 @@ TaskQueue::~TaskQueue(void)
 std::unique_ptr<TaskBase> TaskQueue::pop()
 {
     std::unique_ptr<TaskBase> t = nullptr;
-    Locker<CSLock> locker(m_lock);
-
-    if (!m_TaskQueue.empty())
     {
-        t = std::move(m_TaskQueue.front());
-        m_TaskQueue.pop_front();
+        Locker<CSLock> locker(m_lock);
+        if (!m_queTasks.empty())
+        {
+            t = std::move(m_queTasks.front());
+            m_queTasks.pop_front();
+        }
     }
     return t;
 }
@@ -56,36 +57,36 @@ std::unique_ptr<TaskBase> TaskQueue::pop()
 bool TaskQueue::push(std::unique_ptr<TaskBase> t)
 {
     if (!t.get())
-    {
         return false;
-    }
 
     Locker<CSLock> locker(m_lock);
-    m_TaskQueue.push_back(std::move(t));
+    m_queTasks.emplace_back(std::move(t));
     return true;
 }
 
 bool TaskQueue::pushFront(std::unique_ptr<TaskBase> t)
 {
     if (!t.get())
-    {
         return false;
-    }
 
-    Locker<CSLock> locker(m_lock);
-    m_TaskQueue.push_front(std::move(t));
+    {
+        Locker<CSLock> locker(m_lock);
+        m_queTasks.emplace_front(std::move(t));
+    }
     return true;
 }
 
 bool TaskQueue::isEmpty()
 {
     Locker<CSLock> locker(m_lock);
-    return m_TaskQueue.empty();
+    return m_queTasks.empty();
 }
 
 bool TaskQueue::clear()
 {
-    Locker<CSLock> locker(m_lock);
-    m_TaskQueue.clear();
+    {
+        Locker<CSLock> locker(m_lock);
+        m_queTasks.clear();
+    }
     return true;
 }
