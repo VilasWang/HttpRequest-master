@@ -48,7 +48,7 @@ public:
     static bool cancelAll();
 
     // 异步回调api
-    // 注：最好不要用类的普通成员函数。以免回调返回时类已析构。
+    // 注：最好不要用类的非静态成员函数。以免回调返回时对象已析构。
     // 推荐用lambda。如：
     //		auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string){
     //			if (CurlTool::isInstantiated())
@@ -64,7 +64,7 @@ public:
     //		HttpRequest req;
     //		req.setUrl("...");
     //		req.setResultCallback(onRequestResultCallback);
-    //		req.perform(HttpRequestType::Get, HttpRequest::Async);
+    //		req.perform(HTTP::Get, HTTP::Async);
     int setResultCallback(ResultCallback rc);
     int	setProgressCallback(ProgressCallback pc);
 

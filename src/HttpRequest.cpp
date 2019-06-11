@@ -692,19 +692,15 @@ int CURLWrapper::doDownload()
         long gap = static_cast<long>(m_total_size) / m_thread_count;
         std::vector<HANDLE> threads;
 
-#if _MSC_VER >= 1700
         std::vector<std::unique_ptr<DownloadChunk>> chunks;
-#else
-        std::vector<std::shared_ptr<DownloadChunk>> chunks;
-#endif
         chunks.reserve(m_thread_count);
 
         for (int i = 0; i < m_thread_count; i++)
         {
 #if _MSC_VER >= 1700
-            std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
+            std::unique_ptr<DownloadChunk> chunk = std::make_unique<DownloadChunk>();
 #else
-            std::shared_ptr<DownloadChunk> chunk(new DownloadChunk);
+            std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
 #endif
             chunk->_fp = fp;
             chunk->_helper = this;
@@ -722,13 +718,9 @@ int CURLWrapper::doDownload()
             LOG_DEBUG("[HttpRequest]Part %d, Range: %d - %d\n", i, chunk->_startidx, chunk->_endidx);
 
             UINT thread_id;
-#if _MSC_VER >= 1700
             HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, chunk.get(), 0, &thread_id);
             chunks.emplace_back(std::move(chunk));
-#else
-            HANDLE hThread = (HANDLE)_beginthreadex(nullptr, 0, &CURLWrapper::downloadProc, chunk, 0, &thread_id);
-            chunks.push_back(chunk);
-#endif
+
             threads.emplace_back(hThread);
         }
 
@@ -744,9 +736,9 @@ int CURLWrapper::doDownload()
     else
     {
 #if _MSC_VER >= 1700
-        std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
+        std::unique_ptr<DownloadChunk> chunk = std::make_unique<DownloadChunk>();
 #else
-        std::shared_ptr<DownloadChunk> chunk(new DownloadChunk);
+        std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
 #endif
         chunk->_fp = fp;
         chunk->_helper = this;
@@ -808,18 +800,18 @@ int CURLWrapper::doUpload()
             return curl_code;
         }
 
-#if _MSC_VER >= 1700
-        std::unique_ptr<UploadChannel> uc = nullptr;
-#else
-        std::shared_ptr<UploadChannel> uc = nullptr;
-#endif
+        std::unique_ptr<UploadChannel> uc;
         if (reply.get())
         {
             /* get the file size of the local file */
             struct _stat64 file_info = { 0 };
             _stat64(m_strUploadFile.c_str(), &file_info);
 
+#if _MSC_VER >= 1700
+            uc = std::make_unique<UploadChannel>();
+#else
             uc.reset(new UploadChannel);
+#endif
             uc->_fp = file;
             uc->_helper = this;
 
@@ -1489,7 +1481,11 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType rtype, HTTP::I
         }
         else if (mode == HTTP::Async)
         {
+#if _MSC_VER >= 1700
             std::unique_ptr<HttpTask> task = std::make_unique<HttpTask>(true);
+#else
+            std::unique_ptr<HttpTask> task(new HttpTask(true))
+#endif
             task->attach(m_helper);
             HttpManager::addTask(std::move(task));
         }

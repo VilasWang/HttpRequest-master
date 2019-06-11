@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define POST_TEST_COUNT 100
+#define TEST_POST_COUNT 100
 //¾ÖÓòÍøApache http·þÎñÆ÷
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -83,7 +83,6 @@ int CurlTool::m_nTotalNum = 0;
 int CurlTool::m_nFailedNum = 0;
 int CurlTool::m_nSuccessNum = 0;
 QTime CurlTool::m_timeStart;
-std::map<int, std::shared_ptr<HttpReply>> CurlTool::m_mapReplys;
 CurlTool *CurlTool::ms_instance = nullptr;
 
 CurlTool::CurlTool(QWidget* parent)
@@ -272,12 +271,6 @@ bool CurlTool::event(QEvent* event)
             }
             appendMsg(strMsg, true);
 
-            auto iter = m_mapReplys.find(e->id);
-            if (iter != m_mapReplys.end())
-            {
-                m_mapReplys.erase(iter);
-            }
-
             //qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
             if (m_nTotalNum == m_nSuccessNum + m_nFailedNum)
             {
@@ -359,15 +352,7 @@ void CurlTool::onDownload()
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
     if (reply.get())
     {
-        auto iter = m_mapReplys.find(reply->id());
-        if (iter == m_mapReplys.end())
-        {
-            m_mapReplys[reply->id()] = reply;
-        }
-        else
-        {
-            qDebug() << "error reply! repeat reply id!";
-        }
+        qDebug() << "Error reply!";
     }
 }
 
@@ -402,15 +387,7 @@ void CurlTool::onUpload()
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
     if (reply.get())
     {
-        auto iter = m_mapReplys.find(reply->id());
-        if (iter == m_mapReplys.end())
-        {
-            m_mapReplys[reply->id()] = reply;
-        }
-        else
-        {
-            qDebug() << "error reply!!!";
-        }
+        qDebug() << "Error reply!";
     }
 }
 
@@ -459,15 +436,7 @@ void CurlTool::onFormPost()
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload2, HTTP::Async);
     if (reply.get())
     {
-        auto iter = m_mapReplys.find(reply->id());
-        if (iter == m_mapReplys.end())
-        {
-            m_mapReplys[reply->id()] = reply;
-        }
-        else
-        {
-            qDebug() << "error reply!!!";
-        }
+        qDebug() << "Error reply!";
     }
 }
 
@@ -492,15 +461,7 @@ void CurlTool::onGetRequest()
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Get, HTTP::Async);
     if (reply.get())
     {
-        auto iter = m_mapReplys.find(reply->id());
-        if (iter == m_mapReplys.end())
-        {
-            m_mapReplys[reply->id()] = reply;
-        }
-        else
-        {
-            qDebug() << "error reply!!!";
-        }
+        qDebug() << "Error reply!";
     }
 }
 
@@ -525,7 +486,7 @@ void CurlTool::onPostRequest()
     m_timeStart = QTime::currentTime();
     appendMsg(m_timeStart.toString() + " - Start request[" + strUrl + "]");
 
-    m_nTotalNum = POST_TEST_COUNT;
+    m_nTotalNum = TEST_POST_COUNT;
     for (int i = 0; i < m_nTotalNum; ++i)
     {
         HttpRequest request;
@@ -537,16 +498,7 @@ void CurlTool::onPostRequest()
         std::shared_ptr<HttpReply> reply = request.perform(HTTP::Post, HTTP::Async);
         if (reply.get())
         {
-            int id = reply->id();
-            auto iter = m_mapReplys.find(reply->id());
-            if (iter == m_mapReplys.end())
-            {
-                m_mapReplys[id] = reply;
-            }
-            else
-            {
-                qDebug() << "error reply!!!";
-            }
+            qDebug() << "Error reply!";
         }
     }
 }
@@ -572,16 +524,7 @@ void CurlTool::onHeadRequest()
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Head, HTTP::Async);
     if (reply.get())
     {
-        int id = reply->id();
-        auto iter = m_mapReplys.find(reply->id());
-        if (iter == m_mapReplys.end())
-        {
-            m_mapReplys[id] = reply;
-        }
-        else
-        {
-            qDebug() << "error reply!!!";
-        }
+        qDebug() << "Error reply!";
     }
 }
 
@@ -657,7 +600,6 @@ void CurlTool::reset()
 
     ui.btn_start->setEnabled(true);
     ui.btn_abort->setEnabled(false);
-    m_mapReplys.clear();
 }
 
 QString CurlTool::bytes2String(qint64 bytes)

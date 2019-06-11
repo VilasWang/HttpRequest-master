@@ -83,7 +83,6 @@ private:
     static int m_nSuccessNum;
 
     static QTime m_timeStart;
-    static std::map<int, std::shared_ptr<HttpReply>> m_mapReplys;
 };
 
 #endif // INTERNET_H
