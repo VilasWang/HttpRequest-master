@@ -71,9 +71,6 @@
     <ClCompile Include="ThreadPool\Lock.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
-    <ClCompile Include="lock2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThreadPool\Task.h">
@@ -109,14 +106,11 @@
     <ClInclude Include="log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool\Lock.h">
-      <Filter>ThreadPool</Filter>
-    </ClInclude>
     <ClInclude Include="inc\HttpRequestDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lock2.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="inc\Lock.h">
+      <Filter>ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

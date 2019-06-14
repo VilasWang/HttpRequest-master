@@ -3,9 +3,9 @@
 #include <vector>
 #include <algorithm>
 
-namespace CVC
+namespace VCUtility
 {
-    Lock ClassMemoryTracer::m_lock;
+    CSLock ClassMemoryTracer::m_lock;
     ClassMemoryTracer::TClassRefCount ClassMemoryTracer::s_mapRefCount;
 
     void LogDebug(const std::string& str)
@@ -25,7 +25,7 @@ namespace CVC
 
     void ClassMemoryTracer::checkMemoryLeaks()
     {
-        Locker2<Lock> locker(m_lock);
+        Locker<CSLock> locker(m_lock);
         std::ostringstream oss;
         try
         {

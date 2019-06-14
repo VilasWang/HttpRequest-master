@@ -174,7 +174,6 @@
     <ClCompile Include="HttpManager.cpp" />
     <ClCompile Include="HttpRequest.cpp" />
     <ClCompile Include="HttpTask.cpp" />
-    <ClCompile Include="lock2.cpp" />
     <ClCompile Include="ThreadPool\Lock.cpp" />
     <ClCompile Include="ThreadPool\ScheduleThread.cpp" />
     <ClCompile Include="ThreadPool\Task.cpp" />
@@ -189,9 +188,8 @@
     <ClInclude Include="inc\HttpRequest.h" />
     <ClInclude Include="inc\HttpRequestDef.h" />
     <ClInclude Include="inc\HttpRequest_global.h" />
-    <ClInclude Include="lock2.h" />
+    <ClInclude Include="inc\Lock.h" />
     <ClInclude Include="log.h" />
-    <ClInclude Include="ThreadPool\Lock.h" />
     <ClInclude Include="ThreadPool\ScheduleThread.h" />
     <ClInclude Include="ThreadPool\Task.h" />
     <ClInclude Include="ThreadPool\ThreadPool.h" />

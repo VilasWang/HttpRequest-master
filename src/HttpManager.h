@@ -5,7 +5,7 @@
 #include <map>
 #include "curl/curl.h"
 #include "ThreadPool/ThreadPool.h"
-#include "ThreadPool/lock.h"
+#include "lock.h"
 #include "HttpReply.h"
 
 class TaskBase;

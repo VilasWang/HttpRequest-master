@@ -7,7 +7,7 @@
 #include <process.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
-#include "ThreadPool/lock.h"
+#include "lock.h"
 #include "log.h"
 #include "ClassMemoryTracer.h"
 #include "HttpTask.h"
