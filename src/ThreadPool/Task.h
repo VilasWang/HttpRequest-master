@@ -46,5 +46,5 @@ public:
 
 private:
     std::deque<std::unique_ptr<TaskBase>> m_queTasks;
-    mutable CSLock m_lock;
+    mutable VCUtil::CSLock m_lock;
 };

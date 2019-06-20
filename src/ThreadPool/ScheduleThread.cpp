@@ -6,6 +6,7 @@
 #include "log.h"
 #include "ClassMemoryTracer.h"
 
+using namespace VCUtil;
 
 ScheduleThread::ScheduleThread()
     : m_hThread(INVALID_HANDLE_VALUE)

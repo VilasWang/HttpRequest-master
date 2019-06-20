@@ -2,6 +2,8 @@
 #include "Task.h"
 #include "ClassMemoryTracer.h"
 
+using namespace VCUtil;
+
 #if _MSC_VER >= 1700
 std::atomic<int> TaskBase::s_id = 0;
 #else

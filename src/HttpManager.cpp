@@ -4,35 +4,37 @@
 #include "ClassMemoryTracer.h"
 #include "log.h"
 
+using namespace VCUtil;
+
 namespace {
     static SRWLock s_lock;
-}
 
-void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
-    access, void *useptr)
-{
-    (void)handle;
-    (void)useptr;
-    if (data == CURL_LOCK_DATA_DNS)
+    void curlLock(CURL *handle, curl_lock_data data, curl_lock_access
+        access, void *useptr)
     {
-        if (access == CURL_LOCK_ACCESS_SHARED)
+        (void)handle;
+        (void)useptr;
+        if (data == CURL_LOCK_DATA_DNS)
         {
-            s_lock.lock(true);
-        }
-        else if (access == CURL_LOCK_ACCESS_SINGLE)
-        {
-            s_lock.lock(false);
+            if (access == CURL_LOCK_ACCESS_SHARED)
+            {
+                s_lock.lock(true);
+            }
+            else if (access == CURL_LOCK_ACCESS_SINGLE)
+            {
+                s_lock.lock(false);
+            }
         }
     }
-}
 
-void curlUnlock(CURL *handle, curl_lock_data data, void *useptr)
-{
-    (void)handle;
-    (void)useptr;
-    if (data == CURL_LOCK_DATA_DNS)
+    void curlUnlock(CURL *handle, curl_lock_data data, void *useptr)
     {
-        s_lock.unlock();
+        (void)handle;
+        (void)useptr;
+        if (data == CURL_LOCK_DATA_DNS)
+        {
+            s_lock.unlock();
+        }
     }
 }
 

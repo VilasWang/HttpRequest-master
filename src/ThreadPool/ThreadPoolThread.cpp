@@ -1,12 +1,14 @@
 //#include "stdafx.h"
 #include "ThreadPoolThread.h"
-#include "ThreadPool.h"
-#include "Task.h"
 #include <process.h>
 #include <cassert>
 #include <iostream>
 #include "ClassMemoryTracer.h"
 #include "log.h"
+#include "ThreadPool.h"
+#include "Task.h"
+
+using namespace VCUtil;
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadpool)
     : m_pThreadPool(threadpool)

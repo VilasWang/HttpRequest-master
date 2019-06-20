@@ -6,8 +6,9 @@
 #include <memory>
 #if _MSC_VER >= 1700
 #include <atomic>
-#endif
+#else
 #include "Lock.h"
+#endif
 
 //class ScheduleThread - 线程池调度线程
 class ScheduleThread
@@ -55,7 +56,7 @@ private:
     std::atomic<bool> m_bExit;
     std::atomic<bool> m_bRunning;
 #else
-    mutable CSLock m_lock;
+    mutable VCUtil::CSLock m_lock;
     bool m_bExit;
     bool m_bRunning;
 #endif

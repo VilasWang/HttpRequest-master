@@ -7,6 +7,7 @@
 #endif
 #include "Lock.h"
 
+
 class TaskBase;
 class ThreadPool;
 
@@ -91,7 +92,7 @@ public:
 
 private:
     std::list<std::unique_ptr<ThreadPoolThread>> m_threads;
-    mutable CSLock m_lock;
+    mutable VCUtil::CSLock m_lock;
 };
 
 class IdleThreadStack
@@ -109,5 +110,5 @@ public:
 
 private:
     std::stack<std::unique_ptr<ThreadPoolThread>> m_threads;
-    mutable CSLock m_lock;
+    mutable VCUtil::CSLock m_lock;
 };

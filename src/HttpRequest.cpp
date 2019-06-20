@@ -1,4 +1,3 @@
-//#include "stdafx.h"
 #include "HttpRequest.h"
 #include <iostream>
 #include <fstream>
@@ -12,6 +11,8 @@
 #include "ClassMemoryTracer.h"
 #include "HttpTask.h"
 #include "HttpManager.h"
+
+using namespace VCUtil;
 
 #define DEFAULT_RETRY_COUNT					3
 #define DEFAULT_DOWNLOAD_THREAD_COUNT		5
@@ -50,7 +51,6 @@ struct UploadChannel
         TRACE_CLASS_DESTRUCTOR(UploadChannel);
     }
 };
-
 
 class CURLWrapper : public IRequest
 {
@@ -165,116 +165,117 @@ std::atomic<int> CURLWrapper::s_id = 0;
 int CURLWrapper::s_id = 0;
 #endif
 
-//////////////////////////////////////////////////////////////////////////
-size_t header_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
-{
-    std::string* receive_header = reinterpret_cast<std::string*>(userdata);
-    if (nullptr == receive_header || nullptr == buffer)
-        return 0;
-
-    receive_header->append(reinterpret_cast<const char*>(buffer), size * nmemb);
-    return nmemb * size;
-}
-
-size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
-{
-    std::string* receive_content = reinterpret_cast<std::string*>(userdata);
-    if (nullptr == receive_content || nullptr == ptr)
-        return 0;
-
-    receive_content->append(reinterpret_cast<const char*>(ptr), size * nmemb);
-    return nmemb * size;
-}
-
-size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
-{
-    UploadChannel *uc = (UploadChannel *)userdata;
-    if (!uc || !uc->_fp || !uc->_helper || uc->_helper->isFailed())
-        return 0;
-
-    if (uc->_helper->isCanceled())
-        return CURL_READFUNC_ABORT;
-
-    size_t retcode = fread(ptr, size, nmemb, (FILE *)uc->_fp);
-    size_t nread = retcode * size;
-
-    fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
-        " bytes from file\n", (curl_off_t)nread);
-
-    return nread;
-}
-
-size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
-{
-    CURLWrapper* helper = nullptr;
-    DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(userdata);
-    if (download_chunk)
+namespace {
+    size_t header_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
     {
-        helper = download_chunk->_helper;
+        std::string* receive_header = reinterpret_cast<std::string*>(userdata);
+        if (nullptr == receive_header || nullptr == buffer)
+            return 0;
+
+        receive_header->append(reinterpret_cast<const char*>(buffer), size * nmemb);
+        return nmemb * size;
     }
 
-    if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
-        return 0;
-
-    size_t written = 0;
-    if (0 == fseek(download_chunk->_fp, download_chunk->_startidx, SEEK_SET))
+    size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata)
     {
-        written = fwrite(buffer, size, nmemb, download_chunk->_fp);
-        if (written > 0)
+        std::string* receive_content = reinterpret_cast<std::string*>(userdata);
+        if (nullptr == receive_content || nullptr == ptr)
+            return 0;
+
+        receive_content->append(reinterpret_cast<const char*>(ptr), size * nmemb);
+        return nmemb * size;
+    }
+
+    size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
+    {
+        UploadChannel *uc = (UploadChannel *)userdata;
+        if (!uc || !uc->_fp || !uc->_helper || uc->_helper->isFailed())
+            return 0;
+
+        if (uc->_helper->isCanceled())
+            return CURL_READFUNC_ABORT;
+
+        size_t retcode = fread(ptr, size, nmemb, (FILE *)uc->_fp);
+        size_t nread = retcode * size;
+
+        fprintf_s(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
+            " bytes from file\n", (curl_off_t)nread);
+
+        return nread;
+    }
+
+    size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
+    {
+        CURLWrapper* helper = nullptr;
+        DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(userdata);
+        if (download_chunk)
         {
-            download_chunk->_startidx += written;
-            helper->setCurrentBytes(helper->currentBytes() + written);
+            helper = download_chunk->_helper;
         }
-    }
-    else
-    {
-        LOG_DEBUG("[HttpRequest] %s - fseek error! [%ul]\n", __FUNCTION__, GetLastError());
-    }
 
-    return written;
-}
+        if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
+            return 0;
 
-int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
-{
-    CURLWrapper* helper = nullptr;
-    DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(clientp);
-    if (download_chunk)
-    {
-        helper = download_chunk->_helper;
-    }
-
-    if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
-        return -1;
-
-    std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
-    if (dltotal > 0 && dlnow > 0 && reply.get())
-    {
-        if (helper->isMultiDownload())
+        size_t written = 0;
+        if (0 == fseek(download_chunk->_fp, download_chunk->_startidx, SEEK_SET))
         {
-            reply->replyProgress(helper->requestId(), true, helper->totalBytes(), helper->currentBytes());
+            written = fwrite(buffer, size, nmemb, download_chunk->_fp);
+            if (written > 0)
+            {
+                download_chunk->_startidx += written;
+                helper->setCurrentBytes(helper->currentBytes() + written);
+            }
         }
         else
         {
-            reply->replyProgress(helper->requestId(), true, dltotal, dlnow);
+            LOG_DEBUG("[HttpRequest] %s - fseek error! [%ul]\n", __FUNCTION__, GetLastError());
         }
+
+        return written;
     }
 
-    return 0;
-}
-
-int progress_upload_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
-{
-    IRequest* helper = reinterpret_cast<IRequest*>(clientp);
-    if (!helper || helper->isCanceled() || helper->isFailed())
-        return -1;
-
-    std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
-    if (ultotal > 0 && ulnow > 0 && reply.get())
+    int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
     {
-        reply->replyProgress(helper->requestId(), false, ultotal, ulnow);
+        CURLWrapper* helper = nullptr;
+        DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(clientp);
+        if (download_chunk)
+        {
+            helper = download_chunk->_helper;
+        }
+
+        if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
+            return -1;
+
+        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
+        if (dltotal > 0 && dlnow > 0 && reply.get())
+        {
+            if (helper->isMultiDownload())
+            {
+                reply->replyProgress(helper->requestId(), true, helper->totalBytes(), helper->currentBytes());
+            }
+            else
+            {
+                reply->replyProgress(helper->requestId(), true, dltotal, dlnow);
+            }
+        }
+
+        return 0;
     }
 
-    return 0;
+    int progress_upload_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+    {
+        IRequest* helper = reinterpret_cast<IRequest*>(clientp);
+        if (!helper || helper->isCanceled() || helper->isFailed())
+            return -1;
+
+        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
+        if (ultotal > 0 && ulnow > 0 && reply.get())
+        {
+            reply->replyProgress(helper->requestId(), false, ultotal, ulnow);
+        }
+
+        return 0;
+    }
 }
 
 CURLWrapper::CURLWrapper()
@@ -1486,7 +1487,7 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType rtype, HTTP::I
 #else
             std::unique_ptr<HttpTask> task(new HttpTask(true))
 #endif
-            task->attach(m_helper);
+                task->attach(m_helper);
             HttpManager::addTask(std::move(task));
         }
     }

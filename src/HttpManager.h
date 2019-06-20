@@ -3,9 +3,9 @@
 
 #include <Windows.h>
 #include <map>
-#include "curl/curl.h"
-#include "ThreadPool/ThreadPool.h"
+#include <curl/curl.h>
 #include "lock.h"
+#include "ThreadPool/ThreadPool.h"
 #include "HttpReply.h"
 
 class TaskBase;
@@ -45,7 +45,7 @@ private:
 private:
     static CURLSH* s_share_handle_;
     std::map<int, std::shared_ptr<HttpReply>> m_map_replys;
-    mutable CSLock m_lock;
+    mutable VCUtil::CSLock m_lock;
 
     friend class CURLWrapper;
     friend class HttpRequest;
