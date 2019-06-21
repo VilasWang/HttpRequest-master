@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <functional>
 #include <memory>
@@ -14,8 +14,8 @@ namespace HTTP
         Post = 0,
         Get,
         Download,
-        Upload,		//HTTP put ·½Ê½ÉÏ´ÎÎÄ¼ş (ÎÄ¼şÃûºÍÂ·¾¶ĞèÔÚurlÖĞÖ¸¶¨)
-        Upload2,	//HTTP Multipart formpost ·½Ê½ÉÏ´ÎÎÄ¼ş(´óĞ¡ÊÜÏŞÓÚ·şÎñÆ÷postÊı¾İµÄ´óĞ¡)
+        Upload,		//HTTP put æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶ (æ–‡ä»¶åå’Œè·¯å¾„éœ€åœ¨urlä¸­æŒ‡å®š)
+        Upload2,	//HTTP Multipart formpost æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶(å¤§å°å—é™äºæœåŠ¡å™¨postæ•°æ®çš„å¤§å°)
         Head,
         Unkonwn = -1
     };

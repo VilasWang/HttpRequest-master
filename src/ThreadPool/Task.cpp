@@ -1,5 +1,4 @@
-//#include "stdafx.h"
-#include "Task.h"
+﻿#include "Task.h"
 #include "ClassMemoryTracer.h"
 
 using namespace VCUtil;

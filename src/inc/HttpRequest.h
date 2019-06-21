@@ -1,4 +1,4 @@
-#ifndef __HTTP_REQUEST_H
+ï»¿#ifndef __HTTP_REQUEST_H
 #define __HTTP_REQUEST_H
 
 #include <string>
@@ -11,7 +11,7 @@
 
 
 class CURLWrapper;
-// class HttpRequest - HttpÇëÇóÀà£¨libcurl£©
+// class HttpRequest - Httpè¯·æ±‚ç±»ï¼ˆlibcurlï¼‰
 class HTTP_REQUEST_EXPORT HttpRequest
 {
 public:
@@ -27,29 +27,29 @@ public:
     HttpRequest();
     ~HttpRequest();
 
-    // ³õÊ¼»¯libcurl×ÊÔ´£¬³õÊ¼»¯Ïß³Ì³Ø(ĞèÔÚÖ÷Ïß³ÌÖĞ)
+    // åˆå§‹åŒ–libcurlèµ„æºï¼Œåˆå§‹åŒ–çº¿ç¨‹æ± (éœ€åœ¨ä¸»çº¿ç¨‹ä¸­)
     static void globalInit();
 
-    // È¡ÏûËùÓĞÇëÇó£¬ÇåÀílibcurl×ÊÔ´£¬ÈÃÏß³Ì³ØËùÓĞÏß³ÌÈ¡ÏûÈÎÎñ²¢ÍË³ö(ĞèÔÚÖ÷Ïß³ÌÖĞ)
+    // å–æ¶ˆæ‰€æœ‰è¯·æ±‚ï¼Œæ¸…ç†libcurlèµ„æºï¼Œè®©çº¿ç¨‹æ± æ‰€æœ‰çº¿ç¨‹å–æ¶ˆä»»åŠ¡å¹¶é€€å‡º(éœ€åœ¨ä¸»çº¿ç¨‹ä¸­)
     static void globalCleanup();
 
 public:
-    // ¿ªÊ¼ÇëÇó£¬²¢·µ»ØHttpReply. 
-    // 1£ºÍ¬²½ÇëÇó¿ÉÒÔÖ±½Óµ÷ÓÃHttpReplyµÄ½Ó¿Ú»ñÈ¡½á¹û
-    // 2£ºÒì²½ÇëÇó¿ÉÒÔÉèÖÃÒì²½»Øµ÷½Ó¿Ú£¬ÇëÇó½áÊøÊ±×Ô¶¯»Øµ÷»ñÈ¡½á¹û
-    // ×¢Òâµã£º	1.Òì²½ÇëÇóµÄÊ±ºò£¬ ĞèÒª°Ñ·µ»ØµÄstd::shared_ptr<HttpReply>¸ù¾İid±£´æÆğÀ´£»
-    //				µÈÊÕµ½½áÊø»Øµ÷µÄÊ±ºò£¬ÔÙ°Ñstd::shared_ptr<HttpReply>ÖÃ¿Õ£¬²»È»»áÊÕ²»µ½½áÊø»Øµ÷¡£
-    //			2.Òì²½ÇëÇóµÄ»Øµ÷½Ó¿Ú¶¼ÊÇÔÚcurlÖ´ĞĞµÄ¹¤×÷Ïß³Ìµ÷ÓÃ£¬ËùÒÔ¸ù¾İ²»Í¬Çé¿ö£¬×Ô¼ºÔÙ×öÒ»Ğ©´¦Àí¡£
-    //				±ÈÈç»Øµ÷½Ó¿ÚÖĞ¼ÓËø·ÃÎÊ×ÊÔ´»òÕß°Ñ»Øµ÷½á¹ûÔÙpostµÄÄã×Ô¼ºµÄÏß³ÌÖĞ´¦Àí¡£(±È½ÏºÃµÄÊÇºóÕß)
+    // å¼€å§‹è¯·æ±‚ï¼Œå¹¶è¿”å›HttpReply. 
+    // 1ï¼šåŒæ­¥è¯·æ±‚å¯ä»¥ç›´æ¥è°ƒç”¨HttpReplyçš„æ¥å£è·å–ç»“æœ
+    // 2ï¼šå¼‚æ­¥è¯·æ±‚å¯ä»¥è®¾ç½®å¼‚æ­¥å›è°ƒæ¥å£ï¼Œè¯·æ±‚ç»“æŸæ—¶è‡ªåŠ¨å›è°ƒè·å–ç»“æœ
+    // æ³¨æ„ç‚¹ï¼š	1.å¼‚æ­¥è¯·æ±‚çš„æ—¶å€™ï¼Œ éœ€è¦æŠŠè¿”å›çš„std::shared_ptr<HttpReply>æ ¹æ®idä¿å­˜èµ·æ¥ï¼›
+    //				ç­‰æ”¶åˆ°ç»“æŸå›è°ƒçš„æ—¶å€™ï¼Œå†æŠŠstd::shared_ptr<HttpReply>ç½®ç©ºï¼Œä¸ç„¶ä¼šæ”¶ä¸åˆ°ç»“æŸå›è°ƒã€‚
+    //			2.å¼‚æ­¥è¯·æ±‚çš„å›è°ƒæ¥å£éƒ½æ˜¯åœ¨curlæ‰§è¡Œçš„å·¥ä½œçº¿ç¨‹è°ƒç”¨ï¼Œæ‰€ä»¥æ ¹æ®ä¸åŒæƒ…å†µï¼Œè‡ªå·±å†åšä¸€äº›å¤„ç†ã€‚
+    //				æ¯”å¦‚å›è°ƒæ¥å£ä¸­åŠ é”è®¿é—®èµ„æºæˆ–è€…æŠŠå›è°ƒç»“æœå†postçš„ä½ è‡ªå·±çš„çº¿ç¨‹ä¸­å¤„ç†ã€‚(æ¯”è¾ƒå¥½çš„æ˜¯åè€…)
     std::shared_ptr<HttpReply> perform(HTTP::RequestType, HTTP::IOMode mode = HTTP::Async);
-    // È¡ÏûÇëÇó
+    // å–æ¶ˆè¯·æ±‚
     static bool cancel(int requestId);
-    // È¡ÏûËùÓĞÇëÇó
+    // å–æ¶ˆæ‰€æœ‰è¯·æ±‚
     static bool cancelAll();
 
-    // Òì²½»Øµ÷api
-    // ×¢£º×îºÃ²»ÒªÓÃÀàµÄ·Ç¾²Ì¬³ÉÔ±º¯Êı¡£ÒÔÃâ»Øµ÷·µ»ØÊ±¶ÔÏóÒÑÎö¹¹¡£
-    // ÍÆ¼öÓÃlambda¡£Èç£º
+    // å¼‚æ­¥å›è°ƒapi
+    // æ³¨ï¼šæœ€å¥½ä¸è¦ç”¨ç±»çš„éé™æ€æˆå‘˜å‡½æ•°ã€‚ä»¥å…å›è°ƒè¿”å›æ—¶å¯¹è±¡å·²ææ„ã€‚
+    // æ¨èç”¨lambdaã€‚å¦‚ï¼š
     //		auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string){
     //			if (CurlTool::isInstantiated())
     //			{
@@ -69,7 +69,7 @@ public:
     int	setProgressCallback(ProgressCallback pc);
 
     int setRetryTimes(int retry_times);
-    int setTimeout(long time_out = 0); // ÇëÇó³¬Ê±£¨second£©
+    int setTimeout(long time_out = 0); // è¯·æ±‚è¶…æ—¶ï¼ˆsecondï¼‰
     int setUrl(const std::string& url);
     int setProxy(const std::string& proxy, long proxy_port);
     // set http redirect follow location
@@ -78,14 +78,14 @@ public:
     int setHeader(const std::map<std::string, std::string>& headers);
     int setHeader(const std::string& header);
 
-    // Èôµ÷ÓÃ¸Ã·½·¨¾ÍÊÇpost·½Ê½ÇëÇó£¬·ñÔòÊÇcurlÄ¬ÈÏget
+    // è‹¥è°ƒç”¨è¯¥æ–¹æ³•å°±æ˜¯postæ–¹å¼è¯·æ±‚ï¼Œå¦åˆ™æ˜¯curlé»˜è®¤get
     int setPostData(const std::string& data);
     int setPostData(const char* data, unsigned int size);
 
     int setDownloadFile(const std::string& file_path, int thread_count = 5);
-    //HTTP put ·½Ê½ÉÏ´ÎÎÄ¼ş (ÎÄ¼şÃûºÍÂ·¾¶ÔÚurlÖĞĞèÒªÖ¸¶¨)
+    //HTTP put æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶ (æ–‡ä»¶åå’Œè·¯å¾„åœ¨urlä¸­éœ€è¦æŒ‡å®š)
     int setUploadFile(const std::string& file_path);
-    //HTTP Multipart formpost ·½Ê½ÉÏ´ÎÎÄ¼ş
+    //HTTP Multipart formpost æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶
     int setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path);
 
 private:

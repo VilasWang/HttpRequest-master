@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <deque>
 #include <memory>
@@ -40,7 +40,7 @@ public:
 public:
     std::unique_ptr<TaskBase> pop();
     bool push(std::unique_ptr<TaskBase> t);
-    bool pushFront(std::unique_ptr<TaskBase> t);//²åµ½¶ÓÊ×
+    bool pushFront(std::unique_ptr<TaskBase> t);//æ’åˆ°é˜Ÿé¦–
     bool isEmpty();
     bool clear();
 

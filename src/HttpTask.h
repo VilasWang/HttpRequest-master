@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ThreadPool/Task.h"
 #include "HttpRequest.h"
 #include "httprequestdef.h"
 
-// class HttpTask - HttpÇëÇóÈÎÎñ
+// class HttpTask - Httpè¯·æ±‚ä»»åŠ¡
 class HttpTask : public TaskBase
 {
 public:

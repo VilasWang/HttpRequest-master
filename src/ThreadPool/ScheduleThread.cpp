@@ -1,5 +1,4 @@
-//#include "stdafx.h"
-#include "ScheduleThread.h"
+ï»¿#include "ScheduleThread.h"
 #include <process.h>
 #include <iostream>
 #include "ThreadPool.h"
@@ -206,7 +205,7 @@ void ScheduleThread::run()
 
     if (!ThreadPool::globalInstance()->hasIdleThread())
     {
-        //ÓĞÈÎÎñµ«ÊÇÃ»ÓĞ¿ÕÏĞÏß³Ì¡£µ÷ÓÃSleep(0), ·ÅÆúµ±Ç°cpuÊ±¼äÆ¬£¬µ÷¶È½ø³ÌÇĞ»»¿Éµ÷¶ÈÏß³Ì
+        //æœ‰ä»»åŠ¡ä½†æ˜¯æ²¡æœ‰ç©ºé—²çº¿ç¨‹ã€‚è°ƒç”¨Sleep(0), æ”¾å¼ƒå½“å‰cpuæ—¶é—´ç‰‡ï¼Œè°ƒåº¦è¿›ç¨‹åˆ‡æ¢å¯è°ƒåº¦çº¿ç¨‹
         Sleep(0);//SwitchToThread();
         return;
     }

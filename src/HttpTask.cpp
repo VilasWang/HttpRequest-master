@@ -1,4 +1,4 @@
-#include "HttpTask.h"
+﻿#include "HttpTask.h"
 #include <iostream>
 #include "ClassMemoryTracer.h"
 #include "log.h"

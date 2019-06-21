@@ -1,4 +1,4 @@
-#ifndef INTERNET_H
+﻿#ifndef INTERNET_H
 #define INTERNET_H
 
 #include <QtWidgets/QMainWindow>
@@ -59,7 +59,7 @@ private:
     void initialize();
     void unIntialize();
 
-    //��ȡϵͳĬ������Ŀ¼
+    //获取系统默认下载目录
     QString getDefaultDownloadDir();
     QString bytes2String(qint64 bytes);
     void appendMsg(const QString& strMsg, bool bQDebug = true);

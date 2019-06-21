@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <windows.h>
 #include <string>
 #include "httpRequestDef.h"
 #include "HttpRequest_global.h"
 
-// class HttpReply - HttpÏìÓ¦Àà
+// class HttpReply - Httpå“åº”ç±»
 class HTTP_REQUEST_EXPORT HttpReply
 {
 public:
@@ -32,7 +32,7 @@ private:
     ResultCallback  m_result_callback;
     ProgressCallback  m_progress_callback;
 
-    //·µ»ØÖµ
+    //è¿”å›å€¼
     long m_http_code;
     std::string	m_receive_header;
     std::string	m_receive_content;

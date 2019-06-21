@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <functional>
 #include "ThreadPoolThread.h"
@@ -7,7 +7,7 @@
 
 #define WM_THREAD_TASK_FINISHED (WM_USER + 1000)
 
-// class ThreadPool - Ïß³Ì³Ø
+// class ThreadPool - çº¿ç¨‹æ± 
 class ThreadPool
 {
 public:
@@ -26,12 +26,12 @@ public:
     static ThreadPool* globalInstance();
 
 public:
-    //³õÊ¼»¯Ïß³Ì³Ø£¬´´½¨n¸öÏß³ÌµÄÏß³Ì³Ø¡£
+    //åˆå§‹åŒ–çº¿ç¨‹æ± ï¼Œåˆ›å»ºnä¸ªçº¿ç¨‹çš„çº¿ç¨‹æ± ã€‚
     bool init(int threadCount = 4);
-    //Í£Ö¹ËùÓĞµÄÈÎÎñ£¬²¢ÇÒ½«ËùÓĞÏß³ÌÍË³ö¡£
+    //åœæ­¢æ‰€æœ‰çš„ä»»åŠ¡ï¼Œå¹¶ä¸”å°†æ‰€æœ‰çº¿ç¨‹é€€å‡ºã€‚
     bool waitForDone();
 
-    //priorityÎªÓÅÏÈ¼¶¡£¸ßÓÅÏÈ¼¶µÄÈÎÎñ½«±»²åÈëµ½¶ÓÊ×
+    //priorityä¸ºä¼˜å…ˆçº§ã€‚é«˜ä¼˜å…ˆçº§çš„ä»»åŠ¡å°†è¢«æ’å…¥åˆ°é˜Ÿé¦–
     bool addTask(std::unique_ptr<TaskBase> t, Priority p = Normal);
     bool abortTask(int taskId);
     bool abortAllTask();

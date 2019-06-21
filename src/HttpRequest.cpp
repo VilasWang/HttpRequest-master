@@ -1,4 +1,4 @@
-#include "HttpRequest.h"
+ï»¿#include "HttpRequest.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -16,8 +16,8 @@ using namespace VCUtil;
 
 #define DEFAULT_RETRY_COUNT					3
 #define DEFAULT_DOWNLOAD_THREAD_COUNT		5
-#define DEFAULT_CONNECT_TIMEOUT				10		//Á¬½Ó×î³¤Ê±¼ä
-#define DEFAULT_TIMEOUT						600		//´«Êä×î³¤Ê±¼ä
+#define DEFAULT_CONNECT_TIMEOUT				10		//è¿žæŽ¥æœ€é•¿æ—¶é—´
+#define DEFAULT_TIMEOUT						600		//ä¼ è¾“æœ€é•¿æ—¶é—´
 #define MINIMAL_PROGRESS_INTERVAL			3
 
 struct DownloadChunk
@@ -70,9 +70,9 @@ public:
     int	setProxy(const std::string& proxy, long proxy_port);
     int setDownloadFile(const std::string& file_name);
     int setDownloadThreadCount(int thread_count);
-    //HTTP put ·½Ê½ÉÏ´ÎÎÄ¼þ
+    //HTTP put æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶
     int setUploadFile(const std::string& file_name);
-    //HTTP Multipart formpost ·½Ê½ÉÏ´ÎÎÄ¼þ
+    //HTTP Multipart formpost æ–¹å¼ä¸Šæ¬¡æ–‡ä»¶
     int setUploadFile(const std::string& file_name, const std::string& target_name, const std::string& target_path);
     void setResultCallback(ResultCallback rc);
     void setProgressCallback(ProgressCallback pc);
@@ -104,7 +104,7 @@ private:
     int doPostGet();
     int doDownload();
     int doUpload();
-    int doFormPostUpload();//Êµ¼ÊÉÏÊÇÖ´ÐÐcurl httppostµÄ·½Ê½
+    int doFormPostUpload();//å®žé™…ä¸Šæ˜¯æ‰§è¡Œcurl httppostçš„æ–¹å¼
     int doHead();
 
     int	download(DownloadChunk* download_chunk);
@@ -141,7 +141,7 @@ private:
     ResultCallback  m_result_callback;
     ProgressCallback  m_progress_callback;
 
-    //ÏÂÔØ
+    //ä¸‹è½½
     std::string	m_file_path;
     int	m_thread_count;
 #if _MSC_VER >= 1700
@@ -154,7 +154,7 @@ private:
     INT64 m_current_size;
 #endif
 
-    //ÉÏ´«
+    //ä¸Šä¼ 
     std::string m_strTargetName;
     std::string m_strTargetPath;
     std::string m_strUploadFile;
@@ -687,7 +687,7 @@ int CURLWrapper::doDownload()
     }
     LOG_DEBUG("[HttpRequest]multi-download: %d; thread-count: %d\n", (int)m_multi_download, m_thread_count);
 
-    //ÎÄ¼þ´óÐ¡ÓÐ·Ö¿ªÏÂÔØµÄ±ØÒª²¢ÇÒ·þÎñÆ÷Ö§³Ö¶àÏß³ÌÏÂÔØÊ±£¬ÆôÓÃ¶àÏß³ÌÏÂÔØ
+    //æ–‡ä»¶å¤§å°æœ‰åˆ†å¼€ä¸‹è½½çš„å¿…è¦å¹¶ä¸”æœåŠ¡å™¨æ”¯æŒå¤šçº¿ç¨‹ä¸‹è½½æ—¶ï¼Œå¯ç”¨å¤šçº¿ç¨‹ä¸‹è½½
     if (m_multi_download && m_thread_count > 1)
     {
         long gap = static_cast<long>(m_total_size) / m_thread_count;
@@ -1152,7 +1152,7 @@ int CURLWrapper::download(DownloadChunk* chunk)
         }
         else
         {
-            //›]¸³Öµ¹ý´íÎóÂë£¬¾Í¸³Öµ¸ö200£¬±£Ö¤²»»á°ÑÖ®Ç°´íÎóµÄ³åµô
+            //æ²’èµ‹å€¼è¿‡é”™è¯¯ç ï¼Œå°±èµ‹å€¼ä¸ª200ï¼Œä¿è¯ä¸ä¼šæŠŠä¹‹å‰é”™è¯¯çš„å†²æŽ‰
             if (reply->m_http_code != 0)
             {
                 reply->m_http_code = 200;
@@ -1218,7 +1218,7 @@ INT64 CURLWrapper::getDownloadFileSize()
 
                 if (reply.get())
                 {
-                    //Æ¥Åä"Accept-Ranges: bytes" ÔòÖ¤Ã÷Ö§³Ö¶àÏß³ÌÏÂÔØ
+                    //åŒ¹é…"Accept-Ranges: bytes" åˆ™è¯æ˜Žæ”¯æŒå¤šçº¿ç¨‹ä¸‹è½½
                     std::regex pattern("Accept-Ranges: bytes", std::regex::icase);
                     m_multi_download = std::regex_search(reply->m_receive_header, pattern);
                 }

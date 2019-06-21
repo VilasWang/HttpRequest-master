@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef SCHEDULETHREAD_H
 #define SCHEDULETHREAD_H
 
@@ -10,7 +10,7 @@
 #include "Lock.h"
 #endif
 
-//class ScheduleThread - �̳߳ص����߳�
+//class ScheduleThread - 线程池调度线程
 class ScheduleThread
 {
 public:

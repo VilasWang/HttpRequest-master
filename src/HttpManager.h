@@ -1,4 +1,4 @@
-#ifndef __HTTP_MANAGER_H
+ï»¿#ifndef __HTTP_MANAGER_H
 #define __HTTP_MANAGER_H
 
 #include <Windows.h>
@@ -9,7 +9,7 @@
 #include "HttpReply.h"
 
 class TaskBase;
-// class HttpManager - Http¹ÜÀíÀà
+// class HttpManager - Httpç®¡ç†ç±»
 class HttpManager
 {
 public:

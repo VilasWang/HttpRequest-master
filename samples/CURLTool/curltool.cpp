@@ -1,4 +1,4 @@
-#include <QDebug>
+ï»¿#include <QDebug>
 #include <QDir>
 #include <QTime>
 #include <QJsonDocument>
@@ -15,7 +15,7 @@
 #include "HttpRequest.h"
 
 #define TEST_POST_COUNT 100
-//¾ÖÓòÍøApache http·þÎñÆ÷
+//å±€åŸŸç½‘Apache httpæœåŠ¡å™¨
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
 
@@ -90,7 +90,7 @@ CurlTool::CurlTool(QWidget* parent)
 {
     ui.setupUi(this);
     setFixedSize(630, 610);
-    setWindowTitle(QStringLiteral("CurlÍøÂçÇëÇó¹¤¾ß"));
+    setWindowTitle(QStringLiteral("Curlç½‘ç»œè¯·æ±‚å·¥å…·"));
 
     ui.btn_abort->setEnabled(false);
     ui.textEdit_output->setReadOnly(true);
@@ -175,7 +175,7 @@ void CurlTool::onUpdateDefaultInfos()
         {
             ui.lineEdit_url->setText("http://127.0.0.1:80/_php/formpost.php");
             ui.lineEdit_uploadFile->setText("test.rar");
-            ui.lineEdit_saveDir->setText("./upload");		//¶ÔÓ¦ÉÏ´«·þÎñÆ÷µÄ¸ùÄ¿Â¼µÄÏà¶ÔÂ·¾¶
+            ui.lineEdit_saveDir->setText("./upload");		//å¯¹åº”ä¸Šä¼ æœåŠ¡å™¨çš„æ ¹ç›®å½•çš„ç›¸å¯¹è·¯å¾„
             ui.lineEdit_targetname->setText("test.rar");
         }
         else if (ui.cb_get->isChecked())
@@ -310,7 +310,7 @@ void CurlTool::onDownload()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -318,7 +318,7 @@ void CurlTool::onDownload()
     const QString& strSavePath = ui.lineEdit_saveDir->text().trimmed();
     if (strSavePath.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("ÎÄ¼þ±£´æÎ»ÖÃ²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("æ–‡ä»¶ä¿å­˜ä½ç½®ä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -326,7 +326,7 @@ void CurlTool::onDownload()
     const QString& strFileName = ui.lineEdit_targetname->text().trimmed();
     if (strFileName.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("ÎÄ¼þ±£´æÎ»ÖÃ²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("æ–‡ä»¶ä¿å­˜ä½ç½®ä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -361,7 +361,7 @@ void CurlTool::onUpload()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -369,7 +369,7 @@ void CurlTool::onUpload()
     const QString& strUploadFilePath = ui.lineEdit_uploadFile->text().trimmed();
     if (strUploadFilePath.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("ÉÏ´«ÎÄ¼þ²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("ä¸Šä¼ æ–‡ä»¶ä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -396,7 +396,7 @@ void CurlTool::onFormPost()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -404,7 +404,7 @@ void CurlTool::onFormPost()
     const QString& strUploadFilePath = ui.lineEdit_uploadFile->text().trimmed();
     if (strUploadFilePath.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("ÉÏ´«ÎÄ¼þ²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("ä¸Šä¼ æ–‡ä»¶ä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -445,7 +445,7 @@ void CurlTool::onGetRequest()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -470,7 +470,7 @@ void CurlTool::onPostRequest()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -478,7 +478,7 @@ void CurlTool::onPostRequest()
     const QString& strArg = ui.lineEdit_arg->text().trimmed();
     if (strArg.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("²ÎÊý²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("å‚æ•°ä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -508,7 +508,7 @@ void CurlTool::onHeadRequest()
     const QString& strUrl = ui.lineEdit_url->text().trimmed();
     if (strUrl.isEmpty())
     {
-        QMessageBox::information(nullptr, "Tips", QStringLiteral("url²»ÄÜÎª¿Õ"), QMessageBox::Ok);
+        QMessageBox::information(nullptr, "Tips", QStringLiteral("urlä¸èƒ½ä¸ºç©º"), QMessageBox::Ok);
         reset();
         return;
     }
@@ -565,7 +565,7 @@ void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint
         }
         const QString& strReceived = bytes2String(dlnow);
         ui.progressBar_d->setValue(dlnow);
-        //appendMsg(QStringLiteral("ÏÂÔØ£º%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
+        //appendMsg(QStringLiteral("ä¸‹è½½ï¼š%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
     }
 
     if (ulnow > m_nbytesSent)
@@ -579,7 +579,7 @@ void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint
         }
         const QString& strSent = bytes2String(ulnow);
         ui.progressBar_u->setValue(ulnow);
-        //appendMsg(QStringLiteral("ÉÏ´«£º%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
+        //appendMsg(QStringLiteral("ä¸Šä¼ ï¼š%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
     }
 }
 

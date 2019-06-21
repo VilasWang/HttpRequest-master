@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <windows.h>
 #include <list>
 #include <stack>
@@ -11,7 +11,7 @@
 class TaskBase;
 class ThreadPool;
 
-//Class ThreadPoolThread - Ïß³Ì³Ø¹¤×÷Ïß³Ì
+//Class ThreadPoolThread - çº¿ç¨‹æ± å·¥ä½œçº¿ç¨‹
 class ThreadPoolThread
 {
 public:
@@ -25,9 +25,9 @@ public:
 public:
     bool start();
     void quit();
-    //Ïß³Ì¹ÒÆğ
+    //çº¿ç¨‹æŒ‚èµ·
     bool suspend();
-    //Ïß³Ì¹ÒÆğ»Ö¸´
+    //çº¿ç¨‹æŒ‚èµ·æ¢å¤
     bool resume();
 
     bool isRunning() const;
@@ -35,14 +35,14 @@ public:
     const UINT threadId() const { return m_nThreadID; }
     const int taskId();
 
-    //½«ÈÎÎñ¹ØÁªµ½Ïß³ÌÀà
+    //å°†ä»»åŠ¡å…³è”åˆ°çº¿ç¨‹ç±»
     bool assignTask(std::unique_ptr<TaskBase> pTask);
     bool runTask();
     bool terminateTask();
 
 protected:
     virtual void exec();
-    //³¢ÊÔÍ£Ö¹ÕıÔÚÖ´ĞĞµÄÈÎÎñ£¬·ñÔòµÈ´ıÈÎÎñ½áÊø
+    //å°è¯•åœæ­¢æ­£åœ¨æ‰§è¡Œçš„ä»»åŠ¡ï¼Œå¦åˆ™ç­‰å¾…ä»»åŠ¡ç»“æŸ
     virtual void waitForDone();
 
 private:

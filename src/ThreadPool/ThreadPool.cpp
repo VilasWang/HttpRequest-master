@@ -1,5 +1,4 @@
-//#include "stdafx.h"
-#include "ThreadPool.h"
+ï»¿#include "ThreadPool.h"
 #include <cassert>
 #include <iostream>
 #include "ClassMemoryTracer.h"
@@ -84,11 +83,11 @@ bool ThreadPool::addTask(std::unique_ptr<TaskBase> t, Priority p)
 
     if (p == Normal)
     {
-        m_taskQueue.push(std::move(t));	        //·ÅÈëÈÎÎñ¶ÓÁÐ¶ÓÎ²
+        m_taskQueue.push(std::move(t));	        //æ”¾å…¥ä»»åŠ¡é˜Ÿåˆ—é˜Ÿå°¾
     }
     else if (p == High)
     {
-        m_taskQueue.pushFront(std::move(t));	//¸ßÓÅÏÈ¼¶ÈÎÎñ·ÅÈëÈÎÎñ¶ÓÁÐ¶ÓÊ×
+        m_taskQueue.pushFront(std::move(t));	//é«˜ä¼˜å…ˆçº§ä»»åŠ¡æ”¾å…¥ä»»åŠ¡é˜Ÿåˆ—é˜Ÿé¦–
     }
 
     if (m_pThread.get() && m_pThread->isSuspend())

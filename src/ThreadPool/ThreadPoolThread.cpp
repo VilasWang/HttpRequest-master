@@ -1,5 +1,4 @@
-//#include "stdafx.h"
-#include "ThreadPoolThread.h"
+﻿#include "ThreadPoolThread.h"
 #include <process.h>
 #include <cassert>
 #include <iostream>
