@@ -5,8 +5,6 @@ HttpRequest moudle
 @Contact: QQ451930733 | 451930733@qq.com  
 
 
-** HttpRequest is free library licensed under the term of LGPL v3.0. **
-
 
 
 ## Detailed Description
