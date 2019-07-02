@@ -13,7 +13,7 @@ class HTTP_REQUEST_EXPORT HttpReply
 {
 public:
     explicit HttpReply(int requestId = 0);
-    ~HttpReply();
+    virtual ~HttpReply();
 
     int id() const { return m_request_id; }
     long httpStatusCode() const { return m_http_code; }

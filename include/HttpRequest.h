@@ -26,7 +26,7 @@ public:
 
 public:
     HttpRequest();
-    ~HttpRequest();
+    virtual ~HttpRequest();
 
     // 初始化libcurl资源，初始化线程池(需在主线程中)
     static void globalInit();
