@@ -90,7 +90,7 @@ void ThreadPoolThread::waitForDone()
 
 UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
 {
-    ThreadPoolThread* t = (ThreadPoolThread*)pParam;
+    ThreadPoolThread* t = reinterpret_cast<ThreadPoolThread*>(pParam);
     if (t)
     {
         {

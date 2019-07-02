@@ -153,9 +153,7 @@ void CurlTool::onUpdateDefaultInfos()
     {
         if (ui.cb_download->isChecked())
         {
-            QString str1 = "timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1547925666567&di=52db6d8b1f0da19f118cfdbe3d969b10&imgtype=0&src=http%3A%2F%2Fimg.pconline.com.cn%2Fimages%2Fupload%2Fupc%2Ftx%2Fwallpaper%2F1207%2F02%2Fc0%2F12195456_1341200893045.jpg";
-            QString str2 = "https://www.python.org/ftp/python/3.7.2/python-3.7.2.exe";
-            const QString& strUrl = str2;
+            const QString& strUrl = "https://www.python.org/ftp/python/3.7.2/python-3.7.2.exe";
             ui.lineEdit_url->setText(strUrl);
             ui.lineEdit_targetname->setText("python-3.7.2.exe");
             ui.lineEdit_saveDir->setText(getDefaultDownloadDir());
@@ -415,7 +413,6 @@ void CurlTool::onFormPost()
         QFileInfo fileInfo(strUploadFilePath);
         strTargetName = fileInfo.fileName();
     }
-    const QString& strTargetFilePath = strSavePath + "/" + strTargetName;
 
     m_nTotalNum = 1;
     m_timeStart = QTime::currentTime();

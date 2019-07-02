@@ -188,7 +188,7 @@ namespace {
 
     size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
     {
-        UploadChannel *uc = (UploadChannel *)userdata;
+        UploadChannel *uc = reinterpret_cast<UploadChannel *>(userdata);
         if (!uc || !uc->_fp || !uc->_request || uc->_request->isFailed())
             return 0;
 
@@ -986,7 +986,7 @@ int CURLWrapper::doHead()
         std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
 
         curl_slist*	http_headers = nullptr;
-        CURLcode curl_code = publicSetoptMethod(curl, http_headers);
+        curl_code = publicSetoptMethod(curl, http_headers);
         if (curl_code != CURLE_OK)
         {
             if (reply.get())
@@ -1011,7 +1011,6 @@ int CURLWrapper::doHead()
             curl_easy_setopt(curl, CURLOPT_HEADERDATA, &reply->m_receive_header);
         }
 
-        long http_code = 0;
         curl_code = curl_easy_perform(curl);
         if (curl_code == CURLE_OPERATION_TIMEDOUT)
         {
@@ -1056,7 +1055,7 @@ int CURLWrapper::download(DownloadChunk* chunk)
         std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(m_id);
 
         curl_slist*	http_headers = nullptr;
-        CURLcode curl_code = publicSetoptMethod(curl, http_headers);
+        curl_code = publicSetoptMethod(curl, http_headers);
         if (curl_code != CURLE_OK)
         {
             if (reply.get())

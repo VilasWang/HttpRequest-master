@@ -124,7 +124,7 @@ bool ScheduleThread::isSuspend()
 
 unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
 {
-    ScheduleThread *t = (ScheduleThread *)(pParam);
+    ScheduleThread *t = reinterpret_cast<ScheduleThread *>(pParam);
     if (t)
     {
         {
@@ -141,10 +141,9 @@ unsigned __stdcall ScheduleThread::ThreadFunc(LPVOID pParam)
         HANDLE h[1];
         h[0] = t->m_hEvent;
 
-        DWORD ret = WAIT_FAILED;
         while (!t->isExit())
         {
-            ret = MsgWaitForMultipleObjects(1, h, false, INFINITE, QS_ALLPOSTMESSAGE);
+            DWORD ret = MsgWaitForMultipleObjects(1, h, false, INFINITE, QS_ALLPOSTMESSAGE);
             switch (ret)
             {
             case WAIT_OBJECT_0:
