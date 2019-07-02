@@ -1,7 +1,7 @@
 ﻿#include "HttpTask.h"
 #include <iostream>
 #include "ClassMemoryTracer.h"
-#include "log.h"
+#include "Log.h"
 
 
 HttpTask::HttpTask(bool bAutoDelete) : TaskBase(bAutoDelete)
@@ -16,7 +16,7 @@ HttpTask::~HttpTask()
     detach();
 }
 
-void HttpTask::attach(std::shared_ptr<IRequest> request)
+void HttpTask::attach(std::shared_ptr<HTTP::IRequest> request)
 {
     m_interface = request;
     m_id = request->requestId();

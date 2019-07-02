@@ -14,7 +14,7 @@
 #include "curltool.h"
 #include "HttpRequest.h"
 
-#define TEST_POST_COUNT 100
+#define TEST_POST_COUNT 1000
 //局域网Apache http服务器
 #define HTTP_SERVER_IP "127.0.0.1"
 #define HTTP_SERVER_PORT "80"
@@ -55,26 +55,20 @@ namespace
 
 
     auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string) {
-        if (CurlTool::isInstantiated())
-        {
-            RequestFinishEvent* event = new RequestFinishEvent;
-            event->id = id;
-            event->success = success;
-            event->strContent = QString::fromStdString(data);
-            event->strError = QString::fromStdString(error_string);
-            QCoreApplication::postEvent(CurlTool::getInstance(), event);
-        }
+        RequestFinishEvent* event = new RequestFinishEvent;
+        event->id = id;
+        event->success = success;
+        event->strContent = QString::fromStdString(data);
+        event->strError = QString::fromStdString(error_string);
+        QCoreApplication::postEvent(CurlTool::singleton(), event);
     };
 
     auto onProgressCallback = [](int id, bool bDownload, qint64 total_size, qint64 current_size) {
-        if (CurlTool::isInstantiated())
-        {
-            ProgressEvent* event = new ProgressEvent;
-            event->isDownload = bDownload;
-            event->total = total_size;
-            event->current = current_size;
-            QCoreApplication::postEvent(CurlTool::getInstance(), event);
-        }
+        ProgressEvent* event = new ProgressEvent;
+        event->isDownload = bDownload;
+        event->total = total_size;
+        event->current = current_size;
+        QCoreApplication::postEvent(CurlTool::singleton(), event);
     };
 }
 //////////////////////////////////////////////////////////////////////////
@@ -350,7 +344,7 @@ void CurlTool::onDownload()
     request.setProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
-    if (reply.get())
+    if (!reply.get())
     {
         qDebug() << "Error reply!";
     }
@@ -385,7 +379,7 @@ void CurlTool::onUpload()
     request.setProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
-    if (reply.get())
+    if (!reply.get())
     {
         qDebug() << "Error reply!";
     }
@@ -434,7 +428,7 @@ void CurlTool::onFormPost()
     request.setProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload2, HTTP::Async);
-    if (reply.get())
+    if (!reply.get())
     {
         qDebug() << "Error reply!";
     }
@@ -459,7 +453,7 @@ void CurlTool::onGetRequest()
     request.setResultCallback(onRequestResultCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Get, HTTP::Async);
-    if (reply.get())
+    if (!reply.get())
     {
         qDebug() << "Error reply!";
     }
@@ -496,7 +490,7 @@ void CurlTool::onPostRequest()
         request.setPostData(strSendData.c_str(), strSendData.size());
 
         std::shared_ptr<HttpReply> reply = request.perform(HTTP::Post, HTTP::Async);
-        if (reply.get())
+        if (!reply.get())
         {
             qDebug() << "Error reply!";
         }
@@ -522,7 +516,7 @@ void CurlTool::onHeadRequest()
     request.setResultCallback(onRequestResultCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Head, HTTP::Async);
-    if (reply.get())
+    if (!reply.get())
     {
         qDebug() << "Error reply!";
     }

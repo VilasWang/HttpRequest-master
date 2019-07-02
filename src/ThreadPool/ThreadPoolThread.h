@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿#ifndef THREADPOOLTHREAD_H
+#define THREADPOOLTHREAD_H
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <list>
 #include <stack>
@@ -112,3 +116,5 @@ private:
     std::stack<std::unique_ptr<ThreadPoolThread>> m_threads;
     mutable VCUtil::CSLock m_lock;
 };
+
+#endif

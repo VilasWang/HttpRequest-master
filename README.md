@@ -12,7 +12,7 @@ HttpRequest moudle
 ## Detailed Description
 
 
-HttpRequest库是对libcurl的封装，结合C++线程池，实现http多线程异步/同步请求。
+HttpRequest库是Windows平台下对libcurl的封装，结合C++线程池，实现http多线程异步/同步请求。
 - 多任务并发执行
 - 请求支持同步和异步两种方式调用
 - 所有方法线程安全
@@ -52,28 +52,22 @@ std::cout << reply->id() << reply->httpStatusCode() << reply->errorString() << r
 #include "HttpRequest.h"
 #include "HttpReply.h"
 
-	auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string) {
-        if (CurlTool::isInstantiated())
-        {
-            RequestFinishEvent* event = new RequestFinishEvent;
-            event->id = id;
-            event->success = success;
-            event->strContent = QString::fromStdString(data);
-            event->strError = QString::fromStdString(error_string);
-            QCoreApplication::postEvent(CurlTool::instance(), event);
-        }
-    };
+auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string) {
+    RequestFinishEvent* event = new RequestFinishEvent;
+    event->id = id;
+    event->success = success;
+    event->strContent = QString::fromStdString(data);
+    event->strError = QString::fromStdString(error_string);
+    QCoreApplication::postEvent(T::singleton(), event);
+};
 
-	auto onProgressCallback = [](int id, bool bDownload, qint64 total_size, qint64 current_size) {
-        if (CurlTool::isInstantiated())
-        {
-            ProgressEvent* event = new ProgressEvent;
-            event->isDownload = bDownload;
-            event->total = total_size;
-            event->current = current_size;
-            QCoreApplication::postEvent(CurlTool::getInstance(), event);
-        }
-    };
+auto onProgressCallback = [](int id, bool bDownload, qint64 total_size, qint64 current_size) {
+    ProgressEvent* event = new ProgressEvent;
+    event->isDownload = bDownload;
+    event->total = total_size;
+    event->current = current_size;
+    QCoreApplication::postEvent(T::singleton(), event);
+};
 
 const std::string strUrl = "...";
 const std::string strFilePath = "...";

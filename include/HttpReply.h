@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿#ifndef __HTTPREPLY_H
+#define __HTTPREPLY_H
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
 #include "httpRequestDef.h"
@@ -19,8 +23,8 @@ public:
 
 private:
     void setRequestType(HTTP::RequestType type);
-    void setResultCallback(ResultCallback rc);
-    void setProgressCallback(ProgressCallback pc);
+    void setResultCallback(HTTP::ResultCallback rc);
+    void setProgressCallback(HTTP::ProgressCallback pc);
 
     friend class CURLWrapper;
 
@@ -29,8 +33,8 @@ public:
     void replyResult(bool bSuccess);
 
 private:
-    ResultCallback  m_result_callback;
-    ProgressCallback  m_progress_callback;
+    HTTP::ResultCallback  m_result_callback;
+    HTTP::ProgressCallback  m_progress_callback;
 
     //返回值
     long m_http_code;
@@ -41,3 +45,4 @@ private:
     HTTP::RequestType m_type;
 };
 
+#endif

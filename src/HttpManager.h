@@ -1,10 +1,11 @@
 ﻿#ifndef __HTTP_MANAGER_H
 #define __HTTP_MANAGER_H
+#pragma once
 
 #include <Windows.h>
 #include <map>
 #include <curl/curl.h>
-#include "lock.h"
+#include "Lock.h"
 #include "ThreadPool/ThreadPool.h"
 #include "HttpReply.h"
 
@@ -13,7 +14,7 @@ class TaskBase;
 class HttpManager
 {
 public:
-    ~HttpManager();
+    virtual ~HttpManager();
 #if _MSC_VER >= 1700
     HttpManager(const HttpManager &) = delete;
     HttpManager &operator=(const HttpManager &) = delete;

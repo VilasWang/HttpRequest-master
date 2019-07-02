@@ -4,7 +4,11 @@
 @Contact:	QQ451930733
 */
 
+#ifndef __WINDOWS_LOCK_H__
+#define __WINDOWS_LOCK_H__
+
 #pragma once
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <memory>
 
@@ -83,3 +87,5 @@ namespace VCUtil {
         _Lock& m_lock;
     };
 }
+
+#endif

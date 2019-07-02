@@ -1,5 +1,6 @@
 ﻿#ifndef __HTTP_REQUEST_H
 #define __HTTP_REQUEST_H
+#pragma once
 
 #include <string>
 #include <map>
@@ -25,7 +26,7 @@ public:
 
 public:
     HttpRequest();
-    ~HttpRequest();
+    virtual ~HttpRequest();
 
     // 初始化libcurl资源，初始化线程池(需在主线程中)
     static void globalInit();
@@ -51,22 +52,19 @@ public:
     // 注：最好不要用类的非静态成员函数。以免回调返回时对象已析构。
     // 推荐用lambda。如：
     //		auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string){
-    //			if (CurlTool::isInstantiated())
-    //			{
-    //				RequestFinishEvent* event = new RequestFinishEvent;
-    //				event->id = id;
-    //				event->success = success;
-    //				event->strContent = QString::fromStdString(data);
-    //				event->strError = QString::fromStdString(error_string);
-    //				QCoreApplication::postEvent(CurlTool::instance(), event);
-    //			}
+    //			RequestFinishEvent* event = new RequestFinishEvent;
+    //			event->id = id;
+    //			event->success = success;
+    //			event->strContent = QString::fromStdString(data);
+    //			event->strError = QString::fromStdString(error_string);
+    //			QCoreApplication::postEvent(T::singleton(), event);
     //		};
     //		HttpRequest req;
     //		req.setUrl("...");
     //		req.setResultCallback(onRequestResultCallback);
     //		req.perform(HTTP::Get, HTTP::Async);
-    int setResultCallback(ResultCallback rc);
-    int	setProgressCallback(ProgressCallback pc);
+    int setResultCallback(HTTP::ResultCallback rc);
+    int	setProgressCallback(HTTP::ProgressCallback pc);
 
     int setRetryTimes(int retry_times);
     int setTimeout(long time_out = 0); // 请求超时（second）

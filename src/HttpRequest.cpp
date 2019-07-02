@@ -6,8 +6,8 @@
 #include <process.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
-#include "lock.h"
-#include "log.h"
+#include "Lock.h"
+#include "Log.h"
 #include "ClassMemoryTracer.h"
 #include "HttpTask.h"
 #include "HttpManager.h"
@@ -22,16 +22,16 @@ using namespace VCUtil;
 
 struct DownloadChunk
 {
-    CURLWrapper* _helper;
+    CURLWrapper* _request;
     FILE* _fp;
     long _startidx;
     long _endidx;
 
-    DownloadChunk() : _helper(nullptr), _fp(nullptr), _startidx(0), _endidx(0)
+    DownloadChunk() : _request(nullptr), _fp(nullptr), _startidx(0), _endidx(0)
     {
         TRACE_CLASS_CONSTRUCTOR(DownloadChunk);
     }
-    ~DownloadChunk()
+    virtual ~DownloadChunk()
     {
         TRACE_CLASS_DESTRUCTOR(DownloadChunk);
     }
@@ -39,24 +39,24 @@ struct DownloadChunk
 
 struct UploadChannel
 {
-    CURLWrapper* _helper;
+    CURLWrapper* _request;
     FILE* _fp;
 
-    UploadChannel() : _helper(nullptr), _fp(nullptr)
+    UploadChannel() : _request(nullptr), _fp(nullptr)
     {
         TRACE_CLASS_CONSTRUCTOR(UploadChannel);
     }
-    ~UploadChannel()
+    virtual ~UploadChannel()
     {
         TRACE_CLASS_DESTRUCTOR(UploadChannel);
     }
 };
 
-class CURLWrapper : public IRequest
+class CURLWrapper : public HTTP::IRequest
 {
 public:
     CURLWrapper();
-    ~CURLWrapper();
+    virtual ~CURLWrapper();
 
     friend class HttpRequest;
 
@@ -74,8 +74,8 @@ public:
     int setUploadFile(const std::string& file_name);
     //HTTP Multipart formpost 方式上次文件
     int setUploadFile(const std::string& file_name, const std::string& target_name, const std::string& target_path);
-    void setResultCallback(ResultCallback rc);
-    void setProgressCallback(ProgressCallback pc);
+    void setResultCallback(HTTP::ResultCallback rc);
+    void setProgressCallback(HTTP::ProgressCallback pc);
     void setRequestType(HTTP::RequestType);
 
 public:
@@ -138,8 +138,8 @@ private:
     std::string	m_post_data;
     std::string	m_url;
     std::list<std::string> m_list_header;
-    ResultCallback  m_result_callback;
-    ProgressCallback  m_progress_callback;
+    HTTP::ResultCallback  m_result_callback;
+    HTTP::ProgressCallback  m_progress_callback;
 
     //下载
     std::string	m_file_path;
@@ -189,10 +189,10 @@ namespace {
     size_t read_file_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
     {
         UploadChannel *uc = (UploadChannel *)userdata;
-        if (!uc || !uc->_fp || !uc->_helper || uc->_helper->isFailed())
+        if (!uc || !uc->_fp || !uc->_request || uc->_request->isFailed())
             return 0;
 
-        if (uc->_helper->isCanceled())
+        if (uc->_request->isCanceled())
             return CURL_READFUNC_ABORT;
 
         size_t retcode = fread(ptr, size, nmemb, (FILE *)uc->_fp);
@@ -206,14 +206,14 @@ namespace {
 
     size_t write_file_callback(char* buffer, size_t size, size_t nmemb, void* userdata)
     {
-        CURLWrapper* helper = nullptr;
+        CURLWrapper* pRequest = nullptr;
         DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(userdata);
         if (download_chunk)
         {
-            helper = download_chunk->_helper;
+            pRequest = download_chunk->_request;
         }
 
-        if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
+        if (!download_chunk || !pRequest || pRequest->isCanceled() || pRequest->isFailed())
             return 0;
 
         size_t written = 0;
@@ -223,7 +223,7 @@ namespace {
             if (written > 0)
             {
                 download_chunk->_startidx += written;
-                helper->setCurrentBytes(helper->currentBytes() + written);
+                pRequest->setCurrentBytes(pRequest->currentBytes() + written);
             }
         }
         else
@@ -236,26 +236,26 @@ namespace {
 
     int progress_download_callback(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
     {
-        CURLWrapper* helper = nullptr;
+        CURLWrapper* pRequest = nullptr;
         DownloadChunk* download_chunk = reinterpret_cast<DownloadChunk*>(clientp);
         if (download_chunk)
         {
-            helper = download_chunk->_helper;
+            pRequest = download_chunk->_request;
         }
 
-        if (!download_chunk || !helper || helper->isCanceled() || helper->isFailed())
+        if (!download_chunk || !pRequest || pRequest->isCanceled() || pRequest->isFailed())
             return -1;
 
-        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
+        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(pRequest->requestId());
         if (dltotal > 0 && dlnow > 0 && reply.get())
         {
-            if (helper->isMultiDownload())
+            if (pRequest->isMultiDownload())
             {
-                reply->replyProgress(helper->requestId(), true, helper->totalBytes(), helper->currentBytes());
+                reply->replyProgress(pRequest->requestId(), true, pRequest->totalBytes(), pRequest->currentBytes());
             }
             else
             {
-                reply->replyProgress(helper->requestId(), true, dltotal, dlnow);
+                reply->replyProgress(pRequest->requestId(), true, dltotal, dlnow);
             }
         }
 
@@ -264,14 +264,14 @@ namespace {
 
     int progress_upload_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
     {
-        IRequest* helper = reinterpret_cast<IRequest*>(clientp);
-        if (!helper || helper->isCanceled() || helper->isFailed())
+        HTTP::IRequest* pRequest = reinterpret_cast<HTTP::IRequest*>(clientp);
+        if (!pRequest || pRequest->isCanceled() || pRequest->isFailed())
             return -1;
 
-        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(helper->requestId());
+        std::shared_ptr<HttpReply> reply = HttpManager::globalInstance()->getReply(pRequest->requestId());
         if (ultotal > 0 && ulnow > 0 && reply.get())
         {
-            reply->replyProgress(helper->requestId(), false, ultotal, ulnow);
+            reply->replyProgress(pRequest->requestId(), false, ultotal, ulnow);
         }
 
         return 0;
@@ -383,12 +383,12 @@ int CURLWrapper::setUploadFile(const std::string& file_path, const std::string& 
     return CURLE_OK;
 }
 
-void CURLWrapper::setResultCallback(ResultCallback rc)
+void CURLWrapper::setResultCallback(HTTP::ResultCallback rc)
 {
     m_result_callback = rc;
 }
 
-void CURLWrapper::setProgressCallback(ProgressCallback pc)
+void CURLWrapper::setProgressCallback(HTTP::ProgressCallback pc)
 {
     m_progress_callback = pc;
 }
@@ -704,7 +704,7 @@ int CURLWrapper::doDownload()
             std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
 #endif
             chunk->_fp = fp;
-            chunk->_helper = this;
+            chunk->_request = this;
 
             if (i < m_thread_count - 1)
             {
@@ -742,7 +742,7 @@ int CURLWrapper::doDownload()
         std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
 #endif
         chunk->_fp = fp;
-        chunk->_helper = this;
+        chunk->_request = this;
         chunk->_startidx = 0;
         chunk->_endidx = 0;
         download(chunk.get());
@@ -814,7 +814,7 @@ int CURLWrapper::doUpload()
             uc.reset(new UploadChannel);
 #endif
             uc->_fp = file;
-            uc->_helper = this;
+            uc->_request = this;
 
             curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_file_callback);
             curl_easy_setopt(curl, CURLOPT_READDATA, uc.get());
@@ -1278,14 +1278,10 @@ UINT WINAPI CURLWrapper::downloadProc(LPVOID param)
     DownloadChunk* thread_chunk = reinterpret_cast<DownloadChunk*>(param);
     if (thread_chunk)
     {
-        IRequest* helper = thread_chunk->_helper;
-        if (helper)
+        CURLWrapper* pRequest = thread_chunk->_request;
+        if (pRequest)
         {
-            CURLWrapper *pcurl = dynamic_cast<CURLWrapper *>(helper);
-            if (pcurl)
-            {
-                return pcurl->download(thread_chunk);
-            }
+            return pRequest->download(thread_chunk);
         }
     }
     return -1;
@@ -1440,7 +1436,7 @@ int HttpRequest::setUploadFile(const std::string& file_path, const std::string& 
     return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setResultCallback(ResultCallback rc)
+int HttpRequest::setResultCallback(HTTP::ResultCallback rc)
 {
     if (m_helper.get())
     {
@@ -1451,7 +1447,7 @@ int HttpRequest::setResultCallback(ResultCallback rc)
     return REQUEST_INIT_ERROR;
 }
 
-int	HttpRequest::setProgressCallback(ProgressCallback pc)
+int	HttpRequest::setProgressCallback(HTTP::ProgressCallback pc)
 {
     if (m_helper.get())
     {
@@ -1462,7 +1458,7 @@ int	HttpRequest::setProgressCallback(ProgressCallback pc)
     return REQUEST_INIT_ERROR;
 }
 
-std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType rtype, HTTP::IOMode mode)
+std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType type, HTTP::IOMode mode)
 {
     std::shared_ptr<HttpReply> reply = nullptr;
     if (m_helper.get())
@@ -1471,7 +1467,7 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType rtype, HTTP::I
             m_helper->cancel();
 
         int nId = m_helper->requestId();
-        m_helper->setRequestType(rtype);
+        m_helper->setRequestType(type);
 
         reply = std::make_shared<HttpReply>(nId);
         HttpManager::globalInstance()->addReply(reply);
@@ -1485,9 +1481,9 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType rtype, HTTP::I
 #if _MSC_VER >= 1700
             std::unique_ptr<HttpTask> task = std::make_unique<HttpTask>(true);
 #else
-            std::unique_ptr<HttpTask> task(new HttpTask(true))
+            std::unique_ptr<HttpTask> task(new HttpTask(true));
 #endif
-                task->attach(m_helper);
+            task->attach(m_helper);
             HttpManager::addTask(std::move(task));
         }
     }

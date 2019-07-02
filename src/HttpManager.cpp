@@ -2,7 +2,7 @@
 #include "HttpRequest.h"
 #include <iostream>
 #include "ClassMemoryTracer.h"
-#include "log.h"
+#include "Log.h"
 
 using namespace VCUtil;
 

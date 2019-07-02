@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef THREADPOOL_H
+#define THREADPOOL_H
+#pragma once
 
 #include <functional>
 #include "ThreadPoolThread.h"
@@ -75,3 +77,5 @@ private:
     TaskQueue m_taskQueue;
     std::function<void(int)> m_pCallBack;
 };
+
+#endif

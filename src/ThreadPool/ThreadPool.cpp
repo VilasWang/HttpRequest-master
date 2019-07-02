@@ -2,7 +2,7 @@
 #include <cassert>
 #include <iostream>
 #include "ClassMemoryTracer.h"
-#include "log.h"
+#include "Log.h"
 
 ThreadPool::ThreadPool()
     : m_nThreadNum(1)

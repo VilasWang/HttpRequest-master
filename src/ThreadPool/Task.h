@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef TASKBASE_H
+#define TASKBASE_H
+#pragma once
 
 #include <deque>
 #include <memory>
@@ -48,3 +50,4 @@ private:
     std::deque<std::unique_ptr<TaskBase>> m_queTasks;
     mutable VCUtil::CSLock m_lock;
 };
+#endif

@@ -16,25 +16,11 @@ class CurlTool : public QMainWindow
 public:
     ~CurlTool();
 
-    static CurlTool *getInstance()
+    static CurlTool *singleton()
     {
-        if (nullptr == ms_instance)
-        {
-            ms_instance = new CurlTool;
-        }
-        return ms_instance;
+        static CurlTool s_instance;
+        return &s_instance;
     }
-
-    static void destroyInstance()
-    {
-        if (nullptr != ms_instance)
-        {
-            delete ms_instance;
-            ms_instance = nullptr;
-        }
-    }
-
-    static bool isInstantiated() { return (ms_instance != nullptr); }
 
     bool event(QEvent* event) Q_DECL_OVERRIDE;
 

@@ -1,21 +1,25 @@
-﻿#pragma once
+﻿#ifndef __HTTPTASK_H
+#define __HTTPTASK_H
+#pragma once
 
 #include "ThreadPool/Task.h"
 #include "HttpRequest.h"
-#include "httprequestdef.h"
+#include "HttpRequestDef.h"
 
 // class HttpTask - Http请求任务
 class HttpTask : public TaskBase
 {
 public:
     explicit HttpTask(bool bAutoDelete = true);
-    ~HttpTask();
+    virtual ~HttpTask();
 
-    void attach(std::shared_ptr<IRequest>);
+    void attach(std::shared_ptr<HTTP::IRequest>);
     void detach();
     void exec() override;
     void cancel() override;
 
 private:
-    std::shared_ptr<IRequest> m_interface;
+    std::shared_ptr<HTTP::IRequest> m_interface;
 };
+
+#endif

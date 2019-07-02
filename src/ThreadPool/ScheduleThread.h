@@ -1,7 +1,8 @@
-﻿#pragma once
-#ifndef SCHEDULETHREAD_H
+﻿#ifndef SCHEDULETHREAD_H
 #define SCHEDULETHREAD_H
+#pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <memory>
 #if _MSC_VER >= 1700

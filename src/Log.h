@@ -1,5 +1,6 @@
 ﻿#ifndef __CLOG_H__
 #define __CLOG_H__
+#pragma once
 
 #include <stdio.h>
 #include <varargs.h>

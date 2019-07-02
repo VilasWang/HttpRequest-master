@@ -2,7 +2,7 @@
 #include <process.h>
 #include <iostream>
 #include "ThreadPool.h"
-#include "log.h"
+#include "Log.h"
 #include "ClassMemoryTracer.h"
 
 using namespace VCUtil;

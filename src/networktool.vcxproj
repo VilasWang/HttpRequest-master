@@ -190,7 +190,7 @@
     <ClInclude Include="inc\HttpRequestDef.h" />
     <ClInclude Include="inc\HttpRequest_global.h" />
     <ClInclude Include="inc\Lock.h" />
-    <ClInclude Include="log.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="ThreadPool\ScheduleThread.h" />
     <ClInclude Include="ThreadPool\Task.h" />
     <ClInclude Include="ThreadPool\ThreadPool.h" />

@@ -25,37 +25,33 @@ namespace HTTP
         Sync = 0,
         Async,
     };
-}
 
 #if _MSC_VER >= 1700
-// int id, bool success, const std::string& data, const std::string& error_string
-using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
+    // int id, bool success, const std::string& data, const std::string& error_string
+    using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
 
-// int id, bool is_download, INT64 total_size, INT64 current_size
-using ProgressCallback = std::function<void(int, bool, INT64, INT64)>;
+    // int id, bool is_download, INT64 total_size, INT64 current_size
+    using ProgressCallback = std::function<void(int, bool, INT64, INT64)>;
 
 #else
-// int id, bool success, const std::string& data, const std::string& error_string
-typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
+    // int id, bool success, const std::string& data, const std::string& error_string
+    typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
 
-// int id, bool is_download, INT64 total_size, INT64 current_size
-typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
+    // int id, bool is_download, INT64 total_size, INT64 current_size
+    typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
 
 #endif
 
 
-class IRequest
-{
-public:
-    IRequest() {}
-    virtual ~IRequest() {}
-public:
-    virtual int	perform() = 0;
-    virtual void cancel() = 0;
-    virtual int	requestId() = 0;
-    virtual bool isRunning() const = 0;
-    virtual bool isCanceled() const = 0;
-    virtual bool isFailed() const = 0;
-};
-
-
+    //请求接口类
+    class IRequest
+    {
+    public:
+        virtual int	perform() = 0;
+        virtual void cancel() = 0;
+        virtual int	requestId() = 0;
+        virtual bool isRunning() const = 0;
+        virtual bool isCanceled() const = 0;
+        virtual bool isFailed() const = 0;
+    };
+}

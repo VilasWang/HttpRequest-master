@@ -1,6 +1,6 @@
 ﻿#include "HttpReply.h"
 #include "ClassMemoryTracer.h"
-#include "log.h"
+#include "Log.h"
 
 HttpReply::HttpReply(int requestId)
     : m_result_callback(0)
@@ -23,12 +23,12 @@ void HttpReply::setRequestType(HTTP::RequestType type)
     m_type = type;
 }
 
-void HttpReply::setResultCallback(ResultCallback rc)
+void HttpReply::setResultCallback(HTTP::ResultCallback rc)
 {
     m_result_callback = rc;
 }
 
-void HttpReply::setProgressCallback(ProgressCallback pc)
+void HttpReply::setProgressCallback(HTTP::ProgressCallback pc)
 {
     m_progress_callback = pc;
 }
