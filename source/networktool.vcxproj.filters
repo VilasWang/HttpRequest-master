@@ -56,9 +56,6 @@
     <ClCompile Include="HttpTask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ClassMemoryTracer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HttpReply.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,6 +63,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool\ScheduleThread.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool\ClassMemoryTracer.cpp">
       <Filter>ThreadPool</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool\Lock.cpp">
@@ -83,9 +83,6 @@
       <Filter>ThreadPool</Filter>
     </ClInclude>
     <ClInclude Include="HttpTask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ClassMemoryTracer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HttpManager.h">
@@ -106,11 +103,14 @@
     <ClInclude Include="inc\HttpRequestDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Lock.h">
+    <ClInclude Include="ThreadPool\ClassMemoryTracer.h">
       <Filter>ThreadPool</Filter>
     </ClInclude>
-    <ClInclude Include="Log.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ThreadPool\Lock.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool\Log.h">
+      <Filter>ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
