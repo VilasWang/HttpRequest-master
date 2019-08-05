@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "HttpReply.h"
-#include "httpRequestDef.h"
+#include "HttpRequestDef.h"
 #include "HttpRequest_global.h"
 
 

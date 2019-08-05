@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
-#include "httpRequestDef.h"
+#include "HttpRequestDef.h"
 #include "HttpRequest_global.h"
 
 // class HttpReply - Http响应类
