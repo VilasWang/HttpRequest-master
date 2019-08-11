@@ -48,3 +48,5 @@
 /bin/x64/Debug/HttpRequest.dll
 /lib/Debug/HttpRequest.lib
 /samples/CURLTool/GeneratedFiles
+/lib/Release/HttpRequest.lib
+/bin/Release/HttpRequest.dll
