@@ -19,7 +19,7 @@ namespace VCUtil {
     {
     public:
         CSLock();
-        ~CSLock();
+        virtual ~CSLock();
 
         virtual void lock();
         virtual bool tryLock();
@@ -38,7 +38,7 @@ namespace VCUtil {
     {
     public:
         SRWLock();
-        ~SRWLock();
+        virtual ~SRWLock();
 
         virtual void lock(bool bShared = false);
         virtual bool tryLock(bool bShared = false);
@@ -54,7 +54,9 @@ namespace VCUtil {
         long m_bExclusiveLocked;
     };
 
-    template<class _Lock>
+    template<typename _Lock = typename std::enable_if<
+        std::is_convertible<_Lock, SRWLock>::value ||
+        std::is_convertible<_Lock, CSLock>::value>::type>
     class Locker
     {
     public:

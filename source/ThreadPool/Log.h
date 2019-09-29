@@ -5,11 +5,12 @@
 #include <stdio.h>
 #include <varargs.h>
 
+#define MaxLogSize 128
 namespace Log
 {
     inline void Debug(char *format, ...)
     {
-        char buf[128] = { 0 };
+        char buf[MaxLogSize] = { 0 };
 
         va_list args;
         va_start(args, format);
@@ -18,14 +19,14 @@ namespace Log
 
         if (len != -1)
         {
-            buf[127] = '\0';
+            buf[MaxLogSize-1] = '\0';
             OutputDebugStringA(buf);
         }
     }
 
     inline void DebugW(wchar_t *format, ...)
     {
-        wchar_t buf[128] = { 0 };
+        wchar_t buf[MaxLogSize] = { 0 };
 
         va_list args;
         va_start(args, format);
@@ -34,7 +35,7 @@ namespace Log
 
         if (len != -1)
         {
-            buf[127] = '\0';
+            buf[MaxLogSize-1] = '\0';
             OutputDebugStringW(buf);
         }
     }

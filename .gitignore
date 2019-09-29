@@ -50,3 +50,4 @@
 /samples/CURLTool/GeneratedFiles
 /lib/Release/HttpRequest.lib
 /bin/Release/HttpRequest.dll
+/bin/x64/Debug/HttpRequest.lib
