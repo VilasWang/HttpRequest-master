@@ -11,7 +11,7 @@ using namespace VCUtil;
 
 ThreadPoolThread::ThreadPoolThread(ThreadPool* threadpool)
     : m_pThreadPool(threadpool)
-    , m_pTask(nullptr)
+    , m_task(nullptr)
     , m_hEvent(nullptr)
     , m_hThread(INVALID_HANDLE_VALUE)
     , m_nThreadID(0)
@@ -136,15 +136,15 @@ bool ThreadPoolThread::assignTask(std::unique_ptr<TaskBase> task)
     {
         return false;
     }
-    m_pTask = std::move(task);
+    m_task = std::move(task);
     return true;
 }
 
 const int ThreadPoolThread::taskId()
 {
-    if (m_pTask.get())
+    if (m_task.get())
     {
-        return m_pTask->id();
+        return m_task->id();
     }
     return 0;
 }
@@ -157,9 +157,9 @@ bool ThreadPoolThread::runTask()
 
 bool ThreadPoolThread::terminateTask()
 {
-    if (m_pTask.get())
+    if (m_task.get())
     {
-        m_pTask->cancel();
+        m_task->cancel();
     }
     resume();
     return true;
@@ -170,11 +170,11 @@ void ThreadPoolThread::exec()
     if (isExit())
         return;
 
-    if (m_pTask.get())
+    if (m_task.get())
     {
-        int id = m_pTask->id();
-        m_pTask->exec();
-        m_pTask.reset();
+        int id = m_task->id();
+        m_task->exec();
+        m_task.reset();
 
         if (!isExit() && m_pThreadPool)
         {

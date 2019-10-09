@@ -49,6 +49,8 @@ HttpManager::HttpManager()
     //curl_share_setopt(s_share_handle_, CURLSHOPT_LOCKFUNC, curlLock);
     //curl_share_setopt(s_share_handle_, CURLSHOPT_UNLOCKFUNC, curlUnlock);
 
+    m_mainThreadId = GetCurrentThreadId();
+    LOG_DEBUG("Main Thread: %d\n", m_mainThreadId);
     ThreadPool::globalInstance()->init();
 }
 

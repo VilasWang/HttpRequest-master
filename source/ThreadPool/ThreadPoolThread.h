@@ -72,7 +72,7 @@ private:
     bool m_bRunning;
 #endif
 
-    std::unique_ptr<TaskBase> m_pTask;
+    std::unique_ptr<TaskBase> m_task;
     ThreadPool* m_pThreadPool;
 };
 

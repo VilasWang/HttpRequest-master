@@ -29,6 +29,8 @@ public:
     std::shared_ptr<HttpReply> takeReply(int);
     std::shared_ptr<HttpReply> getReply(int);
 
+    DWORD mainThreadId() { return m_mainThreadId; }
+
 private:
     HttpManager();
 #if _MSC_VER < 1700
@@ -47,6 +49,7 @@ private:
     static CURLSH* s_share_handle_;
     std::map<int, std::shared_ptr<HttpReply>> m_map_replys;
     mutable VCUtil::CSLock m_lock;
+    DWORD m_mainThreadId;
 
     friend class CURLWrapper;
     friend class HttpRequest;

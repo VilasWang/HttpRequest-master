@@ -28,20 +28,16 @@ public:
     HttpRequest();
     virtual ~HttpRequest();
 
-    // 初始化libcurl资源，初始化线程池(需在主线程中)
+    /// 以下两个接口必须在主线程中执行
+    // 初始化libcurl资源，初始化线程池
     static void globalInit();
-
-    // 取消所有请求，清理libcurl资源，让线程池所有线程取消任务并退出(需在主线程中)
+    // 取消所有请求，清理libcurl资源，让线程池所有线程取消任务并退出
     static void globalCleanup();
 
 public:
     // 开始请求，并返回HttpReply. 
     // 1：同步请求可以直接调用HttpReply的接口获取结果
-    // 2：异步请求可以设置异步回调接口，请求结束时自动回调获取结果
-    // 注意点：	1.异步请求的时候， 需要把返回的std::shared_ptr<HttpReply>根据id保存起来；
-    //				等收到结束回调的时候，再把std::shared_ptr<HttpReply>置空，不然会收不到结束回调。
-    //			2.异步请求的回调接口都是在curl执行的工作线程调用，所以根据不同情况，自己再做一些处理。
-    //				比如回调接口中加锁访问资源或者把回调结果再post的你自己的线程中处理。(比较好的是后者)
+    // 2：异步请求可以设置异步回调接口，请求结束时会自动到主线程中异步回调
     std::shared_ptr<HttpReply> perform(HTTP::RequestType, HTTP::IOMode mode = HTTP::Async);
     // 取消请求
     static bool cancel(int requestId);
@@ -49,15 +45,9 @@ public:
     static bool cancelAll();
 
     // 异步回调api
-    // 注：最好不要用类的非静态成员函数。以免回调返回时对象已析构。
     // 推荐用lambda。如：
-    //		auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string){
-    //			RequestFinishEvent* event = new RequestFinishEvent;
-    //			event->id = id;
-    //			event->success = success;
-    //			event->strContent = QString::fromStdString(data);
-    //			event->strError = QString::fromStdString(error_string);
-    //			QCoreApplication::postEvent(T::singleton(), event);
+    //		auto onRequestResultCallback = [](int id, bool success, const std::string& content, const std::string& error){
+    //			CurlTool::singleton()->replyResult(id, success, QString::fromStdString(content), QString::fromStdString(error));
     //		};
     //		HttpRequest req;
     //		req.setUrl("...");
@@ -87,7 +77,7 @@ public:
     int setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path);
 
 private:
-    std::shared_ptr<CURLWrapper> m_helper;
+    std::shared_ptr<CURLWrapper> m_handler;
 };
 
 #endif  /*__HTTP_REQUEST_H*/

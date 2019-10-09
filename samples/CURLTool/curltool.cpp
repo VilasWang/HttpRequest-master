@@ -22,53 +22,19 @@
 //////////////////////////////////////////////////////////////////////////
 namespace
 {
-    const int RequestFinish = QEvent::User + 150;
-    const int Rrogress = QEvent::User + 151;
-
-    class RequestFinishEvent : public QEvent
-    {
-    public:
-        RequestFinishEvent() : QEvent(QEvent::Type(RequestFinish))
-            , success(false)
-            , id(0)
-        {}
-
-        int id;
-        bool success;
-        QString strContent;
-        QString strError;
-    };
-
-    class ProgressEvent : public QEvent
-    {
-    public:
-        ProgressEvent() : QEvent(QEvent::Type(Rrogress))
-            , total(0)
-            , current(0)
-            , isDownload(false)
-        {}
-
-        qint64 total;
-        qint64 current;
-        bool isDownload;
-    };
-
-
-    auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string) {
-        RequestFinishEvent* event = new RequestFinishEvent;
-        event->id = id;
-        event->success = success;
-        event->strContent = QString::fromStdString(data);
-        event->strError = QString::fromStdString(error_string);
-        QCoreApplication::postEvent(CurlTool::singleton(), event);
+    auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error) {
+        CurlTool::singleton()->replyResult(id, success, QString::fromStdString(data), QString::fromStdString(error));
     };
 
     auto onProgressCallback = [](int id, bool bDownload, qint64 total_size, qint64 current_size) {
-        ProgressEvent* event = new ProgressEvent;
-        event->isDownload = bDownload;
-        event->total = total_size;
-        event->current = current_size;
-        QCoreApplication::postEvent(CurlTool::singleton(), event);
+        if (bDownload)
+        {
+            CurlTool::singleton()->replyProgress(total_size, current_size, 0, 0);
+        }
+        else
+        {
+            CurlTool::singleton()->replyProgress(0, 0, total_size, current_size);
+        }
     };
 }
 //////////////////////////////////////////////////////////////////////////
@@ -84,7 +50,7 @@ CurlTool::CurlTool(QWidget* parent)
 {
     ui.setupUi(this);
     setFixedSize(630, 610);
-    setWindowTitle(QStringLiteral("Curl网络请求工具"));
+    setWindowTitle(QStringLiteral("Curl Tool"));
 
     ui.btn_abort->setEnabled(false);
     ui.textEdit_output->setReadOnly(true);
@@ -243,58 +209,65 @@ void CurlTool::onAbortTask()
     reset();
 }
 
-bool CurlTool::event(QEvent* event)
+void CurlTool::replyResult(int id, bool success, const QString& data, const QString& error)
 {
-    if (event->type() == QEvent::Type(RequestFinish))
+    //qDebug() << GetCurrentThreadId();
+    QString strMsg;
+    if (success)
     {
-        RequestFinishEvent* e = static_cast<RequestFinishEvent*>(event);
-        if (nullptr != e)
-        {
-            QString strMsg;
-            if (e->success)
-            {
-                m_nSuccessNum++;
-                strMsg = QString("[async][%1] success.\n%2").arg(e->id).arg(e->strContent);
-            }
-            else
-            {
-                m_nFailedNum++;
-                strMsg = QString("[async][%1] failed.\n%2").arg(e->id).arg(e->strError);
-            }
-            appendMsg(strMsg, true);
-
-            //qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
-            if (m_nTotalNum == m_nSuccessNum + m_nFailedNum)
-            {
-                QTime time = QTime::currentTime();
-                int msec = m_timeStart.msecsTo(time);
-                float sec = (float)msec / 1000;
-                strMsg = QString("Time elapsed: %1s.").arg(sec);
-                appendMsg(strMsg, true);
-
-                reset();
-            }
-        }
-
-        return true;
+        m_nSuccessNum++;
+        strMsg = QString("[async][%1] success.\n%2").arg(id).arg(data);
     }
-    else if (event->type() == QEvent::Type(Rrogress))
+    else
     {
-        ProgressEvent* e = static_cast<ProgressEvent*>(event);
-        if (nullptr != e)
-        {
-            if (e->isDownload)
-            {
-                onProgress(e->total, e->current, 0, 0);
-            }
-            else
-            {
-                onProgress(0, 0, e->total, e->current);
-            }
-        }
-        return true;
+        m_nFailedNum++;
+        strMsg = QString("[async][%1] failed.\n%2").arg(id).arg(error);
     }
-    return __super::event(event);
+    appendMsg(strMsg, true);
+
+    //qDebug() << m_nTotalNum << m_nSuccessNum << m_nFailedNum;
+    if (m_nTotalNum == m_nSuccessNum + m_nFailedNum)
+    {
+        QTime time = QTime::currentTime();
+        int msec = m_timeStart.msecsTo(time);
+        float sec = (float)msec / 1000;
+        strMsg = QString("Time elapsed: %1s.").arg(sec);
+        appendMsg(strMsg, true);
+
+        reset();
+    }
+}
+
+void CurlTool::replyProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow)
+{
+    //qDebug() << GetCurrentThreadId();
+    if (dlnow > m_nbytesReceived)
+    {
+        m_nbytesReceived = dlnow;
+        if (dltotal > m_nbytesTotalDownload)
+        {
+            m_nbytesTotalDownload = dltotal;
+            m_strTotalDownload = bytes2String(dltotal);
+            ui.progressBar_d->setMaximum(dltotal);
+        }
+        const QString& strReceived = bytes2String(dlnow);
+        ui.progressBar_d->setValue(dlnow);
+        //appendMsg(QStringLiteral("下载：%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
+    }
+
+    if (ulnow > m_nbytesSent)
+    {
+        m_nbytesSent = ulnow;
+        if (ultotal > m_nbytesTotalUpload)
+        {
+            m_nbytesTotalUpload = ultotal;
+            m_strTotalUpload = bytes2String(ultotal);
+            ui.progressBar_u->setMaximum(ultotal);
+        }
+        const QString& strSent = bytes2String(ulnow);
+        ui.progressBar_u->setValue(ulnow);
+        //appendMsg(QStringLiteral("上传：%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
+    }
 }
 
 void CurlTool::onDownload()
@@ -540,37 +513,6 @@ void CurlTool::onGetUploadFile()
     if (!fileName.isNull() && !fileName.isEmpty())
     {
         ui.lineEdit_uploadFile->setText(fileName);
-    }
-}
-
-void CurlTool::onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow)
-{
-    if (dlnow > m_nbytesReceived)
-    {
-        m_nbytesReceived = dlnow;
-        if (dltotal > m_nbytesTotalDownload)
-        {
-            m_nbytesTotalDownload = dltotal;
-            m_strTotalDownload = bytes2String(dltotal);
-            ui.progressBar_d->setMaximum(dltotal);
-        }
-        const QString& strReceived = bytes2String(dlnow);
-        ui.progressBar_d->setValue(dlnow);
-        //appendMsg(QStringLiteral("下载：%2 / %3").arg(strReceived).arg(m_strTotalDownload), false);
-    }
-
-    if (ulnow > m_nbytesSent)
-    {
-        m_nbytesSent = ulnow;
-        if (ultotal > m_nbytesTotalUpload)
-        {
-            m_nbytesTotalUpload = ultotal;
-            m_strTotalUpload = bytes2String(ultotal);
-            ui.progressBar_u->setMaximum(ultotal);
-        }
-        const QString& strSent = bytes2String(ulnow);
-        ui.progressBar_u->setValue(ulnow);
-        //appendMsg(QStringLiteral("上传：%2 / %3").arg(strSent).arg(m_strTotalUpload), false);
     }
 }
 

@@ -1,6 +1,6 @@
 HttpRequest moudle
 ======================================================
-@version: 1.0.3  
+@version: 1.0.1  
 @Author: Vilas Wang  
 @Contact: QQ451930733 | 451930733@qq.com  
 
@@ -11,10 +11,13 @@ HttpRequest moudle
 
 
 HttpRequest库是Windows平台下对libcurl的封装，结合C++线程池，实现http多线程异步/同步请求。
-- 多任务并发执行
 - 请求支持同步和异步两种方式调用
+- 异步请求结果异步返回
+- 异步请求支持自定义回调接口
+- 支持多任务并发执行
+- 支持结束单个请求或所有请求
 - 所有方法线程安全
-- 支持结束单个请求任务和结束所有请求任务
+
 
 本模块使用的是vs2015编译的带openssl的libcurl库，版本不同请自行编译。 
 libcurl更多版本请见https://github.com/VilasWang/3rd_Dev_Library.git

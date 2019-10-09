@@ -22,12 +22,12 @@ public:
         return &s_instance;
     }
 
-    bool event(QEvent* event) Q_DECL_OVERRIDE;
+    void replyResult(int id, bool success, const QString& data, const QString& error);
+    void replyProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
 
 private Q_SLOTS:
     void onStartTask();
     void onAbortTask();
-    void onProgress(quint64 dltotal, quint64 dlnow, quint64 ultotal, quint64 ulnow);
     void onDownload();
     void onUpload();
     void onFormPost();

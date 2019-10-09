@@ -77,6 +77,7 @@ public:
     void setResultCallback(HTTP::ResultCallback rc);
     void setProgressCallback(HTTP::ProgressCallback pc);
     void setRequestType(HTTP::RequestType);
+    void setIOMode(HTTP::IOMode mode);
 
 public:
     int	perform() override;
@@ -118,6 +119,7 @@ private:
 
     int m_id;
     HTTP::RequestType m_type;
+    HTTP::IOMode m_mode;
 
 #if _MSC_VER >= 1700
     static std::atomic<int> s_id;
@@ -398,6 +400,11 @@ void CURLWrapper::setRequestType(HTTP::RequestType type)
     m_type = type;
 }
 
+void CURLWrapper::setIOMode(HTTP::IOMode mode)
+{
+    m_mode = mode;
+}
+
 CURLcode CURLWrapper::publicSetoptMethod(CURL* curl_handle, curl_slist* http_headers)
 {
     CURLcode curl_code = CURLE_FAILED_INIT;
@@ -525,12 +532,16 @@ int CURLWrapper::perform()
     setRunning(true);
 
     std::shared_ptr<HttpReply> rly = HttpManager::globalInstance()->getReply(m_id);
-    if (rly.get())
+    if (!rly.get())
     {
-        rly->setRequestType(m_type);
-        rly->setProgressCallback(m_progress_callback);
-        rly->setResultCallback(m_result_callback);
+        setRunning(false);
+        curl_code = CURLE_FAILED_INIT;
+        return curl_code;
     }
+    rly->setRequestType(m_type);
+    rly->setIOMode(m_mode);
+    rly->setProgressCallback(m_progress_callback);
+    rly->setResultCallback(m_result_callback);
 
     if (m_type == HTTP::Post || m_type == HTTP::Get)
     {
@@ -1299,7 +1310,7 @@ void CURLWrapper::reset()
 
 //////////////////////////////////////////////////////////////////////////
 HttpRequest::HttpRequest()
-    : m_helper(new CURLWrapper)
+    : m_handler(new CURLWrapper)
 {
     TRACE_CLASS_CONSTRUCTOR(HttpRequest);
     HttpManager::globalInstance();
@@ -1308,14 +1319,14 @@ HttpRequest::HttpRequest()
 HttpRequest::~HttpRequest()
 {
     TRACE_CLASS_DESTRUCTOR(HttpRequest);
-    m_helper = nullptr;
+    m_handler = nullptr;
 }
 
 int HttpRequest::setRetryTimes(int retry_times)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setRetryTimes(retry_times);
+        return m_handler->setRetryTimes(retry_times);
     }
 
     return REQUEST_INIT_ERROR;
@@ -1323,9 +1334,9 @@ int HttpRequest::setRetryTimes(int retry_times)
 
 int HttpRequest::setTimeout(long time_out)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setTimeout(time_out);
+        return m_handler->setTimeout(time_out);
     }
 
     return REQUEST_INIT_ERROR;
@@ -1333,9 +1344,9 @@ int HttpRequest::setTimeout(long time_out)
 
 int HttpRequest::setUrl(const std::string& url)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setUrl(url);
+        return m_handler->setUrl(url);
     }
 
     return REQUEST_INIT_ERROR;
@@ -1343,9 +1354,9 @@ int HttpRequest::setUrl(const std::string& url)
 
 int HttpRequest::setFollowLocation(bool follow_location)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setFollowLocation(follow_location);
+        return m_handler->setFollowLocation(follow_location);
     }
 
     return REQUEST_INIT_ERROR;
@@ -1358,23 +1369,23 @@ int HttpRequest::setPostData(const std::string& message)
 
 int HttpRequest::setPostData(const char* data, unsigned int size)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setPostData(data, size);
+        return m_handler->setPostData(data, size);
     }
     return REQUEST_INIT_ERROR;
 }
 
 int HttpRequest::setHeader(const std::map<std::string, std::string>& headers)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
         for (auto it = headers.begin(); it != headers.end(); ++it)
         {
             std::string header = it->first;
             header += ": ";
             header += it->second;
-            m_helper->setHeader(header);
+            m_handler->setHeader(header);
         }
         return REQUEST_OK;
     }
@@ -1384,18 +1395,18 @@ int HttpRequest::setHeader(const std::map<std::string, std::string>& headers)
 
 int HttpRequest::setHeader(const std::string& header)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setHeader(header);
+        return m_handler->setHeader(header);
     }
     return REQUEST_INIT_ERROR;
 }
 
 int HttpRequest::setProxy(const std::string& proxy, long proxy_port)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        return m_helper->setProxy(proxy, proxy_port);
+        return m_handler->setProxy(proxy, proxy_port);
     }
 
     return REQUEST_INIT_ERROR;
@@ -1403,10 +1414,10 @@ int HttpRequest::setProxy(const std::string& proxy, long proxy_port)
 
 int HttpRequest::setDownloadFile(const std::string& file_path, int thread_count /* = 5 */)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        m_helper->setDownloadFile(file_path);
-        m_helper->setDownloadThreadCount(thread_count);
+        m_handler->setDownloadFile(file_path);
+        m_handler->setDownloadThreadCount(thread_count);
         return REQUEST_OK;
     }
 
@@ -1415,9 +1426,9 @@ int HttpRequest::setDownloadFile(const std::string& file_path, int thread_count 
 
 int HttpRequest::setUploadFile(const std::string& file_path)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        m_helper->setUploadFile(file_path);
+        m_handler->setUploadFile(file_path);
         return REQUEST_OK;
     }
 
@@ -1426,9 +1437,9 @@ int HttpRequest::setUploadFile(const std::string& file_path)
 
 int HttpRequest::setUploadFile(const std::string& file_path, const std::string& target_name, const std::string& target_path)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        m_helper->setUploadFile(file_path, target_name, target_path);
+        m_handler->setUploadFile(file_path, target_name, target_path);
         return REQUEST_OK;
     }
 
@@ -1437,9 +1448,9 @@ int HttpRequest::setUploadFile(const std::string& file_path, const std::string& 
 
 int HttpRequest::setResultCallback(HTTP::ResultCallback rc)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        m_helper->setResultCallback(rc);
+        m_handler->setResultCallback(rc);
         return REQUEST_OK;
     }
 
@@ -1448,9 +1459,9 @@ int HttpRequest::setResultCallback(HTTP::ResultCallback rc)
 
 int	HttpRequest::setProgressCallback(HTTP::ProgressCallback pc)
 {
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        m_helper->setProgressCallback(pc);
+        m_handler->setProgressCallback(pc);
         return REQUEST_OK;
     }
 
@@ -1460,20 +1471,21 @@ int	HttpRequest::setProgressCallback(HTTP::ProgressCallback pc)
 std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType type, HTTP::IOMode mode)
 {
     std::shared_ptr<HttpReply> reply = nullptr;
-    if (m_helper.get())
+    if (m_handler.get())
     {
-        if (m_helper->isRunning())
-            m_helper->cancel();
+        if (m_handler->isRunning())
+            m_handler->cancel();
 
-        int nId = m_helper->requestId();
-        m_helper->setRequestType(type);
+        int nId = m_handler->requestId();
+        m_handler->setRequestType(type);
+        m_handler->setIOMode(mode);
 
         reply = std::make_shared<HttpReply>(nId);
         HttpManager::globalInstance()->addReply(reply);
 
         if (mode == HTTP::Sync)
         {
-            m_helper->perform();
+            m_handler->perform();
         }
         else if (mode == HTTP::Async)
         {
@@ -1482,7 +1494,7 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType type, HTTP::IO
 #else
             std::unique_ptr<HttpTask> task(new HttpTask(true));
 #endif
-            task->attach(m_helper);
+            task->attach(m_handler);
             HttpManager::addTask(std::move(task));
         }
     }

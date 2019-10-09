@@ -23,6 +23,7 @@ public:
 
 private:
     void setRequestType(HTTP::RequestType type);
+    void setIOMode(HTTP::IOMode mode);
     void setResultCallback(HTTP::ResultCallback rc);
     void setProgressCallback(HTTP::ProgressCallback pc);
 
@@ -33,8 +34,8 @@ public:
     void replyResult(bool bSuccess);
 
 private:
-    HTTP::ResultCallback  m_result_callback;
-    HTTP::ProgressCallback  m_progress_callback;
+    HTTP::ResultCallback m_result_callback;
+    HTTP::ProgressCallback m_progress_callback;
 
     //返回值
     long m_http_code;
@@ -43,6 +44,7 @@ private:
     std::string	m_error_string;
     int m_request_id;
     HTTP::RequestType m_type;
+    HTTP::IOMode m_mode;
 };
 
 #endif
