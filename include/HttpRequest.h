@@ -35,11 +35,11 @@ public:
     static void globalCleanup();
 
 public:
-    // 开始请求，并返回HttpReply. 
+    // 执行请求，并返回HttpReply. 
     // 1：同步请求可以直接调用HttpReply的接口获取结果
-    // 2：异步请求可以设置异步回调接口，请求结束时会自动到主线程中异步回调
+    // 2：异步请求可以设置异步回调接口（见setResultCallback），请求完成后会在主线程中异步回调（APC）
     std::shared_ptr<HttpReply> perform(HTTP::RequestType, HTTP::IOMode mode = HTTP::Async);
-    // 取消请求
+    // 取消某个请求
     static bool cancel(int requestId);
     // 取消所有请求
     static bool cancelAll();
