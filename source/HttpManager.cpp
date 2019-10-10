@@ -51,7 +51,7 @@ HttpManager::HttpManager()
 
     m_mainThreadId = GetCurrentThreadId();
     LOG_DEBUG("Main Thread: %d\n", m_mainThreadId);
-    ThreadPool::globalInstance()->init();
+    ThreadPool::globalInstance()->init(8);
 }
 
 HttpManager::~HttpManager()

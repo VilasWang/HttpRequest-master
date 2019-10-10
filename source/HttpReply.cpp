@@ -107,7 +107,6 @@ void HttpReply::replyResult(bool bSuccess)
             HANDLE mainThread = OpenThread(THREAD_ALL_ACCESS, TRUE, mainThreadId);
             QueueUserAPC(APCResultFunc, mainThread, ULONG_PTR(s));
             SleepEx(1, TRUE);
-            //WaitForSingleObjectEx(mainThread, 1, true);
             CloseHandle(mainThread);
         }
         else
@@ -142,7 +141,6 @@ void HttpReply::replyProgress(int id, bool is_download, INT64 total_size, INT64 
             HANDLE mainThread = OpenThread(THREAD_ALL_ACCESS, TRUE, mainThreadId);
             QueueUserAPC(APCProgressFunc, mainThread, ULONG_PTR(s));
             SleepEx(1, TRUE);
-            //WaitForSingleObjectEx(mainThread, 1, true);
             CloseHandle(mainThread);
         }
         else
