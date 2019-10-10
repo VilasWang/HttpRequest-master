@@ -29,7 +29,7 @@ public:
 
 public:
     //初始化线程池，创建n个线程的线程池。
-    bool init(int threadCount = 4);
+    bool init(int threadCount = 8);
     //停止所有的任务，并且将所有线程退出。
     bool waitForDone();
 

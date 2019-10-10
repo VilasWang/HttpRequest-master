@@ -41,9 +41,9 @@ bool ThreadPool::init(int threadCount)
     if (m_bInitialized)
         return false;
 
-    if (threadCount < 1 || threadCount > 16)
+    if (threadCount < 2 || threadCount > 16)
     {
-        LOG_DEBUG("%s failed! thread range(1-16).\n", __FUNCTION__);
+        LOG_DEBUG("%s failed! threads range(2-16).\n", __FUNCTION__);
         return false;
     }
 
