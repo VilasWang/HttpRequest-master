@@ -6,11 +6,13 @@
 #include <process.h>
 #include <sys/stat.h>
 #include <curl/curl.h>
+#include <list>
 #include "Lock.h"
 #include "Log.h"
 #include "ClassMemoryTracer.h"
 #include "HttpTask.h"
 #include "HttpManager.h"
+#include "HttpReply.h"
 
 using namespace VCUtil;
 
@@ -92,9 +94,9 @@ public:
     void setCanceled(bool bCancel);
     void setFailed(bool bFail);
 
-    INT64 totalBytes() const { return m_total_size; }
-    INT64 currentBytes() const;
-    void setCurrentBytes(INT64);
+    _INT64 totalBytes() const { return m_total_size; }
+    _INT64 currentBytes() const;
+    void setCurrentBytes(_INT64);
 
     bool isMultiDownload() const;
 
@@ -109,8 +111,8 @@ private:
     int doHead();
 
     int	download(DownloadChunk* download_chunk);
-    int	splitDownloadCount(INT64 file_size);
-    INT64 getDownloadFileSize();
+    int	splitDownloadCount(_INT64 file_size);
+    _INT64 getDownloadFileSize();
 
     static UINT WINAPI downloadProc(LPVOID param);
 
@@ -148,12 +150,12 @@ private:
     int	m_thread_count;
 #if _MSC_VER >= 1700
     std::atomic<bool> m_multi_download;
-    std::atomic<INT64> m_total_size;
-    std::atomic<INT64> m_current_size;
+    std::atomic<_INT64> m_total_size;
+    std::atomic<_INT64> m_current_size;
 #else
     bool m_multi_download;
-    INT64 m_total_size;
-    INT64 m_current_size;
+    _INT64 m_total_size;
+    _INT64 m_current_size;
 #endif
 
     //上传
@@ -497,7 +499,7 @@ void CURLWrapper::setFailed(bool bFailed)
     m_is_failed = bFailed;
 }
 
-INT64 CURLWrapper::currentBytes() const
+_INT64 CURLWrapper::currentBytes() const
 {
 #if _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
@@ -505,7 +507,7 @@ INT64 CURLWrapper::currentBytes() const
     return m_current_size;
 }
 
-void CURLWrapper::setCurrentBytes(INT64 current_size)
+void CURLWrapper::setCurrentBytes(_INT64 current_size)
 {
 #if _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
@@ -662,7 +664,7 @@ int CURLWrapper::doPostGet()
 int CURLWrapper::doDownload()
 {
     m_total_size = getDownloadFileSize();
-    INT64 size = m_total_size;
+    _INT64 size = m_total_size;
     LOG_DEBUG("[HttpRequest] file size: %lld\n", size);
 
     if (m_total_size < 0)
@@ -1176,7 +1178,7 @@ int CURLWrapper::download(DownloadChunk* chunk)
     return curl_code;
 }
 
-INT64 CURLWrapper::getDownloadFileSize()
+_INT64 CURLWrapper::getDownloadFileSize()
 {
     if (m_url.empty())
     {
@@ -1184,7 +1186,7 @@ INT64 CURLWrapper::getDownloadFileSize()
     }
     else
     {
-        INT64 file_size = -1;
+        _INT64 file_size = -1;
         CURL* curl_handle = curl_easy_init();
         if (curl_handle)
         {
@@ -1254,11 +1256,11 @@ INT64 CURLWrapper::getDownloadFileSize()
     }
 }
 
-int CURLWrapper::splitDownloadCount(INT64 total_size)
+int CURLWrapper::splitDownloadCount(_INT64 total_size)
 {
-    const INT64 size_2MB = 2 * 1024 * 1024;
-    const INT64 size_10MB = 10 * 1024 * 1024;
-    const INT64 size_50MB = 50 * 1024 * 1024;
+    const _INT64 size_2MB = 2 * 1024 * 1024;
+    const _INT64 size_10MB = 10 * 1024 * 1024;
+    const _INT64 size_50MB = 50 * 1024 * 1024;
 
     int max_count = DEFAULT_DOWNLOAD_THREAD_COUNT * 2;
 

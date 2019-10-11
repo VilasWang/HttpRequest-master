@@ -4,13 +4,15 @@
 
 #include <stdio.h>
 #include <varargs.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
-#define MaxLogSize 128
+#define LOG_MAX_SIZE 128
 namespace Log
 {
     inline void Debug(char *format, ...)
     {
-        char buf[MaxLogSize] = { 0 };
+        char buf[LOG_MAX_SIZE] = { 0 };
 
         va_list args;
         va_start(args, format);
@@ -19,14 +21,14 @@ namespace Log
 
         if (len != -1)
         {
-            buf[MaxLogSize-1] = '\0';
+            buf[LOG_MAX_SIZE-1] = '\0';
             OutputDebugStringA(buf);
         }
     }
 
     inline void DebugW(wchar_t *format, ...)
     {
-        wchar_t buf[MaxLogSize] = { 0 };
+        wchar_t buf[LOG_MAX_SIZE] = { 0 };
 
         va_list args;
         va_start(args, format);
@@ -35,7 +37,7 @@ namespace Log
 
         if (len != -1)
         {
-            buf[MaxLogSize-1] = '\0';
+            buf[LOG_MAX_SIZE-1] = '\0';
             OutputDebugStringW(buf);
         }
     }

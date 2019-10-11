@@ -1,6 +1,5 @@
 ﻿#include "HttpReply.h"
 #include "ClassMemoryTracer.h"
-#include "Log.h"
 #include "HttpManager.h"
 
 namespace {
@@ -17,8 +16,8 @@ namespace {
     {
         int id;
         bool is_download;
-        INT64 total_size;
-        INT64 current_size;
+        _INT64 total_size;
+        _INT64 current_size;
         HTTP::ProgressCallback callback;
     };
 
@@ -123,7 +122,7 @@ void HttpReply::replyResult(bool bSuccess)
     }
 }
 
-void HttpReply::replyProgress(int id, bool is_download, INT64 total_size, INT64 current_size)
+void HttpReply::replyProgress(int id, bool is_download, _INT64 total_size, _INT64 current_size)
 {
     if (m_progress_callback)
     {

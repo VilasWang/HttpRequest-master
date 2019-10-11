@@ -4,7 +4,7 @@
 
 #include "ThreadPool/Task.h"
 #include "HttpRequest.h"
-#include "HttpRequestDef.h"
+#include "HttpRequestDefs.h"
 
 // class HttpTask - Http请求任务
 class HttpTask : public TaskBase

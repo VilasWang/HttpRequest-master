@@ -97,12 +97,6 @@
     <ClInclude Include="inc\HttpRequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\HttpRequest_global.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\HttpRequestDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ThreadPool\ClassMemoryTracer.h">
       <Filter>ThreadPool</Filter>
     </ClInclude>
@@ -111,6 +105,12 @@
     </ClInclude>
     <ClInclude Include="ThreadPool\Log.h">
       <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpRequestDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\HttpRequestGlobal.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

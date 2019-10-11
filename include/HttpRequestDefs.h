@@ -3,8 +3,8 @@
 #include <functional>
 #include <memory>
 
-#ifndef INT64
-#define INT64 long long int
+#ifndef _INT64
+#define _INT64 signed long long //不支持的话改成__int64
 #endif
 
 namespace HTTP
@@ -30,15 +30,15 @@ namespace HTTP
     // int id, bool success, const std::string& data, const std::string& error_string
     using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
 
-    // int id, bool is_download, INT64 total_size, INT64 current_size
-    using ProgressCallback = std::function<void(int, bool, INT64, INT64)>;
+    // int id, bool is_download, _INT64 total_size, _INT64 current_size
+    using ProgressCallback = std::function<void(int, bool, _INT64, _INT64)>;
 
 #else
     // int id, bool success, const std::string& data, const std::string& error_string
     typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
 
-    // int id, bool is_download, INT64 total_size, INT64 current_size
-    typedef std::function<void(int, bool, INT64, INT64)> ProgressCallback;
+    // int id, bool is_download, _INT64 total_size, _INT64 current_size
+    typedef std::function<void(int, bool, _INT64, _INT64)> ProgressCallback;
 
 #endif
 

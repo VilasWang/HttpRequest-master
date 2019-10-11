@@ -3,6 +3,8 @@
 #include <iostream>
 #include "ClassMemoryTracer.h"
 #include "Log.h"
+#include "ThreadPool/ThreadPool.h"
+#include "HttpReply.h"
 
 using namespace VCUtil;
 
@@ -83,13 +85,13 @@ void HttpManager::globalCleanup()
     ThreadPool::globalInstance()->waitForDone();
 }
 
-bool HttpManager::addTask(std::unique_ptr<TaskBase> t, ThreadPool::Priority priority)
+bool HttpManager::addTask(std::unique_ptr<TaskBase> t)
 {
     if (!t.get())
     {
         return false;
     }
-    return ThreadPool::globalInstance()->addTask(std::move(t), priority);
+    return ThreadPool::globalInstance()->addTask(std::move(t));
 }
 
 bool HttpManager::abortTask(int task_id)

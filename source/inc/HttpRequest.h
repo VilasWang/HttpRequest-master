@@ -5,13 +5,12 @@
 #include <string>
 #include <map>
 #include <vector>
-
-#include "HttpReply.h"
-#include "HttpRequestDef.h"
-#include "HttpRequest_global.h"
+#include "HttpRequestDefs.h"
+#include "HttpRequestGlobal.h"
 
 
 class CURLWrapper;
+class HttpReply;
 // class HttpRequest - Http请求类（libcurl）
 class HTTP_REQUEST_EXPORT HttpRequest
 {

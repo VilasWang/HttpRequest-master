@@ -2,11 +2,9 @@
 #define __HTTPREPLY_H
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <string>
-#include "HttpRequestDef.h"
-#include "HttpRequest_global.h"
+#include "HttpRequestDefs.h"
+#include "HttpRequestGlobal.h"
 
 // class HttpReply - Http响应类
 class HTTP_REQUEST_EXPORT HttpReply
@@ -30,7 +28,7 @@ private:
     friend class CURLWrapper;
 
 public:
-    void replyProgress(int id, bool is_download, INT64 total_size, INT64 current_size);
+    void replyProgress(int id, bool is_download, _INT64 total_size, _INT64 current_size);
     void replyResult(bool bSuccess);
 
 private:

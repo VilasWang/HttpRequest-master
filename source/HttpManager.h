@@ -2,14 +2,13 @@
 #define __HTTP_MANAGER_H
 #pragma once
 
-#include <Windows.h>
 #include <map>
 #include <curl/curl.h>
 #include "Lock.h"
-#include "ThreadPool/ThreadPool.h"
-#include "HttpReply.h"
+
 
 class TaskBase;
+class HttpReply;
 // class HttpManager - Http管理类
 class HttpManager
 {
@@ -40,7 +39,7 @@ private:
 
 private:
     static void set_share_handle(CURL* curl_handle);
-    static bool addTask(std::unique_ptr<TaskBase> t, ThreadPool::Priority priority = ThreadPool::Normal);
+    static bool addTask(std::unique_ptr<TaskBase> t);
     static bool abortTask(int taskId);
     static bool abortAllTask();
     void clearReply();
