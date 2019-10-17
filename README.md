@@ -54,20 +54,11 @@ std::cout << reply->id() << reply->httpStatusCode() << reply->errorString() << r
 #include "HttpReply.h"
 
 auto onRequestResultCallback = [](int id, bool success, const std::string& data, const std::string& error_string) {
-    RequestFinishEvent* event = new RequestFinishEvent;
-    event->id = id;
-    event->success = success;
-    event->strContent = QString::fromStdString(data);
-    event->strError = QString::fromStdString(error_string);
-    QCoreApplication::postEvent(T::singleton(), event);
+    ...
 };
 
 auto onProgressCallback = [](int id, bool bDownload, qint64 total_size, qint64 current_size) {
-    ProgressEvent* event = new ProgressEvent;
-    event->isDownload = bDownload;
-    event->total = total_size;
-    event->current = current_size;
-    QCoreApplication::postEvent(T::singleton(), event);
+    ...
 };
 
 const std::string strUrl = "...";
@@ -97,10 +88,8 @@ const std::string strUploadFilePath = "...";
 HttpRequest request;
 request.setUrl(strUrl);
 request.setUploadFile(strUploadFilePath);
-request.setResultCallback(std::bind(&CurlTool::onRequestResultCallback, 
-	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-request.setProgressCallback(std::bind(&CurlTool::onProgressCallback, 
-	std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+request.setResultCallback(onRequestResultCallback);
+request.setProgressCallback(onProgressCallback);
 
 std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
 std::cout << reply->id();
