@@ -123,16 +123,16 @@ private:
     HTTP::RequestType m_type;
     HTTP::IOMode m_mode;
 
-#if _MSC_VER >= 1700
-    static std::atomic<int> s_id;
-    std::atomic<bool> m_is_running;
-    std::atomic<bool> m_is_cancel;
-    std::atomic<bool> m_is_failed;
-#else
-    static int s_id;
+#if defined(_MSC_VER) && _MSC_VER < 1700
+    static int ms_id;
     bool m_is_running;
     bool m_is_cancel;
     bool m_is_failed;
+#else
+    static std::atomic<int> ms_id;
+    std::atomic<bool> m_is_running;
+    std::atomic<bool> m_is_cancel;
+    std::atomic<bool> m_is_failed;
 #endif
     bool m_follow_location;
     int m_retry_times;
@@ -148,7 +148,7 @@ private:
     //下载
     std::string	m_file_path;
     int	m_thread_count;
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
     std::atomic<bool> m_multi_download;
     std::atomic<_INT64> m_total_size;
     std::atomic<_INT64> m_current_size;
@@ -163,10 +163,10 @@ private:
     std::string m_strTargetPath;
     std::string m_strUploadFile;
 };
-#if _MSC_VER >= 1700
-std::atomic<int> CURLWrapper::s_id = 0;
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
+std::atomic<int> CURLWrapper::ms_id = 0;
 #else
-int CURLWrapper::s_id = 0;
+int CURLWrapper::ms_id = 0;
 #endif
 
 namespace {
@@ -284,7 +284,7 @@ namespace {
 
 CURLWrapper::CURLWrapper()
     : m_type(HTTP::Unkonwn)
-    , m_id(++s_id)
+    , m_id(++ms_id)
     , m_is_running(false)
     , m_is_cancel(false)
     , m_is_failed(false)
@@ -453,7 +453,7 @@ CURLcode CURLWrapper::publicSetoptMethod(CURL* curl_handle, curl_slist* http_hea
 
 bool CURLWrapper::isRunning() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_is_running;
@@ -461,7 +461,7 @@ bool CURLWrapper::isRunning() const
 
 void CURLWrapper::setRunning(bool bRunning)
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     m_is_running = bRunning;
@@ -469,7 +469,7 @@ void CURLWrapper::setRunning(bool bRunning)
 
 bool CURLWrapper::isCanceled() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_is_cancel;
@@ -477,7 +477,7 @@ bool CURLWrapper::isCanceled() const
 
 void CURLWrapper::setCanceled(bool bCancel)
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     m_is_cancel = bCancel;
@@ -485,7 +485,7 @@ void CURLWrapper::setCanceled(bool bCancel)
 
 bool CURLWrapper::isFailed() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_is_failed;
@@ -493,7 +493,7 @@ bool CURLWrapper::isFailed() const
 
 void CURLWrapper::setFailed(bool bFailed)
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     m_is_failed = bFailed;
@@ -501,7 +501,7 @@ void CURLWrapper::setFailed(bool bFailed)
 
 _INT64 CURLWrapper::currentBytes() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_current_size;
@@ -509,7 +509,7 @@ _INT64 CURLWrapper::currentBytes() const
 
 void CURLWrapper::setCurrentBytes(_INT64 current_size)
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     m_current_size = current_size;
@@ -517,7 +517,7 @@ void CURLWrapper::setCurrentBytes(_INT64 current_size)
 
 bool CURLWrapper::isMultiDownload() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_multi_download;
@@ -711,7 +711,7 @@ int CURLWrapper::doDownload()
 
         for (int i = 0; i < m_thread_count; i++)
         {
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
             std::unique_ptr<DownloadChunk> chunk = std::make_unique<DownloadChunk>();
 #else
             std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
@@ -749,7 +749,7 @@ int CURLWrapper::doDownload()
     }
     else
     {
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
         std::unique_ptr<DownloadChunk> chunk = std::make_unique<DownloadChunk>();
 #else
         std::unique_ptr<DownloadChunk> chunk(new DownloadChunk);
@@ -821,7 +821,7 @@ int CURLWrapper::doUpload()
             struct _stat64 file_info = { 0 };
             _stat64(m_strUploadFile.c_str(), &file_info);
 
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
             uc = std::make_unique<UploadChannel>();
 #else
             uc.reset(new UploadChannel);
@@ -1491,10 +1491,10 @@ std::shared_ptr<HttpReply> HttpRequest::perform(HTTP::RequestType type, HTTP::IO
         }
         else if (mode == HTTP::Async)
         {
-#if _MSC_VER >= 1700
-            std::unique_ptr<HttpTask> task = std::make_unique<HttpTask>(true);
-#else
+#if defined(_MSC_VER) && _MSC_VER < 1700
             std::unique_ptr<HttpTask> task(new HttpTask(true));
+#else
+            std::unique_ptr<HttpTask> task = std::make_unique<HttpTask>(true);
 #endif
             task->attach(m_handler);
             HttpManager::addTask(std::move(task));

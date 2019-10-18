@@ -94,7 +94,7 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
     if (t)
     {
         {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
             Locker<CSLock> locker(t->m_lock);
 #endif
             t->m_bRunning = true;
@@ -121,7 +121,7 @@ UINT WINAPI ThreadPoolThread::threadFunc(LPVOID pParam)
         }
 
         {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
             Locker<CSLock> locker(t->m_lock);
 #endif
             t->m_bRunning = false;
@@ -185,7 +185,7 @@ void ThreadPoolThread::exec()
 
 bool ThreadPoolThread::isRunning() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_bRunning;
@@ -193,7 +193,7 @@ bool ThreadPoolThread::isRunning() const
 
 bool ThreadPoolThread::isExit() const
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     return m_bExit;
@@ -201,7 +201,7 @@ bool ThreadPoolThread::isExit() const
 
 void ThreadPoolThread::setExit(bool bExit)
 {
-#if _MSC_VER < 1700
+#if defined(_MSC_VER) && _MSC_VER < 1700
     Locker<CSLock> locker(m_lock);
 #endif
     m_bExit = bExit;

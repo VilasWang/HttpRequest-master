@@ -14,10 +14,6 @@ class HttpManager
 {
 public:
     virtual ~HttpManager();
-#if _MSC_VER >= 1700
-    HttpManager(const HttpManager &) = delete;
-    HttpManager &operator=(const HttpManager &) = delete;
-#endif
 
     static HttpManager* globalInstance();
     static void globalInit();
@@ -32,10 +28,8 @@ public:
 
 private:
     HttpManager();
-#if _MSC_VER < 1700
     HttpManager(const HttpManager &);
     HttpManager &operator=(const HttpManager &);
-#endif
 
 private:
     static void set_share_handle(CURL* curl_handle);

@@ -3,10 +3,10 @@
 
 using namespace VCUtil;
 
-#if _MSC_VER >= 1700
-std::atomic<int> TaskBase::s_id = 0;
-#else
+#if defined(_MSC_VER) && _MSC_VER < 1700
 int TaskBase::s_id = 0;
+#else
+std::atomic<int> TaskBase::s_id = 0;
 #endif
 
 TaskBase::TaskBase(bool bAutoDelete)

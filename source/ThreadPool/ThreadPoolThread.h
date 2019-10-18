@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <list>
 #include <stack>
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
 #include <atomic>
 #endif
 #include "Lock.h"
@@ -20,10 +20,6 @@ class ThreadPoolThread
 {
 public:
     explicit ThreadPoolThread(ThreadPool* threadpool);
-#if _MSC_VER >= 1700
-    ThreadPoolThread(const ThreadPoolThread &) = delete;
-    ThreadPoolThread &operator=(const ThreadPoolThread &) = delete;
-#endif
     virtual ~ThreadPoolThread();
 
 public:
@@ -50,10 +46,9 @@ protected:
     virtual void waitForDone();
 
 private:
-#if _MSC_VER < 1700
     ThreadPoolThread(const ThreadPoolThread &);
     ThreadPoolThread &operator=(const ThreadPoolThread &);
-#endif
+
     static UINT WINAPI threadFunc(LPVOID pParam);
 
     bool isExit() const;
@@ -63,7 +58,7 @@ private:
     HANDLE m_hThread;
     UINT m_nThreadID;
     HANDLE m_hEvent;
-#if _MSC_VER >= 1700
+#if defined(_MSC_VER) && _MSC_VER >= 1700
     std::atomic<bool> m_bExit;
     std::atomic<bool> m_bRunning;
 #else

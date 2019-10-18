@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <memory>
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
 #include <atomic>
 #else
 #include "Lock.h"
@@ -17,10 +17,6 @@ class ScheduleThread
 public:
     ScheduleThread();
     virtual ~ScheduleThread();
-#if _MSC_VER >= 1700
-    ScheduleThread(const ScheduleThread &) = delete;
-    ScheduleThread &operator=(const ScheduleThread &) = delete;
-#endif
 
     bool start();
     void quit();
@@ -39,10 +35,8 @@ protected:
     virtual void onBeforeExit() {}
 
 private:
-#if _MSC_VER < 1700
     ScheduleThread(const ScheduleThread &);
     ScheduleThread &operator=(const ScheduleThread &);
-#endif
 
     static unsigned __stdcall ThreadFunc(LPVOID pParam);
     void switchToIdleThread(UINT threadId);
@@ -53,7 +47,7 @@ private:
 private:
     HANDLE m_hThread;
     unsigned m_nThreadID;
-#if _MSC_VER >= 1700
+#if defined(_MSC_VER) && _MSC_VER >= 1700
     std::atomic<bool> m_bExit;
     std::atomic<bool> m_bRunning;
 #else

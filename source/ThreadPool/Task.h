@@ -4,7 +4,7 @@
 
 #include <deque>
 #include <memory>
-#if _MSC_VER >= 1700
+#if !defined(_MSC_VER) || _MSC_VER >= 1700
 #include <atomic>
 #endif
 #include "Lock.h"
@@ -25,10 +25,10 @@ protected:
     int m_id;
 
 private:
-#if _MSC_VER >= 1700
-    static std::atomic<int> s_id;
-#else
+#if defined(_MSC_VER) && _MSC_VER < 1700
     static int s_id;
+#else
+    static std::atomic<int> s_id;
 #endif
     bool m_bAutoDelete;
 };

@@ -33,7 +33,7 @@ namespace VCUtil {
         CRITICAL_SECTION m_cs;
     };
 
-    //Class SRWLock - slim 读写锁
+    //Class SRWLock - slim读写锁
     class SRWLock
     {
     public:
@@ -72,7 +72,7 @@ namespace VCUtil {
             m_lock.lock(bShared);
         }
 
-#if _MSC_VER >= 1700
+#if defined(_MSC_VER) && _MSC_VER >= 1700
         ~Locker() _NOEXCEPT
 #else
         ~Locker()

@@ -26,20 +26,18 @@ namespace HTTP
         Async,
     };
 
-#if _MSC_VER >= 1700
-    // int id, bool success, const std::string& data, const std::string& error_string
-    using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
-
-    // int id, bool is_download, _INT64 total_size, _INT64 current_size
-    using ProgressCallback = std::function<void(int, bool, _INT64, _INT64)>;
-
-#else
-    // int id, bool success, const std::string& data, const std::string& error_string
+#if defined(_MSC_VER) && _MSC_VER < 1700
+    // int id, bool success, const std::string& contentt std::string& error
     typedef std::function<void(int, bool, const std::string&, const std::string&)> ResultCallback;
 
     // int id, bool is_download, _INT64 total_size, _INT64 current_size
     typedef std::function<void(int, bool, _INT64, _INT64)> ProgressCallback;
+#else
+    // int id, bool success, const std::string& contentt, const std::string& error
+    using ResultCallback = std::function<void(int, bool, const std::string&, const std::string&)>;
 
+    // int id, bool is_download, _INT64 total_size, _INT64 current_size
+    using ProgressCallback = std::function<void(int, bool, _INT64, _INT64)>;
 #endif
 
 
