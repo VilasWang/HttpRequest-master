@@ -76,8 +76,8 @@ public:
     int setUploadFile(const std::string& file_name);
     //HTTP Multipart formpost 方式上次文件
     int setUploadFile(const std::string& file_name, const std::string& target_name, const std::string& target_path);
-    void setResultCallback(HTTP::ResultCallback rc);
-    void setProgressCallback(HTTP::ProgressCallback pc);
+    void registerResultCallback(HTTP::ResultCallback rc);
+    void registerProgressCallback(HTTP::ProgressCallback pc);
     void setRequestType(HTTP::RequestType);
     void setIOMode(HTTP::IOMode mode);
 
@@ -387,12 +387,12 @@ int CURLWrapper::setUploadFile(const std::string& file_path, const std::string& 
     return CURLE_OK;
 }
 
-void CURLWrapper::setResultCallback(HTTP::ResultCallback rc)
+void CURLWrapper::registerResultCallback(HTTP::ResultCallback rc)
 {
     m_result_callback = rc;
 }
 
-void CURLWrapper::setProgressCallback(HTTP::ProgressCallback pc)
+void CURLWrapper::registerProgressCallback(HTTP::ProgressCallback pc)
 {
     m_progress_callback = pc;
 }
@@ -542,8 +542,8 @@ int CURLWrapper::perform()
     }
     rly->setRequestType(m_type);
     rly->setIOMode(m_mode);
-    rly->setProgressCallback(m_progress_callback);
-    rly->setResultCallback(m_result_callback);
+    rly->registerProgressCallback(m_progress_callback);
+    rly->registerResultCallback(m_result_callback);
 
     if (m_type == HTTP::Post || m_type == HTTP::Get)
     {
@@ -1448,22 +1448,22 @@ int HttpRequest::setUploadFile(const std::string& file_path, const std::string& 
     return REQUEST_INIT_ERROR;
 }
 
-int HttpRequest::setResultCallback(HTTP::ResultCallback rc)
+int HttpRequest::registerResultCallback(HTTP::ResultCallback rc)
 {
     if (m_handler.get())
     {
-        m_handler->setResultCallback(rc);
+        m_handler->registerResultCallback(rc);
         return REQUEST_OK;
     }
 
     return REQUEST_INIT_ERROR;
 }
 
-int	HttpRequest::setProgressCallback(HTTP::ProgressCallback pc)
+int	HttpRequest::registerProgressCallback(HTTP::ProgressCallback pc)
 {
     if (m_handler.get())
     {
-        m_handler->setProgressCallback(pc);
+        m_handler->registerProgressCallback(pc);
         return REQUEST_OK;
     }
 

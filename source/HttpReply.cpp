@@ -70,12 +70,12 @@ void HttpReply::setIOMode(HTTP::IOMode mode)
     m_mode = mode;
 }
 
-void HttpReply::setResultCallback(HTTP::ResultCallback rc)
+void HttpReply::registerResultCallback(HTTP::ResultCallback rc)
 {
     m_result_callback = rc;
 }
 
-void HttpReply::setProgressCallback(HTTP::ProgressCallback pc)
+void HttpReply::registerProgressCallback(HTTP::ProgressCallback pc)
 {
     m_progress_callback = pc;
 }

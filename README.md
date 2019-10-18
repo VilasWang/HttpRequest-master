@@ -67,8 +67,8 @@ const std::string strFilePath = "...";
 HttpRequest request;
 request.setUrl(strUrl);
 request.setDownloadFile(strFilePath);
-request.setResultCallback(onRequestResultCallback);
-request.setProgressCallback(onProgressCallback);
+request.registerResultCallback(onRequestResultCallback);
+request.registerProgressCallback(onProgressCallback);
 
 std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
 std::cout << reply->id();
@@ -88,8 +88,8 @@ const std::string strUploadFilePath = "...";
 HttpRequest request;
 request.setUrl(strUrl);
 request.setUploadFile(strUploadFilePath);
-request.setResultCallback(onRequestResultCallback);
-request.setProgressCallback(onProgressCallback);
+request.registerResultCallback(onRequestResultCallback);
+request.registerProgressCallback(onProgressCallback);
 
 std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
 std::cout << reply->id();

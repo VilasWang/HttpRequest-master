@@ -36,7 +36,7 @@ public:
 public:
     // 执行请求，并返回HttpReply. 
     // 1：同步请求可以直接调用HttpReply的接口获取结果
-    // 2：异步请求可以设置异步回调接口（见setResultCallback），请求完成后会在主线程中异步回调（APC）
+    // 2：异步请求可以设置异步回调接口（见registerResultCallback），请求完成后会在主线程中异步回调（APC）
     std::shared_ptr<HttpReply> perform(HTTP::RequestType, HTTP::IOMode mode = HTTP::Async);
     // 取消某个请求
     static bool cancel(int requestId);
@@ -50,10 +50,10 @@ public:
     //		};
     //		HttpRequest req;
     //		req.setUrl("...");
-    //		req.setResultCallback(onRequestResultCallback);
+    //		req.registerResultCallback(onRequestResultCallback);
     //		req.perform(HTTP::Get, HTTP::Async);
-    int setResultCallback(HTTP::ResultCallback rc);
-    int	setProgressCallback(HTTP::ProgressCallback pc);
+    int registerResultCallback(HTTP::ResultCallback rc);
+    int	registerProgressCallback(HTTP::ProgressCallback pc);
 
     int setRetryTimes(int retry_times);
     int setTimeout(long time_out = 0); // 请求超时（second）

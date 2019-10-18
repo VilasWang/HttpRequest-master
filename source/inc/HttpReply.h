@@ -22,8 +22,8 @@ public:
 private:
     void setRequestType(HTTP::RequestType type);
     void setIOMode(HTTP::IOMode mode);
-    void setResultCallback(HTTP::ResultCallback rc);
-    void setProgressCallback(HTTP::ProgressCallback pc);
+    void registerResultCallback(HTTP::ResultCallback rc);
+    void registerProgressCallback(HTTP::ProgressCallback pc);
 
     friend class CURLWrapper;
 

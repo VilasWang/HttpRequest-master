@@ -311,8 +311,8 @@ void CurlTool::onDownload()
     request.setUrl(strUrl.toStdString());
     request.setDownloadFile(strFilePath.toStdString(), ui.cmb_multiDownload->currentText().toInt());
     request.setFollowLocation(true);
-    request.setResultCallback(onRequestResultCallback);
-    request.setProgressCallback(onProgressCallback);
+    request.registerResultCallback(onRequestResultCallback);
+    request.registerProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Download, HTTP::Async);
     if (!reply.get())
@@ -346,8 +346,8 @@ void CurlTool::onUpload()
     HttpRequest request;
     request.setUrl(strUrl.toStdString());
     request.setUploadFile(strUploadFilePath.toStdString());
-    request.setResultCallback(onRequestResultCallback);
-    request.setProgressCallback(onProgressCallback);
+    request.registerResultCallback(onRequestResultCallback);
+    request.registerProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload, HTTP::Async);
     if (!reply.get())
@@ -394,8 +394,8 @@ void CurlTool::onFormPost()
     HttpRequest request;
     request.setUrl(strUrl.toStdString());
     request.setUploadFile(strUploadFilePath.toStdString(), strTargetName.toStdString(), strSavePath.toStdString());
-    request.setResultCallback(onRequestResultCallback);
-    request.setProgressCallback(onProgressCallback);
+    request.registerResultCallback(onRequestResultCallback);
+    request.registerProgressCallback(onProgressCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Upload2, HTTP::Async);
     if (!reply.get())
@@ -420,7 +420,7 @@ void CurlTool::onGetRequest()
 
     HttpRequest request;
     request.setUrl(strUrl.toStdString());
-    request.setResultCallback(onRequestResultCallback);
+    request.registerResultCallback(onRequestResultCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Get, HTTP::Async);
     if (!reply.get())
@@ -455,7 +455,7 @@ void CurlTool::onPostRequest()
     {
         HttpRequest request;
         request.setUrl(strUrl.toStdString());
-        request.setResultCallback(onRequestResultCallback);
+        request.registerResultCallback(onRequestResultCallback);
         std::string strSendData = strArg.toStdString();
         request.setPostData(strSendData.c_str(), strSendData.size());
 
@@ -483,7 +483,7 @@ void CurlTool::onHeadRequest()
 
     HttpRequest request;
     request.setUrl(strUrl.toStdString());
-    request.setResultCallback(onRequestResultCallback);
+    request.registerResultCallback(onRequestResultCallback);
 
     std::shared_ptr<HttpReply> reply = request.perform(HTTP::Head, HTTP::Async);
     if (!reply.get())
